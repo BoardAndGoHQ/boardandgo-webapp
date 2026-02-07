@@ -4,13 +4,29 @@ import { useEffect, useState, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/auth';
-import { api, type FlightOffer, type FlightSearchParams } from '@/lib/api';
+import { api, type FlightSearchParams } from '@/lib/api';
 import { FlightSearch } from '@/components/flight-search';
-import { IconLoader, IconPlane, IconClock, IconArrowRight, IconExternalLink } from '@/components/icons';
+import { IconLoader, IconPlane, IconArrowRight, IconExternalLink } from '@/components/icons';
 
-function formatTime(dateStr: string) {
+interface FlightOffer {
+  id: string;
+  airline: string;
+  airlineCode: string;
+  flightNumber: number;
+  origin: string;
+  destination: string;
+  departureTime: string;
+  returnTime: string | null;
+  price: number;
+  currency: string;
+  affiliateUrl: string;
+  stops: number;
+  expiresAt: string;
+}
+
+function formatDate(dateStr: string) {
   const d = new Date(dateStr);
-  return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
 function formatPrice(price: number, currency: string) {
@@ -49,8 +65,19 @@ function SearchResults() {
       };
       if (returnDate) params.returnDate = returnDate;
 
-      const { flights: results } = await api.flights.search(params, token);
-      setFlights(results);
+      const response = await fetch(`http://localhost:3000/api/search/flights`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(params),
+      });
+
+      if (!response.ok) throw new Error('Search failed');
+      
+      const data = await response.json();
+      setFlights(data.flights || []);
     } catch {
       setError('Failed to search flights. Please try again.');
     } finally {
@@ -78,10 +105,7 @@ function SearchResults() {
   if (!origin || !destination || !departureDate) {
     return (
       <div className="text-center py-20">
-        <p className="text-text-muted mb-4">Invalid search parameters</p>
-        <Link href="/" className="text-accent-teal hover:underline">
-          Start a new search
-        </Link>
+        <p className="text-text-muted mb-4">Enter your search above</p>
       </div>
     );
   }
@@ -115,30 +139,43 @@ function SearchResults() {
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20">
           <IconLoader className="w-6 h-6 text-accent-teal animate-spin mb-4" />
-          <p className="text-sm text-text-muted">Searching flights...</p>
+          <p className="text-sm text-text-muted">Searching real-time flight prices...</p>
         </div>
       ) : flights.length === 0 ? (
         <div className="text-center py-20">
           <IconPlane className="w-12 h-12 text-text-muted/50 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-text-secondary mb-2">No flights found</h3>
+          <h3 className="text-lg font-medium text-text-secondary mb-2">No cached prices available</h3>
           <p className="text-sm text-text-muted mb-6">
-            Try different dates or destinations
+            This route may not have recent search data. Search directly for real-time prices:
           </p>
-          <Link href="/" className="text-accent-teal hover:underline">
-            Modify search
-          </Link>
+          <a
+            href={`https://search.jetradar.com/flights/${origin.toUpperCase()}${departureDate.split('-')[2]}${departureDate.split('-')[1]}${destination.toUpperCase()}${returnDate ? returnDate.split('-')[2] + returnDate.split('-')[1] : ''}${passengers}?marker=654591`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-accent-teal text-bg-primary font-medium rounded-lg hover:bg-accent-teal/90 transition-colors"
+          >
+            Search on Jetradar
+            <IconExternalLink className="w-4 h-4" />
+          </a>
+          <p className="text-xs text-text-muted mt-4">
+            Tip: Try popular routes like NYC → LON for cached prices
+          </p>
         </div>
       ) : (
         <div className="space-y-3">
+          <p className="text-sm text-text-muted mb-4">
+            Found {flights.length} flight{flights.length > 1 ? 's' : ''} • Prices from Travelpayouts
+          </p>
           {flights.map((flight) => (
             <div
               key={flight.id}
-              className="p-4 md:p-5 bg-bg-card border border-border-subtle rounded-xl hover:border-border-subtle/80 transition-colors"
+              className="p-4 md:p-5 bg-bg-card border border-border-subtle rounded-xl hover:border-accent-teal/30 transition-colors"
             >
               <div className="flex flex-col md:flex-row md:items-center gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-sm font-medium text-text-primary">{flight.airline}</span>
+                    <span className="text-xs text-text-muted">({flight.airlineCode} {flight.flightNumber})</span>
                     {flight.stops === 0 ? (
                       <span className="px-2 py-0.5 text-xs bg-accent-teal/10 text-accent-teal rounded">Direct</span>
                     ) : (
@@ -149,20 +186,16 @@ function SearchResults() {
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="text-center">
-                      <div className="text-lg font-medium text-text-primary">{formatTime(flight.departureTime)}</div>
+                      <div className="text-sm font-medium text-text-primary">{formatDate(flight.departureTime)}</div>
                       <div className="text-xs text-text-muted">{flight.origin}</div>
                     </div>
                     <div className="flex-1 flex flex-col items-center gap-1">
-                      <div className="flex items-center gap-1 text-xs text-text-muted">
-                        <IconClock className="w-3 h-3" />
-                        {flight.duration}
-                      </div>
                       <div className="w-full h-px bg-border-subtle relative">
-                        <IconPlane className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 text-text-muted rotate-90" />
+                        <IconPlane className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 text-accent-teal rotate-90" />
                       </div>
                     </div>
                     <div className="text-center">
-                      <div className="text-lg font-medium text-text-primary">{formatTime(flight.arrivalTime)}</div>
+                      <div className="text-sm font-medium text-text-primary">{flight.returnTime ? formatDate(flight.returnTime) : 'One-way'}</div>
                       <div className="text-xs text-text-muted">{flight.destination}</div>
                     </div>
                   </div>
@@ -172,7 +205,7 @@ function SearchResults() {
                     <div className="text-xl font-semibold text-text-primary">
                       {formatPrice(flight.price, flight.currency)}
                     </div>
-                    <div className="text-xs text-text-muted">per person</div>
+                    <div className="text-xs text-text-muted">roundtrip</div>
                   </div>
                   <a
                     href={flight.affiliateUrl}
