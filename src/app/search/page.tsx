@@ -45,7 +45,7 @@ function SearchResults() {
         origin,
         destination,
         departureDate,
-        passengers,
+        adults: passengers,
       };
       if (returnDate) params.returnDate = returnDate;
 

@@ -1,4 +1,4 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
 interface RequestOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
@@ -71,7 +71,7 @@ export interface FlightSearchParams {
   destination: string;
   departureDate: string;
   returnDate?: string;
-  passengers?: number;
+  adults?: number;
   cabinClass?: 'economy' | 'business' | 'first';
 }
 
