@@ -82,6 +82,7 @@ function SearchResults() {
   const router = useRouter();
   const { user, token, loading: authLoading } = useAuth();
   const [flights, setFlights] = useState<FlightOffer[]>([]);
+  const [provider, setProvider] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -132,6 +133,7 @@ function SearchResults() {
       
       const data = await response.json();
       setFlights(data.flights || []);
+      setProvider(data.provider || 'amadeus');
     } catch {
       setError('Failed to search flights. Please try again.');
     } finally {
@@ -269,7 +271,7 @@ function SearchResults() {
           </div>
 
           <p className="text-sm text-text-muted">
-            Found {flights.length} flight{flights.length > 1 ? 's' : ''} • Powered by Amadeus
+            Found {flights.length} flight{flights.length > 1 ? 's' : ''} • Powered by {provider === 'travelpayouts' ? 'Travelpayouts' : 'Amadeus'}
           </p>
 
           {flights.map((flight) => {

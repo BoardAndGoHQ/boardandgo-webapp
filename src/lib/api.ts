@@ -142,7 +142,7 @@ export const api = {
 
   flights: {
     search: (params: FlightSearchParams, token: string) =>
-      request<{ flights: FlightOffer[] }>('/api/search/flights', {
+      request<{ flights: FlightOffer[]; provider: string }>('/api/search/flights', {
         method: 'POST',
         body: params,
         token,
