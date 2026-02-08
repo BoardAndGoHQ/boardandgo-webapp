@@ -417,7 +417,8 @@ function SearchModeToggle({
   );
 }
 
-export default function SearchPage() {
+function SearchPageInner() {
+  const searchParams = useSearchParams();
   const [mode, setMode] = useState<'manual' | 'ai'>(() => {
     if (typeof window !== 'undefined') {
       return (localStorage.getItem('searchMode') as 'manual' | 'ai') || 'manual';
@@ -430,6 +431,13 @@ export default function SearchPage() {
     localStorage.setItem('searchMode', newMode);
   };
 
+  // Detect if URL has active search params (from agent confirm or manual search)
+  const hasSearchParams = !!(
+    searchParams.get('origin') &&
+    searchParams.get('destination') &&
+    searchParams.get('departureDate')
+  );
+
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 md:py-12">
       <div className="flex items-center justify-between mb-6">
@@ -441,19 +449,33 @@ export default function SearchPage() {
           <div className="mb-8">
             <FlightSearch />
           </div>
-          <Suspense
-            fallback={
-              <div className="flex items-center justify-center py-20">
-                <IconLoader className="w-6 h-6 text-text-muted animate-spin" />
-              </div>
-            }
-          >
-            <SearchResults />
-          </Suspense>
+          <SearchResults />
         </>
       ) : (
-        <AgentChat />
+        <>
+          <AgentChat />
+          {/* When agent triggers search, show results below the chat */}
+          {hasSearchParams && (
+            <div className="mt-6">
+              <SearchResults />
+            </div>
+          )}
+        </>
       )}
     </div>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center py-20">
+          <IconLoader className="w-6 h-6 text-text-muted animate-spin" />
+        </div>
+      }
+    >
+      <SearchPageInner />
+    </Suspense>
   );
 }
