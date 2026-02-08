@@ -125,6 +125,28 @@ export interface TrackBookClickParams {
   affiliateUrl: string;
 }
 
+export interface AgentChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+export interface SearchIntent {
+  origin: string;
+  destination: string;
+  departureDate: string;
+  returnDate?: string;
+  tripType: 'oneway' | 'return';
+  adults: number;
+  children: number;
+  infants: number;
+  cabin: 'ECONOMY' | 'PREMIUM_ECONOMY' | 'BUSINESS' | 'FIRST';
+}
+
+export interface AgentResponse {
+  message: string;
+  searchIntent: SearchIntent | null;
+}
+
 export const api = {
   auth: {
     register: (email: string, password: string, name?: string) =>
@@ -174,6 +196,15 @@ export const api = {
   gmail: {
     getAuthUrl: (token: string) =>
       request<{ url: string }>('/api/gmail/authorize', { token }),
+  },
+
+  agent: {
+    chat: (messages: AgentChatMessage[], token: string) =>
+      request<AgentResponse>('/api/agent/chat', {
+        method: 'POST',
+        body: { messages },
+        token,
+      }),
   },
 };
 

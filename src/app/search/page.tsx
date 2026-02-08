@@ -6,7 +6,8 @@ import { useAuth } from '@/context/auth';
 import type { FlightSearchParams, TripType, CabinClass, TrackBookClickParams } from '@/lib/api';
 import { api } from '@/lib/api';
 import { FlightSearch } from '@/components/flight-search';
-import { IconLoader, IconPlane, IconArrowRight, IconExternalLink, IconClock } from '@/components/icons';
+import { AgentChat } from '@/components/agent-chat';
+import { IconLoader, IconPlane, IconArrowRight, IconExternalLink, IconClock, IconSearch, IconSparkles } from '@/components/icons';
 
 interface FlightOffer {
   id: string;
@@ -381,19 +382,78 @@ function SearchResults() {
   );
 }
 
+function SearchModeToggle({
+  mode,
+  onChange,
+}: {
+  mode: 'manual' | 'ai';
+  onChange: (mode: 'manual' | 'ai') => void;
+}) {
+  return (
+    <div className="flex gap-1 p-1 bg-bg-elevated rounded-lg w-fit">
+      <button
+        onClick={() => onChange('manual')}
+        className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+          mode === 'manual'
+            ? 'bg-accent-teal text-bg-primary'
+            : 'text-text-muted hover:text-text-primary'
+        }`}
+      >
+        <IconSearch className="w-3.5 h-3.5" />
+        Manual
+      </button>
+      <button
+        onClick={() => onChange('ai')}
+        className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+          mode === 'ai'
+            ? 'bg-accent-teal text-bg-primary'
+            : 'text-text-muted hover:text-text-primary'
+        }`}
+      >
+        <IconSparkles className="w-3.5 h-3.5" />
+        AI Search
+      </button>
+    </div>
+  );
+}
+
 export default function SearchPage() {
+  const [mode, setMode] = useState<'manual' | 'ai'>(() => {
+    if (typeof window !== 'undefined') {
+      return (localStorage.getItem('searchMode') as 'manual' | 'ai') || 'manual';
+    }
+    return 'manual';
+  });
+
+  const handleModeChange = (newMode: 'manual' | 'ai') => {
+    setMode(newMode);
+    localStorage.setItem('searchMode', newMode);
+  };
+
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 md:py-12">
-      <div className="mb-8">
-        <FlightSearch />
+      <div className="flex items-center justify-between mb-6">
+        <SearchModeToggle mode={mode} onChange={handleModeChange} />
       </div>
-      <Suspense fallback={
-        <div className="flex items-center justify-center py-20">
-          <IconLoader className="w-6 h-6 text-text-muted animate-spin" />
-        </div>
-      }>
-        <SearchResults />
-      </Suspense>
+
+      {mode === 'manual' ? (
+        <>
+          <div className="mb-8">
+            <FlightSearch />
+          </div>
+          <Suspense
+            fallback={
+              <div className="flex items-center justify-center py-20">
+                <IconLoader className="w-6 h-6 text-text-muted animate-spin" />
+              </div>
+            }
+          >
+            <SearchResults />
+          </Suspense>
+        </>
+      ) : (
+        <AgentChat />
+      )}
     </div>
   );
 }
