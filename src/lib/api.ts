@@ -52,27 +52,38 @@ export interface AuthResponse {
   user: User;
 }
 
+export type TripType = 'oneway' | 'return' | 'multicity';
+export type CabinClass = 'ECONOMY' | 'PREMIUM_ECONOMY' | 'BUSINESS' | 'FIRST';
+
 export interface FlightOffer {
   id: string;
   airline: string;
+  airlineCode: string;
+  flightNumber: string;
   origin: string;
   destination: string;
   departureTime: string;
   arrivalTime: string;
+  returnDepartureTime?: string;
+  returnArrivalTime?: string;
   duration: string;
   price: number;
   currency: string;
   affiliateUrl: string;
   stops: number;
+  cabin: string;
 }
 
 export interface FlightSearchParams {
+  tripType: TripType;
   origin: string;
   destination: string;
   departureDate: string;
   returnDate?: string;
-  adults?: number;
-  cabinClass?: 'economy' | 'business' | 'first';
+  adults: number;
+  children?: number;
+  infants?: number;
+  cabin?: CabinClass;
 }
 
 export interface Booking {

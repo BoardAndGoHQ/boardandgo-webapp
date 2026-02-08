@@ -2,35 +2,78 @@
 
 import { useEffect, useState, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { useAuth } from '@/context/auth';
-import { api, type FlightSearchParams } from '@/lib/api';
+import type { FlightSearchParams, TripType, CabinClass } from '@/lib/api';
 import { FlightSearch } from '@/components/flight-search';
-import { IconLoader, IconPlane, IconArrowRight, IconExternalLink } from '@/components/icons';
+import { IconLoader, IconPlane, IconArrowRight, IconExternalLink, IconClock } from '@/components/icons';
 
 interface FlightOffer {
   id: string;
   airline: string;
   airlineCode: string;
-  flightNumber: number;
+  flightNumber: string;
   origin: string;
   destination: string;
   departureTime: string;
-  returnTime: string | null;
+  arrivalTime: string;
+  returnDepartureTime?: string;
+  returnArrivalTime?: string;
   price: number;
   currency: string;
   affiliateUrl: string;
   stops: number;
-  expiresAt: string;
+  duration: string;
+  cabin: string;
 }
 
-function formatDate(dateStr: string) {
+function formatDateTime(dateStr: string) {
   const d = new Date(dateStr);
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return {
+    date: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    time: d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
+  };
 }
 
 function formatPrice(price: number, currency: string) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(price);
+}
+
+function buildFallbackUrl(params: {
+  tripType: string;
+  origin: string;
+  destination: string;
+  departureDate: string;
+  returnDate?: string;
+  adults: number;
+  children?: number;
+  cabin?: string;
+}): string {
+  const urlParams = new URLSearchParams({
+    dcity: params.origin.toUpperCase(),
+    acity: params.destination.toUpperCase(),
+    ddate: params.departureDate,
+    triptype: params.tripType === 'oneway' ? 'oneway' : 'return',
+    adult: params.adults.toString(),
+  });
+  if (params.returnDate && params.tripType !== 'oneway') {
+    urlParams.set('rdate', params.returnDate);
+  }
+  if (params.children && params.children > 0) {
+    urlParams.set('child', params.children.toString());
+  }
+  if (params.cabin) {
+    const cabinMap: Record<string, string> = {
+      'ECONOMY': 'Economy',
+      'PREMIUM_ECONOMY': 'Premium Economy',
+      'BUSINESS': 'Business',
+      'FIRST': 'First',
+    };
+    urlParams.set('cabin', cabinMap[params.cabin] || 'Economy');
+  }
+  // Travelpayouts tracking
+  urlParams.set('Allianceid', '3814851');
+  urlParams.set('sid', '654591');
+  return `https://www.trip.com/flights/?${urlParams.toString()}`;
 }
 
 function SearchResults() {
@@ -41,11 +84,17 @@ function SearchResults() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  const tripType = (searchParams.get('tripType') || 'return') as TripType;
   const origin = searchParams.get('origin') || '';
   const destination = searchParams.get('destination') || '';
   const departureDate = searchParams.get('departureDate') || '';
   const returnDate = searchParams.get('returnDate') || '';
-  const passengers = parseInt(searchParams.get('passengers') || '1');
+  const adults = parseInt(searchParams.get('adults') || '1');
+  const children = parseInt(searchParams.get('children') || '0');
+  const infants = parseInt(searchParams.get('infants') || '0');
+  const cabin = (searchParams.get('cabin') || 'ECONOMY') as CabinClass;
+
+  const totalPassengers = adults + children + infants;
 
   const searchFlights = useCallback(async () => {
     if (!token || !origin || !destination || !departureDate) {
@@ -58,12 +107,16 @@ function SearchResults() {
 
     try {
       const params: FlightSearchParams = {
+        tripType,
         origin,
         destination,
         departureDate,
-        adults: passengers,
+        adults,
+        cabin,
       };
-      if (returnDate) params.returnDate = returnDate;
+      if (returnDate && tripType === 'return') params.returnDate = returnDate;
+      if (children > 0) params.children = children;
+      if (infants > 0) params.infants = infants;
 
       const response = await fetch(`http://localhost:3000/api/search/flights`, {
         method: 'POST',
@@ -83,7 +136,7 @@ function SearchResults() {
     } finally {
       setLoading(false);
     }
-  }, [token, origin, destination, departureDate, returnDate, passengers]);
+  }, [token, tripType, origin, destination, departureDate, returnDate, adults, children, infants, cabin]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -110,23 +163,33 @@ function SearchResults() {
     );
   }
 
+  const fallbackUrl = buildFallbackUrl({
+    tripType, origin, destination, departureDate, returnDate, adults, children, cabin,
+  });
+
   return (
     <div>
-      <div className="mb-8 p-4 bg-bg-card border border-border-subtle rounded-xl">
+      {/* Search Summary */}
+      <div className="mb-6 p-4 bg-bg-card border border-border-subtle rounded-xl">
         <div className="flex flex-wrap items-center gap-2 text-sm">
           <span className="font-medium text-text-primary">{origin}</span>
           <IconArrowRight className="w-4 h-4 text-text-muted" />
           <span className="font-medium text-text-primary">{destination}</span>
           <span className="text-text-muted mx-2">|</span>
           <span className="text-text-secondary">{departureDate}</span>
-          {returnDate && (
+          {returnDate && tripType === 'return' && (
             <>
               <span className="text-text-muted">-</span>
               <span className="text-text-secondary">{returnDate}</span>
             </>
           )}
           <span className="text-text-muted mx-2">|</span>
-          <span className="text-text-secondary">{passengers} passenger{passengers > 1 ? 's' : ''}</span>
+          <span className="text-text-secondary">{totalPassengers} traveler{totalPassengers > 1 ? 's' : ''}</span>
+          <span className="text-text-muted mx-2">|</span>
+          <span className="text-text-secondary capitalize">{cabin.toLowerCase().replace('_', ' ')}</span>
+          {tripType === 'oneway' && (
+            <span className="px-2 py-0.5 text-xs bg-accent-amber/10 text-accent-amber rounded ml-2">One-way</span>
+          )}
         </div>
       </div>
 
@@ -144,82 +207,136 @@ function SearchResults() {
       ) : flights.length === 0 ? (
         <div className="text-center py-20">
           <IconPlane className="w-12 h-12 text-text-muted/50 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-text-secondary mb-2">No cached prices available</h3>
+          <h3 className="text-lg font-medium text-text-secondary mb-2">No flights found</h3>
           <p className="text-sm text-text-muted mb-6">
-            This route may not have recent search data. Search directly for real-time prices:
+            Try different dates, destinations, or search directly on our partner:
           </p>
           <a
-            href={`https://search.jetradar.com/flights/${origin.toUpperCase()}${departureDate.split('-')[2]}${departureDate.split('-')[1]}${destination.toUpperCase()}${returnDate ? returnDate.split('-')[2] + returnDate.split('-')[1] : ''}${passengers}?marker=654591`}
+            href={fallbackUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-6 py-3 bg-accent-teal text-bg-primary font-medium rounded-lg hover:bg-accent-teal/90 transition-colors"
           >
-            Search on Jetradar
+            Search on Trip.com
             <IconExternalLink className="w-4 h-4" />
           </a>
-          <p className="text-xs text-text-muted mt-4">
-            Tip: Try popular routes like NYC → LON for cached prices
-          </p>
         </div>
       ) : (
-        <div className="space-y-3">
-          <p className="text-sm text-text-muted mb-4">
-            Found {flights.length} flight{flights.length > 1 ? 's' : ''} • Prices from Travelpayouts
+        <div className="space-y-4">
+          {/* Price Disclaimer */}
+          <div className="px-4 py-3 bg-accent-amber/5 border border-accent-amber/20 rounded-lg">
+            <p className="text-sm text-accent-amber">
+              Fares update in real time. Final price confirmed at partner checkout.
+            </p>
+          </div>
+
+          <p className="text-sm text-text-muted">
+            Found {flights.length} flight{flights.length > 1 ? 's' : ''} • Powered by Amadeus
           </p>
-          {flights.map((flight) => (
-            <div
-              key={flight.id}
-              className="p-4 md:p-5 bg-bg-card border border-border-subtle rounded-xl hover:border-accent-teal/30 transition-colors"
-            >
-              <div className="flex flex-col md:flex-row md:items-center gap-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-sm font-medium text-text-primary">{flight.airline}</span>
-                    <span className="text-xs text-text-muted">({flight.airlineCode} {flight.flightNumber})</span>
-                    {flight.stops === 0 ? (
-                      <span className="px-2 py-0.5 text-xs bg-accent-teal/10 text-accent-teal rounded">Direct</span>
-                    ) : (
-                      <span className="px-2 py-0.5 text-xs bg-accent-amber/10 text-accent-amber rounded">
-                        {flight.stops} stop{flight.stops > 1 ? 's' : ''}
+
+          {flights.map((flight) => {
+            const dep = formatDateTime(flight.departureTime);
+            const arr = formatDateTime(flight.arrivalTime);
+            
+            return (
+              <div
+                key={flight.id}
+                className="p-4 md:p-5 bg-bg-card border border-border-subtle rounded-xl hover:border-accent-teal/30 transition-colors"
+              >
+                <div className="flex flex-col md:flex-row md:items-center gap-4">
+                  <div className="flex-1">
+                    {/* Airline Info */}
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-sm font-medium text-text-primary">{flight.airline}</span>
+                      <span className="text-xs text-text-muted">({flight.flightNumber})</span>
+                      {flight.stops === 0 ? (
+                        <span className="px-2 py-0.5 text-xs bg-accent-teal/10 text-accent-teal rounded">Direct</span>
+                      ) : (
+                        <span className="px-2 py-0.5 text-xs bg-accent-amber/10 text-accent-amber rounded">
+                          {flight.stops} stop{flight.stops > 1 ? 's' : ''}
+                        </span>
+                      )}
+                      <span className="px-2 py-0.5 text-xs bg-bg-elevated text-text-muted rounded capitalize">
+                        {flight.cabin.toLowerCase()}
                       </span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="text-center">
-                      <div className="text-sm font-medium text-text-primary">{formatDate(flight.departureTime)}</div>
-                      <div className="text-xs text-text-muted">{flight.origin}</div>
                     </div>
-                    <div className="flex-1 flex flex-col items-center gap-1">
-                      <div className="w-full h-px bg-border-subtle relative">
-                        <IconPlane className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 text-accent-teal rotate-90" />
+
+                    {/* Outbound Flight */}
+                    <div className="flex items-center gap-4">
+                      <div className="text-center min-w-[60px]">
+                        <div className="text-lg font-semibold text-text-primary">{dep.time}</div>
+                        <div className="text-xs text-text-muted">{flight.origin}</div>
+                      </div>
+                      <div className="flex-1 flex flex-col items-center gap-1">
+                        <div className="flex items-center gap-2 text-xs text-text-muted">
+                          <IconClock className="w-3 h-3" />
+                          {flight.duration}
+                        </div>
+                        <div className="w-full h-px bg-border-subtle relative">
+                          <IconPlane className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 text-accent-teal rotate-90" />
+                        </div>
+                      </div>
+                      <div className="text-center min-w-[60px]">
+                        <div className="text-lg font-semibold text-text-primary">{arr.time}</div>
+                        <div className="text-xs text-text-muted">{flight.destination}</div>
                       </div>
                     </div>
-                    <div className="text-center">
-                      <div className="text-sm font-medium text-text-primary">{flight.returnTime ? formatDate(flight.returnTime) : 'One-way'}</div>
-                      <div className="text-xs text-text-muted">{flight.destination}</div>
+
+                    {/* Return Flight (if exists) */}
+                    {flight.returnDepartureTime && (
+                      <div className="mt-3 pt-3 border-t border-border-subtle">
+                        <div className="flex items-center gap-4">
+                          <div className="text-center min-w-[60px]">
+                            <div className="text-lg font-semibold text-text-primary">
+                              {formatDateTime(flight.returnDepartureTime).time}
+                            </div>
+                            <div className="text-xs text-text-muted">{flight.destination}</div>
+                          </div>
+                          <div className="flex-1 flex flex-col items-center gap-1">
+                            <div className="w-full h-px bg-border-subtle relative">
+                              <IconPlane className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 text-accent-teal -rotate-90" />
+                            </div>
+                          </div>
+                          <div className="text-center min-w-[60px]">
+                            <div className="text-lg font-semibold text-text-primary">
+                              {flight.returnArrivalTime ? formatDateTime(flight.returnArrivalTime).time : '--'}
+                            </div>
+                            <div className="text-xs text-text-muted">{flight.origin}</div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Price & Book Button */}
+                  <div className="flex items-center gap-4 pt-3 md:pt-0 border-t md:border-t-0 md:border-l border-border-subtle md:pl-6">
+                    <div className="text-right">
+                      <div className="text-xl font-semibold text-text-primary">
+                        {formatPrice(flight.price, flight.currency)}
+                      </div>
+                      <div className="text-xs text-text-muted">
+                        {tripType === 'return' ? 'roundtrip' : 'one-way'}
+                      </div>
                     </div>
+                    <a
+                      href={flight.affiliateUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 px-4 py-2.5 bg-accent-teal text-bg-primary text-sm font-medium rounded-lg hover:bg-accent-teal/90 transition-colors"
+                    >
+                      Book now
+                      <IconExternalLink className="w-4 h-4" />
+                    </a>
                   </div>
                 </div>
-                <div className="flex items-center gap-4 pt-3 md:pt-0 border-t md:border-t-0 md:border-l border-border-subtle md:pl-6">
-                  <div className="text-right">
-                    <div className="text-xl font-semibold text-text-primary">
-                      {formatPrice(flight.price, flight.currency)}
-                    </div>
-                    <div className="text-xs text-text-muted">roundtrip</div>
-                  </div>
-                  <a
-                    href={flight.affiliateUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-4 py-2.5 bg-accent-teal text-bg-primary text-sm font-medium rounded-lg hover:bg-accent-teal/90 transition-colors"
-                  >
-                    Book
-                    <IconExternalLink className="w-4 h-4" />
-                  </a>
-                </div>
+
+                {/* Urgency note */}
+                <p className="mt-3 text-xs text-text-muted">
+                  Complete your booking in this session to secure this fare.
+                </p>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
