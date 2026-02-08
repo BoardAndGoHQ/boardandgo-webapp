@@ -49,6 +49,14 @@ body {
   color: var(--bg-primary);
 }
 
+button, [role="button"] {
+  cursor: pointer;
+}
+
+a {
+  cursor: pointer;
+}
+
 input, select, textarea {
   font-family: inherit;
 }

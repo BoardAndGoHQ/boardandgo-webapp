@@ -52,10 +52,14 @@ export function AgentChat() {
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatScrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // Scroll only the chat container, not the whole page
+    if (chatScrollRef.current) {
+      chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+    }
   };
 
   useEffect(() => {
@@ -167,7 +171,7 @@ export function AgentChat() {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
+      <div ref={chatScrollRef} className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center space-y-4">
             <div className="w-14 h-14 rounded-2xl bg-accent-teal/10 flex items-center justify-center">
