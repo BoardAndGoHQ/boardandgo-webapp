@@ -101,6 +101,30 @@ export interface Booking {
   createdAt: string;
 }
 
+export interface TrackBookClickParams {
+  tripType: TripType;
+  origin: string;
+  destination: string;
+  departureDate: string;
+  returnDate?: string;
+  adults: number;
+  children: number;
+  infants: number;
+  cabin?: string;
+  airline: string;
+  airlineCode: string;
+  flightNumber: string;
+  price: number;
+  currency: string;
+  stops: number;
+  duration: string;
+  departureTime: string;
+  arrivalTime: string;
+  returnDepartureTime?: string;
+  returnArrivalTime?: string;
+  affiliateUrl: string;
+}
+
 export const api = {
   auth: {
     register: (email: string, password: string, name?: string) =>
@@ -119,6 +143,13 @@ export const api = {
   flights: {
     search: (params: FlightSearchParams, token: string) =>
       request<{ flights: FlightOffer[] }>('/api/search/flights', {
+        method: 'POST',
+        body: params,
+        token,
+      }),
+
+    trackBookClick: (params: TrackBookClickParams, token: string) =>
+      request<{ success: boolean; clickId: string }>('/api/search/track-book-click', {
         method: 'POST',
         body: params,
         token,

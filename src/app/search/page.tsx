@@ -3,7 +3,8 @@
 import { useEffect, useState, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth';
-import type { FlightSearchParams, TripType, CabinClass } from '@/lib/api';
+import type { FlightSearchParams, TripType, CabinClass, TrackBookClickParams } from '@/lib/api';
+import { api } from '@/lib/api';
 import { FlightSearch } from '@/components/flight-search';
 import { IconLoader, IconPlane, IconArrowRight, IconExternalLink, IconClock } from '@/components/icons';
 
@@ -147,6 +148,43 @@ function SearchResults() {
     searchFlights();
   }, [user, authLoading, router, searchFlights]);
 
+  const handleBookClick = async (flight: FlightOffer) => {
+    if (!token) return;
+    
+    // Track the click in background, don't wait
+    const trackParams: TrackBookClickParams = {
+      tripType,
+      origin,
+      destination,
+      departureDate,
+      returnDate: returnDate || undefined,
+      adults,
+      children,
+      infants,
+      cabin,
+      airline: flight.airline,
+      airlineCode: flight.airlineCode,
+      flightNumber: flight.flightNumber,
+      price: flight.price,
+      currency: flight.currency,
+      stops: flight.stops,
+      duration: flight.duration,
+      departureTime: flight.departureTime,
+      arrivalTime: flight.arrivalTime,
+      returnDepartureTime: flight.returnDepartureTime,
+      returnArrivalTime: flight.returnArrivalTime,
+      affiliateUrl: flight.affiliateUrl,
+    };
+    
+    // Fire and forget - don't block the user
+    api.flights.trackBookClick(trackParams, token).catch(() => {
+      // Silent fail - don't block user experience
+    });
+    
+    // Open affiliate URL immediately
+    window.open(flight.affiliateUrl, '_blank', 'noopener,noreferrer');
+  };
+
   if (authLoading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -263,7 +301,7 @@ function SearchResults() {
 
                     {/* Outbound Flight */}
                     <div className="flex items-center gap-4">
-                      <div className="text-center min-w-[60px]">
+                      <div className="text-center min-w-15">
                         <div className="text-lg font-semibold text-text-primary">{dep.time}</div>
                         <div className="text-xs text-text-muted">{flight.origin}</div>
                       </div>
@@ -276,7 +314,7 @@ function SearchResults() {
                           <IconPlane className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 text-accent-teal rotate-90" />
                         </div>
                       </div>
-                      <div className="text-center min-w-[60px]">
+                      <div className="text-center min-w-15">
                         <div className="text-lg font-semibold text-text-primary">{arr.time}</div>
                         <div className="text-xs text-text-muted">{flight.destination}</div>
                       </div>
@@ -286,7 +324,7 @@ function SearchResults() {
                     {flight.returnDepartureTime && (
                       <div className="mt-3 pt-3 border-t border-border-subtle">
                         <div className="flex items-center gap-4">
-                          <div className="text-center min-w-[60px]">
+                          <div className="text-center min-w-15">
                             <div className="text-lg font-semibold text-text-primary">
                               {formatDateTime(flight.returnDepartureTime).time}
                             </div>
@@ -297,7 +335,7 @@ function SearchResults() {
                               <IconPlane className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 text-accent-teal -rotate-90" />
                             </div>
                           </div>
-                          <div className="text-center min-w-[60px]">
+                          <div className="text-center min-w-15">
                             <div className="text-lg font-semibold text-text-primary">
                               {flight.returnArrivalTime ? formatDateTime(flight.returnArrivalTime).time : '--'}
                             </div>
@@ -318,15 +356,13 @@ function SearchResults() {
                         {tripType === 'return' ? 'roundtrip' : 'one-way'}
                       </div>
                     </div>
-                    <a
-                      href={flight.affiliateUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 px-4 py-2.5 bg-accent-teal text-bg-primary text-sm font-medium rounded-lg hover:bg-accent-teal/90 transition-colors"
+                    <button
+                      onClick={() => handleBookClick(flight)}
+                      className="flex items-center gap-2 px-4 py-2.5 bg-accent-teal text-bg-primary text-sm font-medium rounded-lg hover:bg-accent-teal/90 transition-colors cursor-pointer"
                     >
                       Book now
                       <IconExternalLink className="w-4 h-4" />
-                    </a>
+                    </button>
                   </div>
                 </div>
 
