@@ -1,74 +1,100 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react';
-import { api, type User, ApiError } from '@/lib/api';
+import { getSupabaseClient } from '@/lib/supabase';
+import type { User, Session, AuthChangeEvent } from '@supabase/supabase-js';
 
 interface AuthState {
   user: User | null;
-  token: string | null;
+  session: Session | null;
   loading: boolean;
 }
 
 interface AuthContextValue extends AuthState {
-  login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, name?: string) => Promise<void>;
-  logout: () => void;
+  signInWithEmail: (email: string, password: string) => Promise<void>;
+  signUpWithEmail: (email: string, password: string, name?: string) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
+  signOut: () => Promise<void>;
+  // For backward compatibility with existing code
+  token: string | null;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-const STORAGE_KEY = 'boardandgo_auth';
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AuthState>({
     user: null,
-    token: null,
+    session: null,
     loading: true,
   });
 
+  const supabase = getSupabaseClient();
+
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        const { user, token } = JSON.parse(stored);
-        setState({ user, token, loading: false });
-      } catch {
-        localStorage.removeItem(STORAGE_KEY);
-        setState((s) => ({ ...s, loading: false }));
-      }
-    } else {
-      setState((s) => ({ ...s, loading: false }));
-    }
-  }, []);
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }: { data: { session: Session | null } }) => {
+      setState({
+        user: session?.user ?? null,
+        session,
+        loading: false,
+      });
+    });
 
-  const persist = useCallback((user: User, token: string) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ user, token }));
-    setState({ user, token, loading: false });
-  }, []);
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: AuthChangeEvent, session: Session | null) => {
+      setState({
+        user: session?.user ?? null,
+        session,
+        loading: false,
+      });
+    });
 
-  const login = useCallback(
-    async (email: string, password: string) => {
-      const { user, token } = await api.auth.login(email, password);
-      persist(user, token);
-    },
-    [persist]
-  );
+    return () => subscription.unsubscribe();
+  }, [supabase.auth]);
 
-  const register = useCallback(
-    async (email: string, password: string, name?: string) => {
-      const { user, token } = await api.auth.register(email, password, name);
-      persist(user, token);
-    },
-    [persist]
-  );
+  const signInWithEmail = useCallback(async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+  }, [supabase.auth]);
 
-  const logout = useCallback(() => {
-    localStorage.removeItem(STORAGE_KEY);
-    setState({ user: null, token: null, loading: false });
-  }, []);
+  const signUpWithEmail = useCallback(async (email: string, password: string, name?: string) => {
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { full_name: name },
+      },
+    });
+    if (error) throw error;
+  }, [supabase.auth]);
+
+  const signInWithGoogle = useCallback(async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+    if (error) throw error;
+  }, [supabase.auth]);
+
+  const signOut = useCallback(async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+  }, [supabase.auth]);
+
+  // Token for backward compatibility with existing API calls
+  const token = state.session?.access_token ?? null;
 
   return (
-    <AuthContext.Provider value={{ ...state, login, register, logout }}>
+    <AuthContext.Provider value={{
+      ...state,
+      token,
+      signInWithEmail,
+      signUpWithEmail,
+      signInWithGoogle,
+      signOut,
+    }}>
       {children}
     </AuthContext.Provider>
   );
@@ -79,5 +105,3 @@ export function useAuth() {
   if (!ctx) throw new Error('useAuth must be used within AuthProvider');
   return ctx;
 }
-
-export { ApiError };

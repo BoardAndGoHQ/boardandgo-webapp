@@ -3,8 +3,8 @@
 import { useState, type FormEvent, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useAuth, ApiError } from '@/context/auth';
-import { api } from '@/lib/api';
+import { useAuth } from '@/context/auth';
+import { api, ApiError } from '@/lib/api';
 import { IconPlane, IconMapPin, IconCalendar, IconUser, IconLoader, IconArrowRight } from '@/components/icons';
 
 export default function NewBookingPage() {

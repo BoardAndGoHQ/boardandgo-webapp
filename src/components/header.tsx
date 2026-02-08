@@ -9,10 +9,11 @@ import { IconPlane, IconUser, IconLogout, IconMenu, IconX } from './icons';
 const navLinks = [
   { href: '/', label: 'Search' },
   { href: '/bookings', label: 'Bookings' },
+  { href: '/settings', label: 'Settings' },
 ];
 
 export function Header() {
-  const { user, logout, loading } = useAuth();
+  const { user, signOut, loading } = useAuth();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -47,7 +48,7 @@ export function Header() {
             <div className="flex items-center gap-3">
               <span className="text-sm text-text-secondary">{user.email}</span>
               <button
-                onClick={logout}
+                onClick={signOut}
                 className="p-2 text-text-muted hover:text-text-primary transition-colors"
                 title="Sign out"
               >
@@ -96,7 +97,7 @@ export function Header() {
                 <span className="px-4 py-2 text-sm text-text-secondary">{user.email}</span>
                 <button
                   onClick={() => {
-                    logout();
+                    signOut();
                     setMobileOpen(false);
                   }}
                   className="px-4 py-3 text-sm text-text-secondary text-left"
