@@ -39,13 +39,13 @@ function formatDateDisplay(dateStr: string): string {
 
 const cabinOptions: { value: CabinClass; label: string }[] = [
   { value: 'ECONOMY', label: 'Economy' },
-  { value: 'PREMIUM_ECONOMY', label: 'Premium Economy' },
+  { value: 'PREMIUM_ECONOMY', label: 'Premium' },
   { value: 'BUSINESS', label: 'Business' },
-  { value: 'FIRST', label: 'First Class' },
+  { value: 'FIRST', label: 'First' },
 ];
 
-/* ── Stepper ───────────────────────────────────── */
-function Stepper({
+/* ── Stepper (inline) ─────────────────────────── */
+function InlineStepper({
   label,
   sublabel,
   value,
@@ -107,7 +107,6 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
   const [travelersOpen, setTravelersOpen] = useState(false);
   const travelersRef = useRef<HTMLDivElement>(null);
 
-  // Close travelers popover on outside click
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (travelersRef.current && !travelersRef.current.contains(e.target as Node)) {
@@ -152,6 +151,7 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
 
   const today = new Date().toISOString().split('T')[0];
   const totalPassengers = form.adults + form.children + form.infants;
+  const cabinLabel = cabinOptions.find((c) => c.value === form.cabin)?.label || 'Economy';
 
   return (
     <form onSubmit={handleSubmit} className="w-full">
@@ -174,11 +174,10 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
           ))}
         </div>
 
-        {/* ── Main Search Row ── */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-0 md:gap-0 items-end">
-
-          {/* ── From ── */}
-          <div className="md:col-span-3 search-field-group">
+        {/* ── Row 1: From / Swap / To ── */}
+        <div className="flex flex-col md:flex-row items-stretch gap-3 mb-4">
+          {/* From */}
+          <div className="flex-1 search-field-group">
             <label className="search-label">From</label>
             <div className="relative">
               <IconMapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-accent-teal" />
@@ -194,8 +193,8 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
             </div>
           </div>
 
-          {/* ── Swap ── */}
-          <div className="md:col-span-1 flex items-center justify-center py-2 md:py-0 md:pb-1">
+          {/* Swap */}
+          <div className="flex items-end justify-center pb-1 shrink-0">
             <button
               type="button"
               onClick={handleSwap}
@@ -206,8 +205,8 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
             </button>
           </div>
 
-          {/* ── To ── */}
-          <div className="md:col-span-3 search-field-group">
+          {/* To */}
+          <div className="flex-1 search-field-group">
             <label className="search-label">To</label>
             <div className="relative">
               <IconMapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-accent-teal" />
@@ -222,9 +221,12 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
               />
             </div>
           </div>
+        </div>
 
-          {/* ── Departure ── */}
-          <div className={form.tripType === 'return' ? 'md:col-span-2 search-field-group' : 'md:col-span-2 search-field-group'}>
+        {/* ── Row 2: Dates + Travelers + Cabin ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+          {/* Departure */}
+          <div className="search-field-group">
             <label className="search-label">Depart</label>
             <div className="relative">
               <IconCalendar className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-accent-teal pointer-events-none" />
@@ -246,9 +248,9 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
             </div>
           </div>
 
-          {/* ── Return ── */}
-          {form.tripType === 'return' && (
-            <div className="md:col-span-2 search-field-group">
+          {/* Return */}
+          {form.tripType === 'return' ? (
+            <div className="search-field-group">
               <label className="search-label">Return</label>
               <div className="relative">
                 <IconCalendar className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-accent-teal pointer-events-none" />
@@ -268,10 +270,24 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
                 )}
               </div>
             </div>
+          ) : (
+            /* Cabin class takes this slot when one-way */
+            <div className="search-field-group">
+              <label className="search-label">Cabin</label>
+              <select
+                value={form.cabin}
+                onChange={(e) => setForm((f) => ({ ...f, cabin: e.target.value as CabinClass }))}
+                className="search-input appearance-none cursor-pointer"
+              >
+                {cabinOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
           )}
 
-          {/* ── Travelers ── */}
-          <div className={form.tripType === 'return' ? 'md:col-span-1 search-field-group' : 'md:col-span-3 search-field-group'} ref={travelersRef}>
+          {/* Travelers dropdown */}
+          <div className="search-field-group relative" ref={travelersRef}>
             <label className="search-label">Travelers</label>
             <button
               type="button"
@@ -279,14 +295,17 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
               className="search-input flex items-center gap-2 text-left w-full"
             >
               <IconUsers className="w-4 h-4 text-accent-teal shrink-0" />
-              <span className="text-sm font-medium text-text-primary">{totalPassengers}</span>
-              <IconChevronDown className={`w-3.5 h-3.5 text-text-muted ml-auto transition-transform duration-200 ${travelersOpen ? 'rotate-180' : ''}`} />
+              <span className="text-sm font-medium text-text-primary">
+                {form.adults} Adult{form.adults > 1 ? 's' : ''}
+                {form.children > 0 && `, ${form.children} Child`}
+                {form.infants > 0 && `, ${form.infants} Infant`}
+              </span>
+              <IconChevronDown className={`w-3.5 h-3.5 text-text-muted ml-auto shrink-0 transition-transform duration-200 ${travelersOpen ? 'rotate-180' : ''}`} />
             </button>
 
-            {/* ── Travelers Popover ── */}
             {travelersOpen && (
-              <div className="absolute right-0 md:left-0 top-full mt-2 w-72 bg-bg-card border border-border-subtle rounded-xl shadow-2xl shadow-black/30 z-50 p-4 space-y-1">
-                <Stepper
+              <div className="absolute left-0 md:left-auto md:right-0 top-full mt-2 w-72 bg-bg-card border border-border-subtle rounded-xl shadow-2xl shadow-black/30 z-50 p-4 space-y-1">
+                <InlineStepper
                   label="Adults"
                   sublabel="12+ years"
                   value={form.adults}
@@ -295,7 +314,7 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
                   onChange={(v) => setForm((f) => ({ ...f, adults: v }))}
                 />
                 <div className="border-t border-border-subtle" />
-                <Stepper
+                <InlineStepper
                   label="Children"
                   sublabel="2-11 years"
                   value={form.children}
@@ -304,7 +323,7 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
                   onChange={(v) => setForm((f) => ({ ...f, children: v }))}
                 />
                 <div className="border-t border-border-subtle" />
-                <Stepper
+                <InlineStepper
                   label="Infants"
                   sublabel="Under 2"
                   value={form.infants}
@@ -312,28 +331,6 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
                   max={4}
                   onChange={(v) => setForm((f) => ({ ...f, infants: v }))}
                 />
-
-                {/* Cabin Class inside popover */}
-                <div className="border-t border-border-subtle pt-3 mt-2">
-                  <div className="text-xs text-text-muted mb-2 font-medium">Cabin Class</div>
-                  <div className="grid grid-cols-2 gap-1.5">
-                    {cabinOptions.map((opt) => (
-                      <button
-                        key={opt.value}
-                        type="button"
-                        onClick={() => setForm((f) => ({ ...f, cabin: opt.value }))}
-                        className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${
-                          form.cabin === opt.value
-                            ? 'bg-accent-teal text-bg-primary shadow-sm'
-                            : 'bg-bg-elevated text-text-secondary hover:text-text-primary border border-border-subtle'
-                        }`}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
                 <button
                   type="button"
                   onClick={() => setTravelersOpen(false)}
@@ -344,6 +341,22 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
               </div>
             )}
           </div>
+
+          {/* Cabin class (round trip only -- one-way uses slot above) */}
+          {form.tripType === 'return' && (
+            <div className="search-field-group">
+              <label className="search-label">Cabin</label>
+              <select
+                value={form.cabin}
+                onChange={(e) => setForm((f) => ({ ...f, cabin: e.target.value as CabinClass }))}
+                className="search-input appearance-none cursor-pointer"
+              >
+                {cabinOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
 
         {/* ── Search Button ── */}
@@ -352,7 +365,7 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
           className="w-full mt-5 py-3.5 bg-accent-teal text-bg-primary font-semibold text-sm rounded-xl glow-teal hover:brightness-110 transition-all duration-300 flex items-center justify-center gap-2.5"
         >
           <IconSearch className="w-4.5 h-4.5" />
-          Search Flights
+          Search {totalPassengers} Traveler{totalPassengers > 1 ? 's' : ''} &middot; {cabinLabel}
         </button>
       </div>
     </form>
