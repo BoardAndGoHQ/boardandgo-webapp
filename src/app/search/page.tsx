@@ -469,7 +469,7 @@ function SearchPageInner() {
       >
         <div className="flex gap-5">
           {/* Chat panel — sticky left side */}
-          <div className="w-full md:w-[340px] lg:w-[380px] shrink-0">
+          <div className="w-full md:w-85 lg:w-95 shrink-0">
             <div className="md:sticky md:top-4" style={{ height: 'calc(100vh - 140px)' }}>
               {mode === 'ai' && <AgentChat />}
             </div>
