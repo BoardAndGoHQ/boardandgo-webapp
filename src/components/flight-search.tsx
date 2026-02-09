@@ -309,6 +309,73 @@ function InlineStepper({
   );
 }
 
+/* ── Custom Cabin Dropdown ─────────────────────── */
+function CabinDropdown({
+  value,
+  onChange,
+}: {
+  value: CabinClass;
+  onChange: (v: CabinClass) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    if (open) {
+      document.addEventListener('mousedown', handleClick);
+      return () => document.removeEventListener('mousedown', handleClick);
+    }
+  }, [open]);
+
+  const selected = cabinOptions.find((o) => o.value === value);
+
+  return (
+    <div className="search-field-group relative" ref={ref}>
+      <label className="search-label">Cabin</label>
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="search-input flex items-center gap-2 text-left w-full"
+      >
+        <span className="text-sm font-medium text-text-primary truncate">{selected?.label}</span>
+        <IconChevronDown className={`w-3.5 h-3.5 text-text-muted ml-auto shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
+      </button>
+
+      {open && (
+        <div className="absolute left-0 bottom-full mb-2 w-full min-w-[180px] bg-bg-card border border-border-subtle rounded-xl shadow-2xl shadow-black/40 z-[100] py-1.5">
+          {cabinOptions.map((opt) => {
+            const isActive = opt.value === value;
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => { onChange(opt.value); setOpen(false); }}
+                className={`w-full text-left px-4 py-2.5 text-sm transition-colors duration-150 flex items-center justify-between ${
+                  isActive
+                    ? 'text-accent-teal bg-accent-teal/8 font-medium'
+                    : 'text-text-secondary hover:text-text-primary hover:bg-bg-elevated/60'
+                }`}
+              >
+                {opt.label}
+                {isActive && (
+                  <svg className="w-4 h-4 text-accent-teal shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ── Main Component ────────────────────────────── */
 export function FlightSearch({ onSearch }: FlightSearchProps) {
   const router = useRouter();
@@ -463,18 +530,10 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
               placeholder="Select date"
             />
           ) : (
-            <div className="search-field-group">
-              <label className="search-label">Cabin</label>
-              <select
-                value={form.cabin}
-                onChange={(e) => setForm((f) => ({ ...f, cabin: e.target.value as CabinClass }))}
-                className="search-input appearance-none cursor-pointer"
-              >
-                {cabinOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
-            </div>
+            <CabinDropdown
+              value={form.cabin}
+              onChange={(v) => setForm((f) => ({ ...f, cabin: v }))}
+            />
           )}
 
           {/* Travelers */}
@@ -516,18 +575,10 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
 
           {/* Cabin (round trip) */}
           {form.tripType === 'return' && (
-            <div className="search-field-group">
-              <label className="search-label">Cabin</label>
-              <select
-                value={form.cabin}
-                onChange={(e) => setForm((f) => ({ ...f, cabin: e.target.value as CabinClass }))}
-                className="search-input appearance-none cursor-pointer"
-              >
-                {cabinOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
-            </div>
+            <CabinDropdown
+              value={form.cabin}
+              onChange={(v) => setForm((f) => ({ ...f, cabin: v }))}
+            />
           )}
         </div>
 
