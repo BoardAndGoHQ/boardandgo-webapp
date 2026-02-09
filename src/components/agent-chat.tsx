@@ -180,7 +180,7 @@ export function AgentChat() {
             <div>
               <h4 className="text-sm font-medium text-text-primary mb-1">Where are you flying?</h4>
               <p className="text-xs text-text-muted max-w-xs">
-                Tell me your travel plans and I'll find the best flights for you.
+                Tell me your travel plans and I&apos;ll find the best flights for you.
               </p>
             </div>
             <div className="flex flex-wrap justify-center gap-2 mt-2">

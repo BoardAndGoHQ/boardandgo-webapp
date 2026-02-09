@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { FlightSearch } from '@/components/flight-search';
-import { IconPlane, IconSparkles, IconSearch } from '@/components/icons';
+import { IconSparkles, IconSearch } from '@/components/icons';
 
 /* ── data ──────────────────────────────────────────────────────── */
 const features = [

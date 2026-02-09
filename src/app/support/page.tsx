@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 
 const QuickHelp = ({ title, description, icon }: { title: string; description: string; icon: React.ReactNode }) => (
   <div className="glass-effect rounded-2xl p-6 hover:scale-[1.02] transition-all">
@@ -18,21 +18,22 @@ const QuickHelp = ({ title, description, icon }: { title: string; description: s
 
 const FAQItem = ({ question, answer }: { question: string; answer: string }) => {
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  const [h, setH] = useState(0);
 
-  useEffect(() => {
-    if (ref.current) setH(open ? ref.current.scrollHeight : 0);
-  }, [open]);
+  const toggle = useCallback(() => setOpen((prev) => !prev), []);
 
   return (
     <div className="border-b border-border-subtle">
-      <button onClick={() => setOpen(!open)} className="w-full flex items-center justify-between py-4 text-left hover:text-accent-teal transition-colors">
+      <button onClick={toggle} className="w-full flex items-center justify-between py-4 text-left hover:text-accent-teal transition-colors">
         <span className="font-medium text-text-primary">{question}</span>
         <svg className={`w-5 h-5 text-text-muted transition-transform ${open ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
       </button>
-      <div ref={ref} className="overflow-hidden transition-all duration-500" style={{ height: h }}>
-        <p className="pb-4 text-sm text-text-muted" style={{ opacity: open ? 1 : 0, transition: 'opacity 300ms' }}>{answer}</p>
+      <div
+        className="grid transition-all duration-500"
+        style={{ gridTemplateRows: open ? '1fr' : '0fr' }}
+      >
+        <div className="overflow-hidden">
+          <p className="pb-4 text-sm text-text-muted" style={{ opacity: open ? 1 : 0, transition: 'opacity 300ms' }}>{answer}</p>
+        </div>
       </div>
     </div>
   );
