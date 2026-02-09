@@ -86,6 +86,8 @@ function SearchResults() {
   const [provider, setProvider] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const FLIGHTS_PER_PAGE = 10;
 
   const tripType = (searchParams.get('tripType') || 'return') as TripType;
   const origin = searchParams.get('origin') || '';
@@ -135,6 +137,7 @@ function SearchResults() {
       const data = await response.json();
       setFlights(data.flights || []);
       setProvider(data.provider || 'amadeus');
+      setCurrentPage(1);
     } catch {
       setError('Failed to search flights. Please try again.');
     } finally {
@@ -208,6 +211,33 @@ function SearchResults() {
     tripType, origin, destination, departureDate, returnDate, adults, children, cabin,
   });
 
+  const totalPages = Math.ceil(flights.length / FLIGHTS_PER_PAGE);
+  const paginatedFlights = flights.slice(
+    (currentPage - 1) * FLIGHTS_PER_PAGE,
+    currentPage * FLIGHTS_PER_PAGE
+  );
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const getPageNumbers = () => {
+    const pages: (number | '...')[] = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (currentPage > 3) pages.push('...');
+      for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
+        pages.push(i);
+      }
+      if (currentPage < totalPages - 2) pages.push('...');
+      pages.push(totalPages);
+    }
+    return pages;
+  };
+
   return (
     <div>
       {/* Search Summary */}
@@ -273,9 +303,12 @@ function SearchResults() {
 
           <p className="text-sm text-text-muted">
             Found {flights.length} flight{flights.length > 1 ? 's' : ''} • Powered by {provider === 'travelpayouts' ? 'Travelpayouts' : 'Amadeus'}
+            {totalPages > 1 && (
+              <span className="ml-2">• Page {currentPage} of {totalPages}</span>
+            )}
           </p>
 
-          {flights.map((flight) => {
+          {paginatedFlights.map((flight) => {
             const dep = formatDateTime(flight.departureTime);
             const arr = formatDateTime(flight.arrivalTime);
             
@@ -376,6 +409,45 @@ function SearchResults() {
               </div>
             );
           })}
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 pt-6 pb-2">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="px-3 py-2 text-sm text-text-muted hover:text-text-primary bg-bg-card border border-border-subtle rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                Previous
+              </button>
+
+              {getPageNumbers().map((page, i) =>
+                page === '...' ? (
+                  <span key={`ellipsis-${i}`} className="px-2 text-text-muted">...</span>
+                ) : (
+                  <button
+                    key={page}
+                    onClick={() => handlePageChange(page)}
+                    className={`w-10 h-10 text-sm rounded-lg transition-colors ${
+                      currentPage === page
+                        ? 'bg-accent-teal text-bg-primary font-medium'
+                        : 'text-text-muted hover:text-text-primary bg-bg-card border border-border-subtle'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                )
+              )}
+
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="px-3 py-2 text-sm text-text-muted hover:text-text-primary bg-bg-card border border-border-subtle rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                Next
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
