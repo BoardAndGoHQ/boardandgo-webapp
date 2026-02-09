@@ -25,7 +25,7 @@ export default function SettingsPage() {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:3000/api/gmail/authorize', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/gmail/authorize`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

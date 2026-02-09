@@ -121,7 +121,7 @@ function SearchResults() {
       if (children > 0) params.children = children;
       if (infants > 0) params.infants = infants;
 
-      const response = await fetch(`http://localhost:3000/api/search/flights`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/search/flights`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
