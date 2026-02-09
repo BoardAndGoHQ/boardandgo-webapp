@@ -210,15 +210,21 @@ export default function Home() {
             </p>
           </div>
 
-          {/* Mode Toggle */}
+          {/* Mode Toggle — sliding pill */}
           <div className="flex justify-center mb-8">
-            <div className="inline-flex gap-1 p-1 bg-bg-elevated/60 border border-border-subtle rounded-full">
+            <div className="relative inline-flex p-1 bg-bg-elevated/60 border border-border-subtle rounded-full">
+              {/* Sliding indicator */}
+              <div
+                className="absolute top-1 bottom-1 rounded-full bg-accent-teal shadow-sm shadow-accent-teal/25 transition-all duration-300 ease-in-out"
+                style={{
+                  left: searchMode === 'manual' ? '4px' : '50%',
+                  width: 'calc(50% - 4px)',
+                }}
+              />
               <button
                 onClick={() => setSearchMode('manual')}
-                className={`flex items-center gap-2 px-5 py-2 text-[13px] font-medium rounded-full transition-all duration-200 ${
-                  searchMode === 'manual'
-                    ? 'bg-accent-teal text-bg-primary shadow-sm shadow-accent-teal/25'
-                    : 'text-text-muted hover:text-text-primary'
+                className={`relative z-10 flex items-center gap-2 px-5 py-2 text-[13px] font-medium rounded-full transition-colors duration-300 ${
+                  searchMode === 'manual' ? 'text-bg-primary' : 'text-text-muted hover:text-text-primary'
                 }`}
               >
                 <IconSearch className="w-3.5 h-3.5" />
@@ -226,10 +232,8 @@ export default function Home() {
               </button>
               <button
                 onClick={() => setSearchMode('ai')}
-                className={`flex items-center gap-2 px-5 py-2 text-[13px] font-medium rounded-full transition-all duration-200 ${
-                  searchMode === 'ai'
-                    ? 'bg-accent-teal text-bg-primary shadow-sm shadow-accent-teal/25'
-                    : 'text-text-muted hover:text-text-primary'
+                className={`relative z-10 flex items-center gap-2 px-5 py-2 text-[13px] font-medium rounded-full transition-colors duration-300 ${
+                  searchMode === 'ai' ? 'text-bg-primary' : 'text-text-muted hover:text-text-primary'
                 }`}
               >
                 <IconSparkles className="w-3.5 h-3.5" />
@@ -238,25 +242,27 @@ export default function Home() {
             </div>
           </div>
 
-          {/* ── Manual Mode ── */}
-          <div
-            className={`transition-all duration-500 ease-in-out ${
-              searchMode === 'manual'
-                ? 'opacity-100 translate-y-0'
-                : 'opacity-0 translate-y-4 max-h-0 overflow-hidden pointer-events-none absolute'
-            }`}
-          >
-            <FlightSearch onSearch={handleFlightSearch} />
-          </div>
+          {/* ── Content area with slide transition ── */}
+          <div className="relative overflow-hidden">
+            {/* Manual Mode */}
+            <div
+              className={`transition-all duration-500 ease-in-out ${
+                searchMode === 'manual'
+                  ? 'opacity-100 translate-x-0 relative'
+                  : 'opacity-0 -translate-x-8 absolute inset-x-0 top-0 pointer-events-none'
+              }`}
+            >
+              <FlightSearch onSearch={handleFlightSearch} />
+            </div>
 
-          {/* ── AI Mode ── */}
-          <div
-            className={`transition-all duration-500 ease-in-out ${
-              searchMode === 'ai'
-                ? 'opacity-100 translate-y-0'
-                : 'opacity-0 translate-y-4 max-h-0 overflow-hidden pointer-events-none absolute'
-            }`}
-          >
+            {/* AI Mode */}
+            <div
+              className={`transition-all duration-500 ease-in-out ${
+                searchMode === 'ai'
+                  ? 'opacity-100 translate-x-0 relative'
+                  : 'opacity-0 translate-x-8 absolute inset-x-0 top-0 pointer-events-none'
+              }`}
+            >
             <div className="flex flex-col md:flex-row gap-5">
               {/* Chat panel */}
               <div className="w-full md:w-[380px] lg:w-[420px] shrink-0">
@@ -308,6 +314,7 @@ export default function Home() {
                 </div>
               </div>
             </div>
+          </div>
           </div>
         </div>
       </section>
