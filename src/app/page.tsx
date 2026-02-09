@@ -74,6 +74,9 @@ const testimonials = [
 
 /* ── Animated flight path SVG ── */
 function FlightPath() {
+  const path1 = "M-100 300 C200 100, 400 500, 600 250 S900 400, 1300 150";
+  const path2 = "M-50 450 C150 200, 500 350, 700 150 S1000 300, 1350 100";
+
   return (
     <svg
       className="absolute inset-0 w-full h-full pointer-events-none opacity-[0.04]"
@@ -81,21 +84,54 @@ function FlightPath() {
       fill="none"
       preserveAspectRatio="none"
     >
+      {/* Dashed trails */}
       <path
-        d="M-100 300 C200 100, 400 500, 600 250 S900 400, 1300 150"
+        d={path1}
         stroke="currentColor"
         strokeWidth="2"
         strokeDasharray="12 8"
         className="text-accent-teal animate-dash"
       />
       <path
-        d="M-50 450 C150 200, 500 350, 700 150 S1000 300, 1350 100"
+        d={path2}
         stroke="currentColor"
         strokeWidth="1.5"
         strokeDasharray="8 12"
         className="text-text-muted animate-dash"
         style={{ animationDelay: '-15s' }}
       />
+
+      {/* Plane on path 1 */}
+      <g opacity="0.7">
+        <path
+          d="M0 -6 L3 6 L0 4 L-3 6 Z"
+          fill="currentColor"
+          className="text-accent-teal"
+        >
+          <animateMotion
+            dur="22s"
+            repeatCount="indefinite"
+            rotate="auto"
+            path={path1}
+          />
+        </path>
+      </g>
+
+      {/* Plane on path 2 */}
+      <g opacity="0.5">
+        <path
+          d="M0 -5 L2.5 5 L0 3.5 L-2.5 5 Z"
+          fill="currentColor"
+          className="text-text-muted"
+        >
+          <animateMotion
+            dur="28s"
+            repeatCount="indefinite"
+            rotate="auto"
+            path={path2}
+          />
+        </path>
+      </g>
     </svg>
   );
 }
