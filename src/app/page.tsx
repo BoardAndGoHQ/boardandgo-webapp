@@ -279,7 +279,7 @@ export default function Home() {
           </div>
 
           {/* ── Content area with slide transition ── */}
-          <div className="relative overflow-hidden">
+          <div className="relative">
             {/* Manual Mode */}
             <div
               className={`transition-all duration-500 ease-in-out ${
