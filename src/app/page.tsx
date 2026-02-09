@@ -125,7 +125,7 @@ export default function Home() {
   return (
     <div className="flex flex-col">
       {/* ───────── Hero ───────── */}
-      <section className="relative py-24 md:py-36 overflow-hidden">
+      <section className="relative py-16 md:py-24 overflow-hidden">
         {/* Atmospheric backgrounds */}
         <FlightPath />
         <div className="absolute inset-0 bg-linear-to-b from-bg-secondary/50 to-transparent pointer-events-none" />
