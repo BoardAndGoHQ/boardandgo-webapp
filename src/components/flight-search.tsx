@@ -495,19 +495,21 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
             </button>
 
             {travelersOpen && (
-              <div className="absolute left-0 md:left-auto md:right-0 top-full mt-2 w-72 bg-bg-card border border-border-subtle rounded-xl shadow-2xl shadow-black/30 z-50 p-4 space-y-1">
+              <div className="absolute left-0 md:left-auto md:right-0 top-full mt-2 w-72 bg-bg-card border border-border-subtle rounded-xl shadow-2xl shadow-black/30 z-[100] p-4">
                 <InlineStepper label="Adults" sublabel="12+ years" value={form.adults} min={1} max={9} onChange={(v) => setForm((f) => ({ ...f, adults: v }))} />
                 <div className="border-t border-border-subtle" />
                 <InlineStepper label="Children" sublabel="2-11 years" value={form.children} min={0} max={6} onChange={(v) => setForm((f) => ({ ...f, children: v }))} />
                 <div className="border-t border-border-subtle" />
                 <InlineStepper label="Infants" sublabel="Under 2" value={form.infants} min={0} max={4} onChange={(v) => setForm((f) => ({ ...f, infants: v }))} />
-                <button
-                  type="button"
-                  onClick={() => setTravelersOpen(false)}
-                  className="w-full mt-3 py-2 text-xs font-medium text-accent-teal hover:bg-accent-teal/10 rounded-lg transition-colors"
-                >
-                  Done
-                </button>
+                <div className="pt-3 mt-2 border-t border-border-subtle">
+                  <button
+                    type="button"
+                    onClick={() => setTravelersOpen(false)}
+                    className="w-full py-2 text-xs font-medium text-accent-teal hover:bg-accent-teal/10 rounded-lg transition-colors"
+                  >
+                    Done
+                  </button>
+                </div>
               </div>
             )}
           </div>
