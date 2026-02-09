@@ -439,29 +439,68 @@ function SearchPageInner() {
   );
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 md:py-12">
+    <div className="max-w-350 mx-auto px-4 py-8 md:py-12">
       <div className="flex items-center justify-between mb-6">
         <SearchModeToggle mode={mode} onChange={handleModeChange} />
       </div>
 
-      {mode === 'manual' ? (
-        <>
-          <div className="mb-8">
-            <FlightSearch />
-          </div>
-          <SearchResults />
-        </>
-      ) : (
-        <>
-          <AgentChat />
-          {/* When agent triggers search, show results below the chat */}
-          {hasSearchParams && (
-            <div className="mt-6">
-              <SearchResults />
+      {/* Manual mode — full width, same as before */}
+      <div
+        className={`transition-all duration-500 ease-in-out ${
+          mode === 'manual'
+            ? 'opacity-100 max-h-2499.75'
+            : 'opacity-0 max-h-0 overflow-hidden pointer-events-none'
+        }`}
+      >
+        <div className="mb-8">
+          <FlightSearch />
+        </div>
+        {mode === 'manual' && <SearchResults />}
+      </div>
+
+      {/* AI mode — side-by-side: chat left, results right */}
+      <div
+        className={`transition-all duration-500 ease-in-out ${
+          mode === 'ai'
+            ? 'opacity-100'
+            : 'opacity-0 max-h-0 overflow-hidden pointer-events-none'
+        }`}
+      >
+        <div className="flex gap-5">
+          {/* Chat panel — sticky left side */}
+          <div className="w-full md:w-85 lg:w-95 shrink-0">
+            <div className="md:sticky md:top-4" style={{ height: 'calc(100vh - 140px)' }}>
+              {mode === 'ai' && <AgentChat />}
             </div>
-          )}
-        </>
-      )}
+          </div>
+
+          {/* Results panel — scrolls naturally on the right */}
+          <div className="hidden md:block flex-1 min-w-0">
+            {hasSearchParams ? (
+              <SearchResults />
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full text-center py-32">
+                <div className="w-16 h-16 rounded-2xl bg-bg-elevated flex items-center justify-center mb-4">
+                  <IconPlane className="w-8 h-8 text-text-muted/40" />
+                </div>
+                <h3 className="text-base font-medium text-text-secondary mb-1.5">
+                  Your flights will appear here
+                </h3>
+                <p className="text-sm text-text-muted max-w-xs">
+                  Chat with the AI assistant to find flights, then confirm to see results.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Mobile: results below chat */}
+        {hasSearchParams && (
+          <div className="md:hidden mt-6">
+            <SearchResults />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -148,7 +148,7 @@ export function AgentChat() {
     cabin.charAt(0) + cabin.slice(1).toLowerCase().replace('_', ' ');
 
   return (
-    <div className="bg-bg-card border border-border-subtle rounded-xl overflow-hidden flex flex-col" style={{ height: '520px' }}>
+    <div className="bg-bg-card border border-border-subtle rounded-xl overflow-hidden flex flex-col h-full">
       {/* Header */}
       <div className="flex items-center justify-between px-5 py-3.5 border-b border-border-subtle bg-bg-elevated/50">
         <div className="flex items-center gap-2.5">
