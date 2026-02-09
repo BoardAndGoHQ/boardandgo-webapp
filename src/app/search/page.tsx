@@ -132,14 +132,53 @@ function SearchResults() {
         body: JSON.stringify(params),
       });
 
-      if (!response.ok) throw new Error('Search failed');
+      if (!response.ok) {
+        // Try to parse the backend error for a friendly message
+        try {
+          const errData = await response.json();
+          const code = errData?.error?.code;
+          const details = errData?.error?.details;
+
+          if (code === 'VALIDATION_ERROR' && details) {
+            const fields = Object.keys(details);
+            if (fields.includes('origin') || fields.includes('destination')) {
+              throw new Error('Please enter a valid 3-letter airport code for origin and destination. Try searching by city name to find the right code.');
+            }
+            if (fields.includes('departureDate')) {
+              throw new Error('Please select a valid departure date.');
+            }
+            throw new Error(`Please check your search details: ${fields.join(', ')}`);
+          }
+
+          if (response.status === 401) {
+            throw new Error('Your session has expired. Please log in again.');
+          }
+
+          if (response.status >= 500) {
+            throw new Error('Something went wrong on our end. Please try again in a moment.');
+          }
+
+          throw new Error(errData?.error?.message || 'Search failed. Please try again.');
+        } catch (parseErr) {
+          if (parseErr instanceof Error && parseErr.message !== 'Search failed. Please try again.') {
+            throw parseErr;
+          }
+          throw new Error('Search failed. Please try again.');
+        }
+      }
       
       const data = await response.json();
       setFlights(data.flights || []);
       setProvider(data.provider || 'amadeus');
       setCurrentPage(1);
-    } catch {
-      setError('Failed to search flights. Please try again.');
+    } catch (err) {
+      if (err instanceof TypeError && err.message.includes('fetch')) {
+        setError('Unable to reach our servers. Please check your internet connection and try again.');
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Something unexpected happened. Please try again.');
+      }
     } finally {
       setLoading(false);
     }

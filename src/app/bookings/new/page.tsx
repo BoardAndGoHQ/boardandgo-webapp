@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '@/context/auth';
 import { api, ApiError } from '@/lib/api';
 import { IconPlane, IconMapPin, IconCalendar, IconUser, IconLoader, IconArrowRight } from '@/components/icons';
+import { AirportAutocomplete } from '@/components/airport-autocomplete';
 
 export default function NewBookingPage() {
   const router = useRouter();
@@ -127,27 +128,27 @@ export default function NewBookingPage() {
           <div className="flex items-center gap-4">
             <div className="flex-1">
               <label className="text-xs text-text-muted mb-1.5 block">Origin</label>
-              <input
-                type="text"
+              <AirportAutocomplete
                 value={form.origin}
-                onChange={(e) => setForm((f) => ({ ...f, origin: e.target.value.toUpperCase() }))}
+                onChange={(iata) => setForm((f) => ({ ...f, origin: iata }))}
+                placeholder="City or airport"
                 required
-                maxLength={3}
-                placeholder="SFO"
                 className="w-full px-4 py-3 bg-bg-elevated border border-border-subtle rounded-lg text-sm text-text-primary placeholder:text-text-muted focus:border-accent-teal/50 transition-colors"
+                label="Origin airport"
+                name="origin"
               />
             </div>
             <IconArrowRight className="w-5 h-5 text-text-muted mt-5" />
             <div className="flex-1">
               <label className="text-xs text-text-muted mb-1.5 block">Destination</label>
-              <input
-                type="text"
+              <AirportAutocomplete
                 value={form.destination}
-                onChange={(e) => setForm((f) => ({ ...f, destination: e.target.value.toUpperCase() }))}
+                onChange={(iata) => setForm((f) => ({ ...f, destination: iata }))}
+                placeholder="City or airport"
                 required
-                maxLength={3}
-                placeholder="JFK"
                 className="w-full px-4 py-3 bg-bg-elevated border border-border-subtle rounded-lg text-sm text-text-primary placeholder:text-text-muted focus:border-accent-teal/50 transition-colors"
+                label="Destination airport"
+                name="destination"
               />
             </div>
           </div>

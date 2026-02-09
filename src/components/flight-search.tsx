@@ -13,6 +13,7 @@ import {
   IconChevronDown,
   IconChevronUp,
 } from './icons';
+import { AirportAutocomplete } from './airport-autocomplete';
 import type { TripType, CabinClass } from '@/lib/api';
 
 interface FlightSearchData {
@@ -466,18 +467,17 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
         <div className="flex flex-col md:flex-row items-stretch gap-3 mb-4">
           <div className="flex-1 search-field-group">
             <label className="search-label">From</label>
-            <div className="relative">
-              <IconMapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-accent-teal" />
-              <input
-                type="text"
-                placeholder="JFK"
-                value={form.origin}
-                onChange={(e) => setForm((f) => ({ ...f, origin: e.target.value.toUpperCase() }))}
-                maxLength={3}
-                required
-                className="search-input pl-14 uppercase tracking-widest font-semibold text-lg"
-              />
-            </div>
+            <AirportAutocomplete
+              value={form.origin}
+              onChange={(iata) => setForm((f) => ({ ...f, origin: iata }))}
+              placeholder="City or airport"
+              required
+              icon={<IconMapPin className="w-4 h-4 text-accent-teal" />}
+              className="search-input pl-14"
+              label="Origin airport"
+              id="origin"
+              name="origin"
+            />
           </div>
 
           <div className="flex items-end justify-center pb-1 shrink-0">
@@ -493,18 +493,17 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
 
           <div className="flex-1 search-field-group">
             <label className="search-label">To</label>
-            <div className="relative">
-              <IconMapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-accent-teal" />
-              <input
-                type="text"
-                placeholder="NBO"
-                value={form.destination}
-                onChange={(e) => setForm((f) => ({ ...f, destination: e.target.value.toUpperCase() }))}
-                maxLength={3}
-                required
-                className="search-input pl-14 uppercase tracking-widest font-semibold text-lg"
-              />
-            </div>
+            <AirportAutocomplete
+              value={form.destination}
+              onChange={(iata) => setForm((f) => ({ ...f, destination: iata }))}
+              placeholder="City or airport"
+              required
+              icon={<IconMapPin className="w-4 h-4 text-accent-teal" />}
+              className="search-input pl-14"
+              label="Destination airport"
+              id="destination"
+              name="destination"
+            />
           </div>
         </div>
 
