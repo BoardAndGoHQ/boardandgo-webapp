@@ -31,22 +31,32 @@ export function Header() {
     pathname === href || pathname.startsWith(href + '/') || (href === '/search' && pathname.startsWith('/search'));
 
   return (
-    <header className="sticky top-0 z-50 glass border-b border-border-subtle">
+    <header className="sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 text-text-primary font-semibold text-lg tracking-tight">
-          <Image src="/logo.svg" alt="BoardAndGo" width={24} height={34} className="w-6 h-auto" />
-          <span>BoardAndGo</span>
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2.5 group">
+          <Image
+            src="/logo.svg"
+            alt="BoardAndGo"
+            width={24}
+            height={34}
+            className="w-6 h-auto transition-transform duration-300 group-hover:scale-110"
+          />
+          <span className="text-text-primary font-semibold text-base tracking-tight">
+            BoardAndGo
+          </span>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-1">
+        {/* Desktop Nav — pill-style links */}
+        <nav className="hidden md:flex items-center bg-bg-elevated/40 border border-border-subtle rounded-full px-1 py-1">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className={`px-4 py-2 text-sm rounded-lg transition-colors ${
+              className={`relative px-4 py-1.5 text-[13px] font-medium rounded-full transition-all duration-200 ${
                 isActive(link.href)
-                  ? 'text-text-primary bg-bg-elevated'
-                  : 'text-text-secondary hover:text-text-primary hover:bg-bg-elevated/50'
+                  ? 'text-bg-primary bg-accent-teal shadow-sm shadow-accent-teal/25'
+                  : 'text-text-secondary hover:text-text-primary'
               }`}
             >
               {link.label}
@@ -54,59 +64,71 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="hidden md:flex items-center gap-3">
+        {/* Desktop Right */}
+        <div className="hidden md:flex items-center gap-2">
           {loading ? (
-            <div className="w-20 h-8 bg-bg-elevated rounded animate-pulse" />
+            <div className="w-20 h-8 bg-bg-elevated/50 rounded-full animate-pulse" />
           ) : user ? (
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-text-secondary">{user.email}</span>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-bg-elevated/40 border border-border-subtle rounded-full">
+                <div className="w-6 h-6 rounded-full bg-accent-teal/15 flex items-center justify-center">
+                  <span className="text-[10px] font-semibold text-accent-teal">
+                    {user.email?.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+                <span className="text-[13px] text-text-secondary max-w-[140px] truncate">
+                  {user.email}
+                </span>
+              </div>
               <button
                 onClick={signOut}
-                className="p-2 text-text-muted hover:text-text-primary transition-colors"
+                className="p-2 text-text-muted hover:text-text-primary hover:bg-bg-elevated/50 rounded-full transition-all duration-200"
                 title="Sign out"
               >
-                <IconLogout className="w-5 h-5" />
+                <IconLogout className="w-4 h-4" />
               </button>
             </div>
           ) : (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <Link
                 href="/login"
-                className="px-4 py-2 text-sm text-text-secondary hover:text-text-primary transition-colors"
+                className="px-4 py-1.5 text-[13px] font-medium text-text-secondary hover:text-text-primary transition-colors"
               >
-                Login
+                Log in
               </Link>
               <Link
                 href="/register"
-                className="flex items-center gap-2 px-4 py-2 text-sm text-bg-primary bg-accent-teal rounded-lg hover:bg-accent-teal/90 transition-colors"
+                className="flex items-center gap-1.5 px-4 py-1.5 text-[13px] font-medium text-bg-primary bg-accent-teal rounded-full hover:brightness-110 shadow-sm shadow-accent-teal/25 transition-all duration-200"
               >
-                <IconUser className="w-4 h-4" />
+                <IconUser className="w-3.5 h-3.5" />
                 Get Started
               </Link>
             </div>
           )}
         </div>
 
+        {/* Mobile Toggle */}
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="md:hidden p-2 text-text-secondary hover:text-text-primary"
+          className="md:hidden p-2 text-text-secondary hover:text-text-primary hover:bg-bg-elevated/50 rounded-lg transition-colors"
         >
-          {mobileOpen ? <IconX className="w-6 h-6" /> : <IconMenu className="w-6 h-6" />}
+          {mobileOpen ? <IconX className="w-5 h-5" /> : <IconMenu className="w-5 h-5" />}
         </button>
       </div>
 
+      {/* Mobile Menu */}
       {mobileOpen && (
-        <div className="md:hidden border-t border-border-subtle bg-bg-secondary">
-          <nav className="flex flex-col p-4 gap-2">
+        <div className="md:hidden border-t border-border-subtle bg-bg-primary/95 backdrop-blur-xl">
+          <nav className="flex flex-col p-4 gap-1">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setMobileOpen(false)}
-                className={`px-4 py-3 text-sm rounded-lg ${
+                className={`px-4 py-3 text-sm rounded-xl transition-all ${
                   isActive(link.href)
-                    ? 'text-text-primary bg-bg-elevated'
-                    : 'text-text-secondary'
+                    ? 'text-bg-primary bg-accent-teal font-medium'
+                    : 'text-text-secondary hover:text-text-primary hover:bg-bg-elevated/50'
                 }`}
               >
                 {link.label}
@@ -115,34 +137,41 @@ export function Header() {
             <div className="border-t border-border-subtle my-2" />
             {user ? (
               <>
-                <span className="px-4 py-2 text-sm text-text-secondary">{user.email}</span>
+                <div className="flex items-center gap-2 px-4 py-2">
+                  <div className="w-7 h-7 rounded-full bg-accent-teal/15 flex items-center justify-center">
+                    <span className="text-xs font-semibold text-accent-teal">
+                      {user.email?.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                  <span className="text-sm text-text-secondary truncate">{user.email}</span>
+                </div>
                 <button
                   onClick={() => {
                     signOut();
                     setMobileOpen(false);
                   }}
-                  className="px-4 py-3 text-sm text-text-secondary text-left"
+                  className="px-4 py-3 text-sm text-text-secondary text-left rounded-xl hover:bg-bg-elevated/50 transition-colors"
                 >
                   Sign out
                 </button>
               </>
             ) : (
-              <>
+              <div className="flex flex-col gap-2 px-4 pt-2">
                 <Link
                   href="/login"
                   onClick={() => setMobileOpen(false)}
-                  className="px-4 py-3 text-sm text-text-secondary"
+                  className="py-2.5 text-sm text-text-secondary text-center rounded-xl hover:bg-bg-elevated/50 transition-colors"
                 >
-                  Login
+                  Log in
                 </Link>
                 <Link
                   href="/register"
                   onClick={() => setMobileOpen(false)}
-                  className="px-4 py-3 text-sm text-accent-teal font-medium"
+                  className="py-2.5 text-sm text-bg-primary bg-accent-teal text-center font-medium rounded-xl"
                 >
                   Get Started
                 </Link>
-              </>
+              </div>
             )}
           </nav>
         </div>

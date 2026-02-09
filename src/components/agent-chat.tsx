@@ -171,7 +171,7 @@ export function AgentChat() {
       </div>
 
       {/* Messages */}
-      <div ref={chatScrollRef} className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
+      <div ref={chatScrollRef} className="flex-1 overflow-y-auto px-5 py-4 space-y-4 scrollbar-thin">
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center space-y-4">
             <div className="w-14 h-14 rounded-2xl bg-accent-teal/10 flex items-center justify-center">
