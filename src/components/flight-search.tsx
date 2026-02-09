@@ -473,7 +473,7 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
               placeholder="City or airport"
               required
               icon={<IconMapPin className="w-4 h-4 text-accent-teal" />}
-              className="search-input pl-14"
+              className="search-input"
               label="Origin airport"
               id="origin"
               name="origin"
@@ -499,7 +499,7 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
               placeholder="City or airport"
               required
               icon={<IconMapPin className="w-4 h-4 text-accent-teal" />}
-              className="search-input pl-14"
+              className="search-input"
               label="Destination airport"
               id="destination"
               name="destination"

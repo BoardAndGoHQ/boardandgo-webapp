@@ -179,7 +179,7 @@ export function AirportAutocomplete({
     <div ref={containerRef} className="relative">
       <div className="relative">
         {icon && (
-          <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10 pointer-events-none">
             {icon}
           </div>
         )}
@@ -200,7 +200,7 @@ export function AirportAutocomplete({
           aria-expanded={isOpen}
           aria-autocomplete="list"
           role="combobox"
-          className={`${className} ${value && !isFocused ? 'uppercase tracking-widest font-semibold text-lg' : ''}`}
+          className={`${className} ${icon ? '!pl-12' : ''} ${value && !isFocused ? 'uppercase tracking-widest font-semibold text-lg' : ''}`}
         />
       </div>
 
