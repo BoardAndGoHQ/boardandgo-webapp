@@ -164,7 +164,7 @@ function DatePicker({
       )}
 
       {open && (
-        <div className="absolute left-0 top-full mt-2 w-[300px] bg-bg-card border border-border-subtle rounded-xl shadow-2xl shadow-black/40 z-50 p-4">
+        <div className="absolute left-0 bottom-full mb-2 w-[300px] bg-bg-card border border-border-subtle rounded-xl shadow-2xl shadow-black/40 z-[100] p-4">
           {/* Month/Year Header */}
           <div className="flex items-center justify-between mb-3">
             <button
