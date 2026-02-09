@@ -177,7 +177,7 @@ export default function Home() {
           </div>
 
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-text-primary tracking-tight mb-5 leading-[1.1]">
-            Your AI Travel Partner
+            Your AI Travel Concierge
             <br />
             <span className="gradient-text">Never Miss a Flight</span>
           </h1>
