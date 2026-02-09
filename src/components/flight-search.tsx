@@ -408,7 +408,7 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
                 onChange={(e) => setForm((f) => ({ ...f, origin: e.target.value.toUpperCase() }))}
                 maxLength={3}
                 required
-                className="search-input pl-12 uppercase tracking-widest font-semibold text-lg"
+                className="search-input pl-14 uppercase tracking-widest font-semibold text-lg"
               />
             </div>
           </div>
@@ -435,7 +435,7 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
                 onChange={(e) => setForm((f) => ({ ...f, destination: e.target.value.toUpperCase() }))}
                 maxLength={3}
                 required
-                className="search-input pl-12 uppercase tracking-widest font-semibold text-lg"
+                className="search-input pl-14 uppercase tracking-widest font-semibold text-lg"
               />
             </div>
           </div>
