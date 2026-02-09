@@ -215,24 +215,7 @@ input:focus, select:focus, textarea:focus {
   box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
 }
 
-/* Date input overlay trick */
-.date-input {
-  color: transparent;
-}
-
-.date-input::-webkit-calendar-picker-indicator {
-  opacity: 0;
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  cursor: pointer;
-}
-
-/* If no date selected, show placeholder-like text */
-.date-input:not(:valid) + div {
-  display: none;
-}
+/* Date picker handled by custom component */
 
 /* ── Feature card lift ── */
 .feature-card {
