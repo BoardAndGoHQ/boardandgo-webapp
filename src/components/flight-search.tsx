@@ -1,8 +1,17 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useState, useRef, useEffect, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import { IconMapPin, IconCalendar, IconUsers, IconSearch, IconSwap } from './icons';
+import {
+  IconMapPin,
+  IconCalendar,
+  IconUsers,
+  IconSearch,
+  IconSwapHorizontal,
+  IconPlus,
+  IconMinus,
+  IconChevronDown,
+} from './icons';
 import type { TripType, CabinClass } from '@/lib/api';
 
 interface FlightSearchData {
@@ -17,7 +26,71 @@ interface FlightSearchData {
   cabin: CabinClass;
 }
 
-export function FlightSearch() {
+interface FlightSearchProps {
+  onSearch?: (params: URLSearchParams) => void;
+}
+
+/* ── helpers ───────────────────────────────────── */
+function formatDateDisplay(dateStr: string): string {
+  if (!dateStr) return '';
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+}
+
+const cabinOptions: { value: CabinClass; label: string }[] = [
+  { value: 'ECONOMY', label: 'Economy' },
+  { value: 'PREMIUM_ECONOMY', label: 'Premium Economy' },
+  { value: 'BUSINESS', label: 'Business' },
+  { value: 'FIRST', label: 'First Class' },
+];
+
+/* ── Stepper ───────────────────────────────────── */
+function Stepper({
+  label,
+  sublabel,
+  value,
+  min,
+  max,
+  onChange,
+}: {
+  label: string;
+  sublabel: string;
+  value: number;
+  min: number;
+  max: number;
+  onChange: (v: number) => void;
+}) {
+  return (
+    <div className="flex items-center justify-between py-2.5">
+      <div>
+        <div className="text-sm font-medium text-text-primary">{label}</div>
+        <div className="text-xs text-text-muted">{sublabel}</div>
+      </div>
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={() => onChange(Math.max(min, value - 1))}
+          disabled={value <= min}
+          className="w-8 h-8 rounded-full border border-border-subtle flex items-center justify-center text-text-secondary hover:border-accent-teal hover:text-accent-teal transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+        >
+          <IconMinus className="w-3.5 h-3.5" />
+        </button>
+        <span className="w-6 text-center text-sm font-semibold text-text-primary tabular-nums">{value}</span>
+        <button
+          type="button"
+          onClick={() => onChange(Math.min(max, value + 1))}
+          disabled={value >= max}
+          className="w-8 h-8 rounded-full border border-border-subtle flex items-center justify-center text-text-secondary hover:border-accent-teal hover:text-accent-teal transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+        >
+          <IconPlus className="w-3.5 h-3.5" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ── Main Component ────────────────────────────── */
+export function FlightSearch({ onSearch }: FlightSearchProps) {
   const router = useRouter();
   const [form, setForm] = useState<FlightSearchData>({
     tripType: 'return',
@@ -30,6 +103,22 @@ export function FlightSearch() {
     infants: 0,
     cabin: 'ECONOMY',
   });
+
+  const [travelersOpen, setTravelersOpen] = useState(false);
+  const travelersRef = useRef<HTMLDivElement>(null);
+
+  // Close travelers popover on outside click
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (travelersRef.current && !travelersRef.current.contains(e.target as Node)) {
+        setTravelersOpen(false);
+      }
+    }
+    if (travelersOpen) {
+      document.addEventListener('mousedown', handleClick);
+      return () => document.removeEventListener('mousedown', handleClick);
+    }
+  }, [travelersOpen]);
 
   const handleSwap = () => {
     setForm((f) => ({ ...f, origin: f.destination, destination: f.origin }));
@@ -54,7 +143,11 @@ export function FlightSearch() {
     if (form.infants > 0) {
       params.set('infants', form.infants.toString());
     }
-    router.push(`/search?${params.toString()}`);
+    if (onSearch) {
+      onSearch(params);
+    } else {
+      router.push(`/search?${params.toString()}`);
+    }
   };
 
   const today = new Date().toISOString().split('T')[0];
@@ -62,18 +155,18 @@ export function FlightSearch() {
 
   return (
     <form onSubmit={handleSubmit} className="w-full">
-      <div className="bg-bg-card border border-border-subtle rounded-xl p-4 md:p-6">
-        {/* Trip Type Tabs */}
-        <div className="flex gap-1 mb-4 p-1 bg-bg-elevated rounded-lg w-fit">
+      <div className="boarding-pass relative">
+        {/* Trip Type Toggle */}
+        <div className="flex items-center gap-2 mb-5">
           {(['return', 'oneway'] as TripType[]).map((type) => (
             <button
               key={type}
               type="button"
               onClick={() => setForm((f) => ({ ...f, tripType: type }))}
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+              className={`px-5 py-2 text-[13px] font-medium rounded-full transition-all duration-200 ${
                 form.tripType === type
-                  ? 'bg-accent-teal text-bg-primary'
-                  : 'text-text-muted hover:text-text-primary'
+                  ? 'bg-accent-teal text-bg-primary shadow-sm shadow-accent-teal/25'
+                  : 'text-text-muted hover:text-text-primary bg-bg-elevated/50 border border-border-subtle'
               }`}
             >
               {type === 'return' ? 'Round Trip' : 'One Way'}
@@ -81,160 +174,185 @@ export function FlightSearch() {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-4">
-          {/* Origin */}
-          <div className="md:col-span-3 relative">
-            <label className="text-xs text-text-muted mb-1.5 block">From</label>
+        {/* ── Main Search Row ── */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-0 md:gap-0 items-end">
+
+          {/* ── From ── */}
+          <div className="md:col-span-3 search-field-group">
+            <label className="search-label">From</label>
             <div className="relative">
-              <IconMapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+              <IconMapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-accent-teal" />
               <input
                 type="text"
-                placeholder="City or airport"
+                placeholder="JFK"
                 value={form.origin}
                 onChange={(e) => setForm((f) => ({ ...f, origin: e.target.value.toUpperCase() }))}
                 maxLength={3}
                 required
-                className="w-full pl-10 pr-4 py-3 bg-bg-elevated border border-border-subtle rounded-lg text-sm text-text-primary placeholder:text-text-muted focus:border-accent-teal/50 transition-colors"
+                className="search-input pl-10 uppercase tracking-widest font-semibold text-lg"
               />
             </div>
           </div>
 
-          {/* Swap button */}
-          <div className="md:col-span-1 flex items-end justify-center pb-1">
+          {/* ── Swap ── */}
+          <div className="md:col-span-1 flex items-center justify-center py-2 md:py-0 md:pb-1">
             <button
               type="button"
               onClick={handleSwap}
-              className="p-2.5 text-text-muted hover:text-accent-teal hover:bg-bg-elevated rounded-lg transition-colors"
-              title="Swap"
+              className="w-10 h-10 rounded-full bg-bg-elevated border border-border-subtle flex items-center justify-center text-text-muted hover:text-accent-teal hover:border-accent-teal hover:rotate-180 transition-all duration-300"
+              title="Swap origin and destination"
             >
-              <IconSwap className="w-5 h-5" />
+              <IconSwapHorizontal className="w-4 h-4" />
             </button>
           </div>
 
-          {/* Destination */}
-          <div className="md:col-span-3 relative">
-            <label className="text-xs text-text-muted mb-1.5 block">To</label>
+          {/* ── To ── */}
+          <div className="md:col-span-3 search-field-group">
+            <label className="search-label">To</label>
             <div className="relative">
-              <IconMapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+              <IconMapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-accent-teal" />
               <input
                 type="text"
-                placeholder="City or airport"
+                placeholder="NBO"
                 value={form.destination}
                 onChange={(e) => setForm((f) => ({ ...f, destination: e.target.value.toUpperCase() }))}
                 maxLength={3}
                 required
-                className="w-full pl-10 pr-4 py-3 bg-bg-elevated border border-border-subtle rounded-lg text-sm text-text-primary placeholder:text-text-muted focus:border-accent-teal/50 transition-colors"
+                className="search-input pl-10 uppercase tracking-widest font-semibold text-lg"
               />
             </div>
           </div>
 
-          {/* Departure Date */}
-          <div className="md:col-span-2">
-            <label className="text-xs text-text-muted mb-1.5 block">Departure</label>
+          {/* ── Departure ── */}
+          <div className={form.tripType === 'return' ? 'md:col-span-2 search-field-group' : 'md:col-span-2 search-field-group'}>
+            <label className="search-label">Depart</label>
             <div className="relative">
-              <IconCalendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none" />
+              <IconCalendar className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-accent-teal pointer-events-none" />
               <input
                 type="date"
                 value={form.departureDate}
                 onChange={(e) => setForm((f) => ({ ...f, departureDate: e.target.value }))}
                 min={today}
                 required
-                className="w-full pl-10 pr-3 py-3 bg-bg-elevated border border-border-subtle rounded-lg text-sm text-text-primary focus:border-accent-teal/50 transition-colors appearance-none"
+                className="search-input pl-10 date-input"
               />
+              {form.departureDate && (
+                <div className="absolute inset-0 flex items-center pl-10 pr-3 pointer-events-none">
+                  <span className="text-sm font-medium text-text-primary">
+                    {formatDateDisplay(form.departureDate)}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Return Date */}
+          {/* ── Return ── */}
           {form.tripType === 'return' && (
-            <div className="md:col-span-2">
-              <label className="text-xs text-text-muted mb-1.5 block">Return</label>
+            <div className="md:col-span-2 search-field-group">
+              <label className="search-label">Return</label>
               <div className="relative">
-                <IconCalendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none" />
+                <IconCalendar className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-accent-teal pointer-events-none" />
                 <input
                   type="date"
                   value={form.returnDate}
                   onChange={(e) => setForm((f) => ({ ...f, returnDate: e.target.value }))}
                   min={form.departureDate || today}
-                  className="w-full pl-10 pr-3 py-3 bg-bg-elevated border border-border-subtle rounded-lg text-sm text-text-primary focus:border-accent-teal/50 transition-colors appearance-none"
+                  className="search-input pl-10 date-input"
                 />
+                {form.returnDate && (
+                  <div className="absolute inset-0 flex items-center pl-10 pr-3 pointer-events-none">
+                    <span className="text-sm font-medium text-text-primary">
+                      {formatDateDisplay(form.returnDate)}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           )}
 
-          {/* Passengers */}
-          <div className={form.tripType === 'return' ? 'md:col-span-1' : 'md:col-span-3'}>
-            <label className="text-xs text-text-muted mb-1.5 block">Travelers</label>
-            <div className="relative">
-              <IconUsers className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none" />
-              <select
-                value={form.adults}
-                onChange={(e) => setForm((f) => ({ ...f, adults: parseInt(e.target.value) }))}
-                className="w-full pl-10 pr-3 py-3 bg-bg-elevated border border-border-subtle rounded-lg text-sm text-text-primary focus:border-accent-teal/50 transition-colors appearance-none cursor-pointer"
-              >
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
-                  <option key={n} value={n}>
-                    {n} Adult{n > 1 ? 's' : ''}
-                  </option>
-                ))}
-              </select>
-            </div>
+          {/* ── Travelers ── */}
+          <div className={form.tripType === 'return' ? 'md:col-span-1 search-field-group' : 'md:col-span-3 search-field-group'} ref={travelersRef}>
+            <label className="search-label">Travelers</label>
+            <button
+              type="button"
+              onClick={() => setTravelersOpen(!travelersOpen)}
+              className="search-input flex items-center gap-2 text-left w-full"
+            >
+              <IconUsers className="w-4 h-4 text-accent-teal shrink-0" />
+              <span className="text-sm font-medium text-text-primary">{totalPassengers}</span>
+              <IconChevronDown className={`w-3.5 h-3.5 text-text-muted ml-auto transition-transform duration-200 ${travelersOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {/* ── Travelers Popover ── */}
+            {travelersOpen && (
+              <div className="absolute right-0 md:left-0 top-full mt-2 w-72 bg-bg-card border border-border-subtle rounded-xl shadow-2xl shadow-black/30 z-50 p-4 space-y-1">
+                <Stepper
+                  label="Adults"
+                  sublabel="12+ years"
+                  value={form.adults}
+                  min={1}
+                  max={9}
+                  onChange={(v) => setForm((f) => ({ ...f, adults: v }))}
+                />
+                <div className="border-t border-border-subtle" />
+                <Stepper
+                  label="Children"
+                  sublabel="2-11 years"
+                  value={form.children}
+                  min={0}
+                  max={6}
+                  onChange={(v) => setForm((f) => ({ ...f, children: v }))}
+                />
+                <div className="border-t border-border-subtle" />
+                <Stepper
+                  label="Infants"
+                  sublabel="Under 2"
+                  value={form.infants}
+                  min={0}
+                  max={4}
+                  onChange={(v) => setForm((f) => ({ ...f, infants: v }))}
+                />
+
+                {/* Cabin Class inside popover */}
+                <div className="border-t border-border-subtle pt-3 mt-2">
+                  <div className="text-xs text-text-muted mb-2 font-medium">Cabin Class</div>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {cabinOptions.map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => setForm((f) => ({ ...f, cabin: opt.value }))}
+                        className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${
+                          form.cabin === opt.value
+                            ? 'bg-accent-teal text-bg-primary shadow-sm'
+                            : 'bg-bg-elevated text-text-secondary hover:text-text-primary border border-border-subtle'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setTravelersOpen(false)}
+                  className="w-full mt-3 py-2 text-xs font-medium text-accent-teal hover:bg-accent-teal/10 rounded-lg transition-colors"
+                >
+                  Done
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Advanced Options Row */}
-        <div className="mt-4 pt-4 border-t border-border-subtle">
-          <div className="flex flex-wrap gap-4">
-            {/* Cabin Class */}
-            <div>
-              <label className="text-xs text-text-muted mb-1.5 block">Cabin Class</label>
-              <select
-                value={form.cabin}
-                onChange={(e) => setForm((f) => ({ ...f, cabin: e.target.value as CabinClass }))}
-                className="px-4 py-2 bg-bg-elevated border border-border-subtle rounded-lg text-sm text-text-primary focus:border-accent-teal/50 transition-colors cursor-pointer"
-              >
-                <option value="ECONOMY">Economy</option>
-                <option value="PREMIUM_ECONOMY">Premium Economy</option>
-                <option value="BUSINESS">Business</option>
-                <option value="FIRST">First Class</option>
-              </select>
-            </div>
-
-            {/* Children */}
-            <div>
-              <label className="text-xs text-text-muted mb-1.5 block">Children (2-11)</label>
-              <select
-                value={form.children}
-                onChange={(e) => setForm((f) => ({ ...f, children: parseInt(e.target.value) }))}
-                className="px-4 py-2 bg-bg-elevated border border-border-subtle rounded-lg text-sm text-text-primary focus:border-accent-teal/50 transition-colors cursor-pointer"
-              >
-                {[0, 1, 2, 3, 4, 5, 6].map((n) => (
-                  <option key={n} value={n}>{n}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Infants */}
-            <div>
-              <label className="text-xs text-text-muted mb-1.5 block">Infants (0-2)</label>
-              <select
-                value={form.infants}
-                onChange={(e) => setForm((f) => ({ ...f, infants: parseInt(e.target.value) }))}
-                className="px-4 py-2 bg-bg-elevated border border-border-subtle rounded-lg text-sm text-text-primary focus:border-accent-teal/50 transition-colors cursor-pointer"
-              >
-                {[0, 1, 2, 3, 4].map((n) => (
-                  <option key={n} value={n}>{n}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
-
+        {/* ── Search Button ── */}
         <button
           type="submit"
-          className="w-full mt-4 py-3.5 bg-accent-teal text-bg-primary font-medium text-sm rounded-lg hover:bg-accent-teal/90 transition-colors flex items-center justify-center gap-2"
+          className="w-full mt-5 py-3.5 bg-accent-teal text-bg-primary font-semibold text-sm rounded-xl glow-teal hover:brightness-110 transition-all duration-300 flex items-center justify-center gap-2.5"
         >
-          <IconSearch className="w-4 h-4" />
-          Search Flights ({totalPassengers} traveler{totalPassengers > 1 ? 's' : ''})
+          <IconSearch className="w-4.5 h-4.5" />
+          Search Flights
         </button>
       </div>
     </form>
