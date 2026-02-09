@@ -2,13 +2,11 @@
 
 import { useState, type FormEvent } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth';
 import { IconMail, IconUser, IconLoader } from '@/components/icons';
 import type { AuthError } from '@supabase/supabase-js';
 
 export default function RegisterPage() {
-  const router = useRouter();
   const { signUpWithEmail, signInWithGoogle } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');

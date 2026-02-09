@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth';
-import { IconMail, IconLoader, IconCheck, IconX } from '@/components/icons';
+import { IconMail, IconLoader, IconCheck } from '@/components/icons';
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -48,7 +48,7 @@ export default function SettingsPage() {
           setGmailConnected(true);
         }
       }, 1000);
-    } catch (err) {
+    } catch {
       setError('Failed to connect Gmail. Please try again.');
       setGmailConnecting(false);
     }
