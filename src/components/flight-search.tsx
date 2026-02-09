@@ -400,7 +400,7 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
           <div className="flex-1 search-field-group">
             <label className="search-label">From</label>
             <div className="relative">
-              <IconMapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-accent-teal" />
+              <IconMapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-accent-teal" />
               <input
                 type="text"
                 placeholder="JFK"
@@ -408,7 +408,7 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
                 onChange={(e) => setForm((f) => ({ ...f, origin: e.target.value.toUpperCase() }))}
                 maxLength={3}
                 required
-                className="search-input pl-11 uppercase tracking-widest font-semibold text-lg"
+                className="search-input pl-12 uppercase tracking-widest font-semibold text-lg"
               />
             </div>
           </div>
@@ -427,7 +427,7 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
           <div className="flex-1 search-field-group">
             <label className="search-label">To</label>
             <div className="relative">
-              <IconMapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-accent-teal" />
+              <IconMapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-accent-teal" />
               <input
                 type="text"
                 placeholder="NBO"
@@ -435,7 +435,7 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
                 onChange={(e) => setForm((f) => ({ ...f, destination: e.target.value.toUpperCase() }))}
                 maxLength={3}
                 required
-                className="search-input pl-11 uppercase tracking-widest font-semibold text-lg"
+                className="search-input pl-12 uppercase tracking-widest font-semibold text-lg"
               />
             </div>
           </div>
