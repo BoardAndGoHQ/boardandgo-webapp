@@ -7,7 +7,7 @@ import { useAuth } from '@/context/auth';
 import { IconPlane, IconUser, IconLogout, IconMenu, IconX } from './icons';
 
 const navLinks = [
-  { href: '/', label: 'Search' },
+  { href: '/search', label: 'Search' },
   { href: '/bookings', label: 'Bookings' },
   { href: '/settings', label: 'Settings' },
 ];
@@ -31,7 +31,7 @@ export function Header() {
               key={link.href}
               href={link.href}
               className={`px-4 py-2 text-sm rounded-lg transition-colors ${
-                pathname === link.href
+                pathname === link.href || (link.href === '/search' && pathname.startsWith('/search'))
                   ? 'text-text-primary bg-bg-elevated'
                   : 'text-text-secondary hover:text-text-primary hover:bg-bg-elevated/50'
               }`}

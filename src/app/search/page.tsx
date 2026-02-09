@@ -420,10 +420,11 @@ function SearchModeToggle({
 function SearchPageInner() {
   const searchParams = useSearchParams();
   const [mode, setMode] = useState<'manual' | 'ai'>(() => {
-    if (typeof window !== 'undefined') {
-      return (localStorage.getItem('searchMode') as 'manual' | 'ai') || 'manual';
-    }
-    return 'manual';
+    if (typeof window === 'undefined') return 'manual';
+    // Support ?mode=ai from homepage "Try AI Search" button
+    const urlMode = new URLSearchParams(window.location.search).get('mode');
+    if (urlMode === 'ai') return 'ai';
+    return (localStorage.getItem('searchMode') as 'manual' | 'ai') || 'manual';
   });
 
   const handleModeChange = (newMode: 'manual' | 'ai') => {
@@ -439,7 +440,7 @@ function SearchPageInner() {
   );
 
   return (
-    <div className="max-w-350 mx-auto px-4 py-8 md:py-12">
+    <div style={{ maxWidth: '1400px' }} className="mx-auto px-4 py-8 md:py-12">
       <div className="flex items-center justify-between mb-6">
         <SearchModeToggle mode={mode} onChange={handleModeChange} />
       </div>
@@ -448,7 +449,7 @@ function SearchPageInner() {
       <div
         className={`transition-all duration-500 ease-in-out ${
           mode === 'manual'
-            ? 'opacity-100 max-h-2499.75'
+            ? 'opacity-100'
             : 'opacity-0 max-h-0 overflow-hidden pointer-events-none'
         }`}
       >
@@ -468,7 +469,7 @@ function SearchPageInner() {
       >
         <div className="flex gap-5">
           {/* Chat panel — sticky left side */}
-          <div className="w-full md:w-85 lg:w-95 shrink-0">
+          <div className="w-full md:w-[340px] lg:w-[380px] shrink-0">
             <div className="md:sticky md:top-4" style={{ height: 'calc(100vh - 140px)' }}>
               {mode === 'ai' && <AgentChat />}
             </div>
