@@ -78,3 +78,10 @@ input:focus, select:focus, textarea:focus {
   -webkit-backdrop-filter: blur(12px);
 }
 
+.glass-effect {
+  background: rgba(10, 22, 40, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-subtle);
+}
+

@@ -6,7 +6,14 @@ import { useState } from 'react';
 import { useAuth } from '@/context/auth';
 import { IconPlane, IconUser, IconLogout, IconMenu, IconX } from './icons';
 
-const navLinks = [
+/* Links swap depending on auth state */
+const publicLinks = [
+  { href: '/features', label: 'Features' },
+  { href: '/pricing', label: 'Pricing' },
+  { href: '/about', label: 'About' },
+];
+
+const appLinks = [
   { href: '/search', label: 'Search' },
   { href: '/bookings', label: 'Bookings' },
   { href: '/settings', label: 'Settings' },
@@ -16,6 +23,11 @@ export function Header() {
   const { user, signOut, loading } = useAuth();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const navLinks = user ? appLinks : publicLinks;
+
+  const isActive = (href: string) =>
+    pathname === href || pathname.startsWith(href + '/') || (href === '/search' && pathname.startsWith('/search'));
 
   return (
     <header className="sticky top-0 z-50 glass border-b border-border-subtle">
@@ -31,7 +43,7 @@ export function Header() {
               key={link.href}
               href={link.href}
               className={`px-4 py-2 text-sm rounded-lg transition-colors ${
-                pathname === link.href || (link.href === '/search' && pathname.startsWith('/search'))
+                isActive(link.href)
                   ? 'text-text-primary bg-bg-elevated'
                   : 'text-text-secondary hover:text-text-primary hover:bg-bg-elevated/50'
               }`}
@@ -56,13 +68,21 @@ export function Header() {
               </button>
             </div>
           ) : (
-            <Link
-              href="/login"
-              className="flex items-center gap-2 px-4 py-2 text-sm text-bg-primary bg-accent-teal rounded-lg hover:bg-accent-teal/90 transition-colors"
-            >
-              <IconUser className="w-4 h-4" />
-              Sign in
-            </Link>
+            <div className="flex items-center gap-3">
+              <Link
+                href="/login"
+                className="px-4 py-2 text-sm text-text-secondary hover:text-text-primary transition-colors"
+              >
+                Login
+              </Link>
+              <Link
+                href="/register"
+                className="flex items-center gap-2 px-4 py-2 text-sm text-bg-primary bg-accent-teal rounded-lg hover:bg-accent-teal/90 transition-colors"
+              >
+                <IconUser className="w-4 h-4" />
+                Get Started
+              </Link>
+            </div>
           )}
         </div>
 
@@ -83,7 +103,7 @@ export function Header() {
                 href={link.href}
                 onClick={() => setMobileOpen(false)}
                 className={`px-4 py-3 text-sm rounded-lg ${
-                  pathname === link.href
+                  isActive(link.href)
                     ? 'text-text-primary bg-bg-elevated'
                     : 'text-text-secondary'
                 }`}
@@ -106,13 +126,22 @@ export function Header() {
                 </button>
               </>
             ) : (
-              <Link
-                href="/login"
-                onClick={() => setMobileOpen(false)}
-                className="px-4 py-3 text-sm text-accent-teal"
-              >
-                Sign in
-              </Link>
+              <>
+                <Link
+                  href="/login"
+                  onClick={() => setMobileOpen(false)}
+                  className="px-4 py-3 text-sm text-text-secondary"
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/register"
+                  onClick={() => setMobileOpen(false)}
+                  className="px-4 py-3 text-sm text-accent-teal font-medium"
+                >
+                  Get Started
+                </Link>
+              </>
             )}
           </nav>
         </div>
