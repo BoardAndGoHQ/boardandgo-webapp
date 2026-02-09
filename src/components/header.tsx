@@ -1,10 +1,11 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { useAuth } from '@/context/auth';
-import { IconPlane, IconUser, IconLogout, IconMenu, IconX } from './icons';
+import { IconUser, IconLogout, IconMenu, IconX } from './icons';
 
 /* Links swap depending on auth state */
 const publicLinks = [
@@ -33,7 +34,7 @@ export function Header() {
     <header className="sticky top-0 z-50 glass border-b border-border-subtle">
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 text-text-primary font-semibold text-lg tracking-tight">
-          <IconPlane className="w-6 h-6 text-accent-teal" />
+          <Image src="/logo.svg" alt="BoardAndGo" width={24} height={34} className="w-6 h-auto" />
           <span>BoardAndGo</span>
         </Link>
 

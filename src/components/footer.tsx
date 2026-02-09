@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { IconPlane } from './icons';
+import Image from 'next/image';
 
 const footerSections = [
   {
@@ -40,7 +40,7 @@ export function Footer() {
           {/* Logo & contact */}
           <div className="col-span-2">
             <Link href="/" className="flex items-center gap-2 text-text-primary font-semibold text-lg mb-4">
-              <IconPlane className="w-6 h-6 text-accent-teal" />
+              <Image src="/logo.svg" alt="BoardAndGo" width={24} height={34} className="w-6 h-auto" />
               <span>BoardAndGo</span>
             </Link>
             <p className="text-sm text-text-muted max-w-sm leading-relaxed mb-4">

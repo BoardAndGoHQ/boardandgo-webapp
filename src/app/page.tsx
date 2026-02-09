@@ -180,26 +180,34 @@ export default function Home() {
             </div>
 
             <div className="relative flex justify-center items-center gap-6">
-              <div className="absolute inset-0 bg-accent-teal/5 rounded-full blur-3xl pointer-events-none" />
-              <div className="relative rounded-3xl p-1.5 shadow-xl glass-effect">
-                <Image
-                  src="/mockups/ios-device.png"
-                  alt="BoardAndGo iOS App"
-                  width={180}
-                  height={360}
-                  className="rounded-2xl"
-                  style={{ transform: 'rotate(-5deg)' }}
-                />
+              <div className="absolute inset-0 bg-accent-teal/5 rounded-full blur-3xl pointer-events-none animate-pulse-slow" />
+
+              {/* iOS Device */}
+              <div className="animate-float hover:scale-105 transition-transform duration-500">
+                <div className="glass-effect rounded-3xl p-1.5 shadow-xl">
+                  <Image
+                    src="/mockups/ios-device.png"
+                    alt="BoardAndGo iOS App"
+                    width={180}
+                    height={360}
+                    className="rounded-2xl"
+                    style={{ transform: 'rotate(-5deg)' }}
+                  />
+                </div>
               </div>
-              <div className="relative rounded-3xl p-1.5 shadow-xl glass-effect">
-                <Image
-                  src="/mockups/android-device.png"
-                  alt="BoardAndGo Android App"
-                  width={180}
-                  height={360}
-                  className="rounded-2xl"
-                  style={{ transform: 'rotate(5deg)' }}
-                />
+
+              {/* Android Device */}
+              <div className="animate-float-delay hover:scale-105 transition-transform duration-500">
+                <div className="glass-effect rounded-3xl p-1.5 shadow-xl">
+                  <Image
+                    src="/mockups/android-device.png"
+                    alt="BoardAndGo Android App"
+                    width={180}
+                    height={360}
+                    className="rounded-2xl"
+                    style={{ transform: 'rotate(5deg)' }}
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -215,16 +223,41 @@ export default function Home() {
               {testimonials.map((t, i) => (
                 <div
                   key={t.name}
-                  className={`glass-effect rounded-xl p-5 hover:scale-[1.02] transition-transform ${
+                  className={`glass-effect rounded-xl p-5 group relative overflow-hidden hover:scale-[1.02] transition-all duration-300 ${
                     i % 2 !== 0 ? 'sm:translate-y-6' : ''
                   }`}
                 >
-                  <p className="text-sm text-text-secondary leading-relaxed mb-4">
-                    &ldquo;{t.content}&rdquo;
-                  </p>
-                  <div>
-                    <p className="text-sm font-medium text-text-primary">{t.name}</p>
-                    <p className="text-xs text-text-muted">{t.role}</p>
+                  {/* Hover gradient glow */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-accent-teal/10 via-accent-amber/5 to-transparent rounded-xl opacity-0 group-hover:opacity-50 transition-all duration-500" />
+
+                  <div className="relative space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-accent-teal/20 to-accent-amber/10 flex items-center justify-center text-xs font-semibold text-accent-teal shrink-0 group-hover:scale-110 transition-transform duration-300">
+                        {t.name.charAt(0)}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-text-primary group-hover:text-accent-teal transition-colors duration-300">
+                          {t.name}
+                        </p>
+                        <p className="text-xs text-text-muted">{t.role}</p>
+                      </div>
+                    </div>
+                    <p className="text-sm text-text-secondary leading-relaxed group-hover:text-text-primary transition-colors duration-300">
+                      &ldquo;{t.content}&rdquo;
+                    </p>
+                    <div className="flex gap-0.5">
+                      {[...Array(5)].map((_, j) => (
+                        <svg
+                          key={j}
+                          className="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition-transform duration-300"
+                          style={{ transitionDelay: `${j * 50}ms` }}
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                      ))}
+                    </div>
                   </div>
                 </div>
               ))}
