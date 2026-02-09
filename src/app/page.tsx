@@ -45,25 +45,25 @@ const features = [
 
 const testimonials = [
   {
-    name: 'Sarah Chen',
+    name: 'Daniel Okafor',
     role: 'Business Consultant',
     content:
       "BoardAndGo's AI agents called me about my Paris connection while I was still at JFK. They had already calculated my walking time to the gate and confirmed my flight was on schedule.",
   },
   {
-    name: 'James Whitfield',
+    name: 'Priya Nair',
     role: 'Software Developer',
     content:
       "When my Tokyo flight was diverted, BoardAndGo's AI Agents had already arranged my hotel and rebooking before we landed. Incredible proactive service!",
   },
   {
-    name: 'Emma Thornton',
+    name: 'Lena Bergström',
     role: 'Digital Nomad',
     content:
       'Managing four connecting flights across three continents was a breeze. The AI Agents tracked each flight and even arranged fast-track security when my connection was tight.',
   },
   {
-    name: 'Maria Rossi',
+    name: 'Marco Delgado',
     role: 'Management Consultant',
     content:
       "The voice updates about my next flight while I'm still in the air are game-changing. Makes tight connections so much less stressful.",
