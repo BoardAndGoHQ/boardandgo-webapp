@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/auth';
 import { api, type Booking } from '@/lib/api';
-import { IconPlane, IconLoader, IconClock, IconCalendar, IconUser, IconMail } from '@/components/icons';
+import { IconPlane, IconLoader, IconClock, IconCalendar, IconUser, IconMail, IconSignal } from '@/components/icons';
 
 function formatDate(dateStr: string) {
   const d = new Date(dateStr);
@@ -145,6 +145,16 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="mt-4 flex justify-center">
+        <Link
+          href={`/bookings/${id}/track`}
+          className="flex items-center gap-2 px-5 py-3 text-sm font-medium text-bg-primary bg-accent-teal rounded-xl hover:bg-accent-teal/90 transition-colors"
+        >
+          <IconSignal className="w-4 h-4" />
+          Track Flight
+        </Link>
       </div>
     </div>
   );

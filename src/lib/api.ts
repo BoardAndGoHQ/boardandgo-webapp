@@ -1,4 +1,5 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+const POST_BOOKING_API = process.env.NEXT_PUBLIC_POST_BOOKING_API_URL || 'http://localhost:3001';
 
 interface RequestOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
@@ -147,6 +148,59 @@ export interface AgentResponse {
   searchIntent: SearchIntent | null;
 }
 
+export interface TrackedFlight {
+  id: string;
+  bookingId: string;
+  flightNumber: string;
+  airlineCode: string;
+  airlineName: string | null;
+  departureAirport: string;
+  departureAirportName: string | null;
+  arrivalAirport: string;
+  arrivalAirportName: string | null;
+  scheduledDeparture: string;
+  scheduledArrival: string;
+  estimatedDeparture: string | null;
+  estimatedArrival: string | null;
+  actualDeparture: string | null;
+  actualArrival: string | null;
+  flightStatus: string;
+  departureDelayMinutes: number;
+  arrivalDelayMinutes: number;
+  departureGate: string | null;
+  departureTerminal: string | null;
+  arrivalGate: string | null;
+  arrivalTerminal: string | null;
+  aircraftType: string | null;
+  durationMinutes: number | null;
+}
+
+export interface FlightStatusEvent {
+  id: string;
+  flightId: string;
+  eventType: string;
+  oldStatus: string | null;
+  newStatus: string | null;
+  delayMinutes: number | null;
+  eventTime: string;
+}
+
+async function trackingRequest<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
+  const { method = 'GET', body, token } = options;
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  const res = await fetch(`${POST_BOOKING_API}${endpoint}`, {
+    method,
+    headers,
+    body: body ? JSON.stringify(body) : undefined,
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new ApiError(res.status, data.error?.message || 'Request failed');
+  return data;
+}
+
 export const api = {
   auth: {
     register: (email: string, password: string, name?: string) =>
@@ -205,6 +259,44 @@ export const api = {
         body: { messages },
         token,
       }),
+  },
+
+  tracking: {
+    getByBooking: (bookingServiceId: string, token: string) =>
+      trackingRequest<{ booking: { id: string; flights: (TrackedFlight & { statusEvents: FlightStatusEvent[] })[] } }>(
+        `/api/flights/by-booking/${bookingServiceId}`, { token }
+      ),
+
+    getFlightStatus: (flightId: string, token: string) =>
+      trackingRequest<{ flight: TrackedFlight & { statusEvents: FlightStatusEvent[] } }>(
+        `/api/flights/${flightId}/status`, { token }
+      ),
+
+    getTimeline: (flightId: string, token: string) =>
+      trackingRequest<{ events: FlightStatusEvent[] }>(
+        `/api/flights/${flightId}/timeline`, { token }
+      ),
+
+    createShareLink: (flightId: string, bookingId: string, token: string) =>
+      trackingRequest<{ shareToken: string; expiresAt: string }>(
+        '/api/share/create', { method: 'POST', body: { flightId, bookingId }, token }
+      ),
+
+    getSharedFlight: (shareToken: string) =>
+      trackingRequest<{ flight: TrackedFlight & { statusEvents: FlightStatusEvent[] } }>(
+        `/api/share/${shareToken}`
+      ),
+
+    getPreferences: (token: string) =>
+      trackingRequest<{ preferences: Record<string, unknown> }>('/api/preferences', { token }),
+
+    updatePreferences: (prefs: Record<string, unknown>, token: string) =>
+      trackingRequest<{ preferences: Record<string, unknown> }>(
+        '/api/preferences', { method: 'PUT', body: prefs, token }
+      ),
+
+    streamUrl: (flightId: string, token: string) =>
+      `${POST_BOOKING_API}/api/flights/${flightId}/stream?token=${encodeURIComponent(token)}`,
   },
 };
 

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth';
 import { api, type Booking } from '@/lib/api';
-import { IconPlane, IconPlus, IconMail, IconLoader, IconArrowRight, IconClock } from '@/components/icons';
+import { IconPlane, IconPlus, IconMail, IconLoader, IconArrowRight, IconClock, IconSignal } from '@/components/icons';
 
 function formatDate(dateStr: string) {
   const d = new Date(dateStr);
@@ -174,6 +174,14 @@ export default function BookingsPage() {
                       <div className="text-text-secondary font-mono text-xs">{booking.confirmationCode}</div>
                     </div>
                   )}
+                  <Link
+                    href={`/bookings/${booking.id}/track`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-accent-teal bg-accent-teal/10 rounded-lg hover:bg-accent-teal/20 transition-colors"
+                  >
+                    <IconSignal className="w-3.5 h-3.5" />
+                    Track
+                  </Link>
                 </div>
               </div>
             </Link>
