@@ -122,7 +122,40 @@ export function FlightMap({ flights, positions, selectedFlightId, onSelectFlight
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
     map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
 
-    map.on('load', () => setMapLoaded(true));
+    map.on('load', () => {
+      // Create a plane icon since CartoDB Dark Matter has no "airport" sprite
+      const size = 32;
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d')!;
+      ctx.fillStyle = '#14b8a6';
+      ctx.beginPath();
+      // Simple airplane silhouette pointing up
+      ctx.moveTo(16, 2);   // nose
+      ctx.lineTo(19, 12);
+      ctx.lineTo(30, 18);  // right wing tip
+      ctx.lineTo(30, 21);
+      ctx.lineTo(19, 17);
+      ctx.lineTo(19, 24);
+      ctx.lineTo(23, 28);  // right tail
+      ctx.lineTo(23, 30);
+      ctx.lineTo(16, 27);
+      ctx.lineTo(9, 30);   // left tail
+      ctx.lineTo(9, 28);
+      ctx.lineTo(13, 24);
+      ctx.lineTo(13, 17);
+      ctx.lineTo(2, 21);   // left wing tip
+      ctx.lineTo(2, 18);
+      ctx.lineTo(13, 12);
+      ctx.closePath();
+      ctx.fill();
+
+      const imgData = ctx.getImageData(0, 0, size, size);
+      map.addImage('airport', imgData, { sdf: false });
+
+      setMapLoaded(true);
+    });
 
     mapRef.current = map;
 
