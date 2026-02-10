@@ -17,6 +17,7 @@ const publicLinks = [
 const appLinks = [
   { href: '/search', label: 'Search' },
   { href: '/bookings', label: 'Bookings' },
+  { href: '/dashboard', label: 'Dashboard' },
   { href: '/track', label: 'Track' },
   { href: '/settings', label: 'Settings' },
 ];
