@@ -149,6 +149,7 @@ export interface AgentResponse {
 }
 
 export interface FlightLookupResult {
+  source: string;
   status: string;
   departureAirport: string;
   arrivalAirport: string;
@@ -162,10 +163,18 @@ export interface FlightLookupResult {
   departureGate: string | null;
   arrivalTerminal: string | null;
   arrivalGate: string | null;
+  baggageCarousel: string | null;
   aircraftType: string | null;
+  aircraftRegistration: string | null;
+  airlineName: string | null;
   departureDelayMinutes: number;
   arrivalDelayMinutes: number;
   durationMinutes: number | null;
+  liveLatitude: number | null;
+  liveLongitude: number | null;
+  liveAltitude: number | null;
+  liveSpeed: number | null;
+  liveHeading: number | null;
 }
 
 export interface TrackedFlight {
@@ -203,6 +212,18 @@ export interface FlightStatusEvent {
   newStatus: string | null;
   delayMinutes: number | null;
   eventTime: string;
+}
+
+export interface FlightPosition {
+  flightIata: string;
+  latitude: number;
+  longitude: number;
+  altitude: number;
+  speed: number;
+  heading: number;
+  verticalSpeed: number;
+  status: string;
+  updated: number;
 }
 
 async function trackingRequest<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
@@ -295,6 +316,11 @@ export const api = {
     myFlights: (token: string) =>
       trackingRequest<{ flights: (TrackedFlight & { statusEvents: FlightStatusEvent[] })[] }>(
         '/api/flights/my-flights', { token }
+      ),
+
+    positions: (token: string) =>
+      trackingRequest<{ positions: FlightPosition[] }>(
+        '/api/flights/positions', { token }
       ),
 
     getByBooking: (bookingServiceId: string, token: string) =>

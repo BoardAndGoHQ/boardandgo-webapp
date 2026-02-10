@@ -241,7 +241,14 @@ export default function TrackFlightPage() {
             </div>
 
             {lookupResult.aircraftType && (
-              <div className="mt-3 text-xs text-text-muted">Aircraft: {lookupResult.aircraftType}</div>
+              <div className="mt-3 flex items-center gap-3 text-xs text-text-muted">
+                <span>Aircraft: {lookupResult.aircraftType}</span>
+                {lookupResult.aircraftRegistration && <span>Reg: {lookupResult.aircraftRegistration}</span>}
+                {lookupResult.airlineName && <span>{lookupResult.airlineName}</span>}
+                {lookupResult.source && (
+                  <span className="ml-auto px-1.5 py-0.5 rounded bg-bg-elevated text-text-muted/60 text-[10px] uppercase tracking-wider">{lookupResult.source}</span>
+                )}
+              </div>
             )}
           </div>
         </div>

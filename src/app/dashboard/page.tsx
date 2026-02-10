@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/auth';
-import { api, type TrackedFlight, type FlightStatusEvent } from '@/lib/api';
+import { api, type TrackedFlight, type FlightStatusEvent, type FlightPosition } from '@/lib/api';
 import { FlightMap } from '@/components/flight-map';
 import { StatusBadge } from '@/components/flight-tracker';
 import {
@@ -51,6 +51,7 @@ export default function DashboardPage() {
   const { user, token, loading: authLoading } = useAuth();
 
   const [flights, setFlights] = useState<FlightWithEvents[]>([]);
+  const [positions, setPositions] = useState<FlightPosition[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -68,6 +69,21 @@ export default function DashboardPage() {
         .finally(() => setLoading(false));
     }
   }, [user, authLoading, token, router]);
+
+  // Poll live positions every 30 seconds for active flights
+  useEffect(() => {
+    if (!token || flights.length === 0) return;
+    const hasActive = flights.some((f) => f.flightStatus === 'active');
+    if (!hasActive) return;
+
+    const fetchPositions = () => {
+      api.tracking.positions(token).then(({ positions: p }) => setPositions(p)).catch(() => {});
+    };
+
+    fetchPositions(); // Initial fetch
+    const interval = setInterval(fetchPositions, 30_000); // Every 30s
+    return () => clearInterval(interval);
+  }, [token, flights]);
 
   const selectedFlight = flights.find((f) => f.id === selectedId) ?? null;
 
@@ -162,6 +178,7 @@ export default function DashboardPage() {
                 <div className="glass-card rounded-xl border border-border-subtle overflow-hidden">
                   <FlightMap
                     flights={flights}
+                    positions={positions}
                     selectedFlightId={selectedId}
                     onSelectFlight={setSelectedId}
                     className="h-[400px] md:h-[520px]"

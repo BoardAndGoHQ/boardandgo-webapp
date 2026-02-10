@@ -3,7 +3,7 @@
 import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import type { TrackedFlight } from '@/lib/api';
+import type { TrackedFlight, FlightPosition } from '@/lib/api';
 import { greatCircleArc, pointAlongArc, bearing, type Coord } from '@/lib/arc-utils';
 
 /* ── Types ── */
@@ -16,6 +16,7 @@ export interface AirportCoord {
 
 interface FlightMapProps {
   flights: TrackedFlight[];
+  positions?: FlightPosition[];
   selectedFlightId?: string | null;
   onSelectFlight?: (id: string) => void;
   className?: string;
@@ -52,7 +53,6 @@ async function resolveAirports(codes: string[]): Promise<Map<string, AirportCoor
 function getFlightProgress(flight: TrackedFlight): number {
   if (flight.flightStatus === 'landed') return 1;
   if (flight.flightStatus !== 'active') return 0;
-  // Estimate progress based on time
   const dep = flight.actualDeparture ?? flight.estimatedDeparture ?? flight.scheduledDeparture;
   const arr = flight.estimatedArrival ?? flight.scheduledArrival;
   if (!dep || !arr) return 0.5;
@@ -62,6 +62,13 @@ function getFlightProgress(flight: TrackedFlight): number {
   if (now <= start) return 0;
   if (now >= end) return 1;
   return (now - start) / (end - start);
+}
+
+/** Match a FlightPosition to a TrackedFlight by IATA code */
+function findPosition(flight: TrackedFlight, positions?: FlightPosition[]): FlightPosition | undefined {
+  if (!positions || positions.length === 0) return undefined;
+  const iata = `${flight.airlineCode}${flight.flightNumber.replace(/\D/g, '')}`;
+  return positions.find((p) => p.flightIata === iata);
 }
 
 function statusColor(status: string): string {
@@ -78,7 +85,7 @@ function statusColor(status: string): string {
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
 
 /* ── Component ── */
-export function FlightMap({ flights, selectedFlightId, onSelectFlight, className }: FlightMapProps) {
+export function FlightMap({ flights, positions, selectedFlightId, onSelectFlight, className }: FlightMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const [airports, setAirports] = useState<Map<string, AirportCoord>>(new Map());
@@ -253,19 +260,30 @@ export function FlightMap({ flights, selectedFlightId, onSelectFlight, className
 
       // Plane icon for active flights
       if (flight.flightStatus === 'active' || isSelected) {
-        const progress = getFlightProgress(flight);
-        const planePos = pointAlongArc(from, to, Math.max(0.02, Math.min(0.98, progress)));
-        const planeBearing = bearing(
-          pointAlongArc(from, to, Math.max(0, progress - 0.02)),
-          pointAlongArc(from, to, Math.min(1, progress + 0.02))
-        );
+        const livePos = findPosition(flight, positions);
+        let planeCoord: Coord;
+        let planeBearingDeg: number;
+
+        if (livePos) {
+          // Use real GPS from AirLabs
+          planeCoord = { lat: livePos.latitude, lon: livePos.longitude };
+          planeBearingDeg = livePos.heading;
+        } else {
+          // Fallback: estimate from time-based progress
+          const progress = getFlightProgress(flight);
+          planeCoord = pointAlongArc(from, to, Math.max(0.02, Math.min(0.98, progress)));
+          planeBearingDeg = bearing(
+            pointAlongArc(from, to, Math.max(0, progress - 0.02)),
+            pointAlongArc(from, to, Math.min(1, progress + 0.02))
+          );
+        }
 
         map.addSource(`plane-${flight.id}`, {
           type: 'geojson',
           data: {
             type: 'Feature',
-            properties: { bearing: planeBearing, flight: `${flight.airlineCode}${flight.flightNumber}` },
-            geometry: { type: 'Point', coordinates: [planePos.lon, planePos.lat] },
+            properties: { bearing: planeBearingDeg, flight: `${flight.airlineCode}${flight.flightNumber}` },
+            geometry: { type: 'Point', coordinates: [planeCoord.lon, planeCoord.lat] },
           },
         });
 
@@ -294,7 +312,7 @@ export function FlightMap({ flights, selectedFlightId, onSelectFlight, className
         });
       }
     });
-  }, [flights, airports, mapLoaded, selectedFlightId, onSelectFlight]);
+  }, [flights, positions, airports, mapLoaded, selectedFlightId, onSelectFlight]);
 
   useEffect(() => {
     renderFlights();
