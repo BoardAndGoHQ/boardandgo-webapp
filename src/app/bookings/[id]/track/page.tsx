@@ -6,10 +6,11 @@ import Link from 'next/link';
 import { useAuth } from '@/context/auth';
 import { api, type TrackedFlight, type FlightStatusEvent } from '@/lib/api';
 import { FlightStatusCard, FlightTimeline } from '@/components/flight-tracker';
+import { FlightMap } from '@/components/flight-map';
 import { IconLoader, IconShare, IconCopy, IconArrowRight } from '@/components/icons';
 
 export default function TrackFlightPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id: bookingId } = use(params);
+  const { id } = use(params);
   const router = useRouter();
   const { user, token, loading: authLoading } = useAuth();
   const [flights, setFlights] = useState<(TrackedFlight & { statusEvents: FlightStatusEvent[] })[]>([]);
@@ -17,21 +18,38 @@ export default function TrackFlightPage({ params }: { params: Promise<{ id: stri
   const [error, setError] = useState('');
   const [shareUrl, setShareUrl] = useState('');
   const [copied, setCopied] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
   const eventSourceRef = useRef<EventSource | null>(null);
   const trackedBookingId = useRef<string>('');
 
   const fetchTracking = useCallback(async () => {
     if (!token) return;
     try {
-      const { booking } = await api.tracking.getByBooking(bookingId, token);
+      // First try as a booking-service ID (from actual bookings)
+      const { booking } = await api.tracking.getByBooking(id, token);
       trackedBookingId.current = booking.id;
       setFlights(booking.flights);
     } catch {
-      setError('Flight tracking will begin once your booking is processed. Check back shortly.');
+      // Fallback: try as a post-booking internal booking ID (standalone flights)
+      try {
+        const { flights: myFlights } = await api.tracking.myFlights(token);
+        const match = myFlights.filter((f) => f.bookingId === id);
+        if (match.length > 0) {
+          setFlights(match);
+          setIsStandalone(true);
+        } else {
+          // Last fallback: try as a flight ID
+          const { flight } = await api.tracking.getFlightStatus(id, token);
+          setFlights([flight]);
+          setIsStandalone(true);
+        }
+      } catch {
+        setError('Flight not found.');
+      }
     } finally {
       setLoading(false);
     }
-  }, [token, bookingId]);
+  }, [token, id]);
 
   useEffect(() => {
     if (!token || flights.length === 0) return;
@@ -91,8 +109,8 @@ export default function TrackFlightPage({ params }: { params: Promise<{ id: stri
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 md:py-12">
       <div className="mb-6">
-        <Link href={`/bookings/${bookingId}`} className="text-sm text-text-muted hover:text-text-secondary transition-colors flex items-center gap-1">
-          <IconArrowRight className="w-3 h-3 rotate-180" /> Back to Booking
+        <Link href={isStandalone ? '/track' : `/bookings/${id}`} className="text-sm text-text-muted hover:text-text-secondary transition-colors flex items-center gap-1">
+          <IconArrowRight className="w-3 h-3 rotate-180" /> {isStandalone ? 'Back to Tracking' : 'Back to Booking'}
         </Link>
       </div>
 
@@ -121,6 +139,13 @@ export default function TrackFlightPage({ params }: { params: Promise<{ id: stri
               {copied ? 'Copied!' : <IconCopy className="w-4 h-4" />}
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Map */}
+      {flights.length > 0 && (
+        <div className="mb-6">
+          <FlightMap flights={flights} className="h-[300px] rounded-xl" />
         </div>
       )}
 
