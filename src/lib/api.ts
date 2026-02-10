@@ -148,6 +148,26 @@ export interface AgentResponse {
   searchIntent: SearchIntent | null;
 }
 
+export interface FlightLookupResult {
+  status: string;
+  departureAirport: string;
+  arrivalAirport: string;
+  scheduledDeparture: string | null;
+  estimatedDeparture: string | null;
+  actualDeparture: string | null;
+  scheduledArrival: string | null;
+  estimatedArrival: string | null;
+  actualArrival: string | null;
+  departureTerminal: string | null;
+  departureGate: string | null;
+  arrivalTerminal: string | null;
+  arrivalGate: string | null;
+  aircraftType: string | null;
+  departureDelayMinutes: number;
+  arrivalDelayMinutes: number;
+  durationMinutes: number | null;
+}
+
 export interface TrackedFlight {
   id: string;
   bookingId: string;
@@ -262,6 +282,21 @@ export const api = {
   },
 
   tracking: {
+    lookup: (carrier: string, number: string, date: string, token: string) =>
+      trackingRequest<{ flight: FlightLookupResult }>(
+        `/api/flights/lookup?carrier=${encodeURIComponent(carrier)}&number=${encodeURIComponent(number)}&date=${encodeURIComponent(date)}`, { token }
+      ),
+
+    trackStandalone: (flight: { carrierCode: string; flightNumber: string; date: string; departureAirport: string; arrivalAirport: string; scheduledDeparture: string; scheduledArrival: string }, token: string) =>
+      trackingRequest<{ flight: TrackedFlight & { statusEvents: FlightStatusEvent[] } }>(
+        '/api/flights/track-standalone', { method: 'POST', body: flight, token }
+      ),
+
+    myFlights: (token: string) =>
+      trackingRequest<{ flights: (TrackedFlight & { statusEvents: FlightStatusEvent[] })[] }>(
+        '/api/flights/my-flights', { token }
+      ),
+
     getByBooking: (bookingServiceId: string, token: string) =>
       trackingRequest<{ booking: { id: string; flights: (TrackedFlight & { statusEvents: FlightStatusEvent[] })[] } }>(
         `/api/flights/by-booking/${bookingServiceId}`, { token }
