@@ -80,7 +80,7 @@ const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.j
 /* ── Trail / route colors ── */
 const TRAIL_COLOR = '#e040fb';        // Magenta — flown path
 const REMAINING_COLOR = '#9e9e9e';    // Gray — remaining route
-const PLANE_COLOR = '#FFB300';        // Amber/yellow (PlaneFinder style)
+const PLANE_COLOR = '#FF6D00';        // Deep orange (FlightRadar24 style)
 
 /* ── Airline logo CDN ── */
 const AIRLINE_LOGO_URL = (iata: string) => `https://images.kiwi.com/airlines/64/${iata}.png`;
@@ -150,27 +150,38 @@ export function FlightMap({
     map.on('load', () => {
       map.resize();
 
-      // Add plane icon — FlightRadar24-style wide commercial jet with engines
+      // Add plane icon — detailed top-down jet with engines & shadow (FR24 style)
       try {
-        const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
-          <defs><filter id="s" x="-10%" y="-10%" width="120%" height="120%"><feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="#000" flood-opacity="0.4"/></filter></defs>
-          <g filter="url(#s)">
-            <!-- Fuselage -->
-            <path d="M32 3C30.2 3 28.8 5 28.5 8L28 18L28.2 38L27 44L27 48L32 46L37 48L37 44L35.8 38L36 18L35.5 8C35.2 5 33.8 3 32 3Z" fill="${PLANE_COLOR}" stroke="rgba(0,0,0,0.35)" stroke-width="0.6"/>
-            <!-- Left wing -->
-            <path d="M28 20L6 30L6 32.5L28 27Z" fill="${PLANE_COLOR}" stroke="rgba(0,0,0,0.35)" stroke-width="0.6"/>
-            <!-- Right wing -->
-            <path d="M36 20L58 30L58 32.5L36 27Z" fill="${PLANE_COLOR}" stroke="rgba(0,0,0,0.35)" stroke-width="0.6"/>
-            <!-- Left engine -->
-            <ellipse cx="16" cy="25.5" rx="2" ry="3.5" fill="${PLANE_COLOR}" stroke="rgba(0,0,0,0.3)" stroke-width="0.5"/>
-            <!-- Right engine -->
-            <ellipse cx="48" cy="25.5" rx="2" ry="3.5" fill="${PLANE_COLOR}" stroke="rgba(0,0,0,0.3)" stroke-width="0.5"/>
-            <!-- Left tailfin -->
-            <path d="M28.2 38L21 43L21 44.5L28.5 41Z" fill="${PLANE_COLOR}" stroke="rgba(0,0,0,0.3)" stroke-width="0.4"/>
-            <!-- Right tailfin -->
-            <path d="M35.8 38L43 43L43 44.5L35.5 41Z" fill="${PLANE_COLOR}" stroke="rgba(0,0,0,0.3)" stroke-width="0.4"/>
-          </g>
-        </svg>`;
+        const svgStr = [
+          '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">',
+          '<defs>',
+          '  <filter id="ds" x="-10%" y="-5%" width="120%" height="115%">',
+          '    <feDropShadow dx="0" dy="1.5" stdDeviation="1.2" flood-color="#000" flood-opacity=".45"/>',
+          '  </filter>',
+          '  <linearGradient id="bf" x1="0" y1="0" x2="0" y2="1">',
+          `    <stop offset="0%" stop-color="${PLANE_COLOR}"/>`,
+          `    <stop offset="100%" stop-color="#E65100"/>`,
+          '  </linearGradient>',
+          '</defs>',
+          '<g filter="url(#ds)">',
+          // Fuselage — elongated rounded body
+          '  <path d="M32 3c-1.6 0-2.8 1.4-3 4l-.4 10.5-1.2 5.5v12l1.2 8 .8 4 .6 3.5c.5 2 1.5 3 2 3s1.5-1 2-3l.6-3.5.8-4 1.2-8V23l-1.2-5.5L35 7c-.2-2.6-1.4-4-3-4z" fill="url(#bf)"/>',
+          // Main wings — swept back with taper
+          '  <path d="M28.6 21L6 30.5v2.5l22.6-6V21z" fill="url(#bf)"/>',
+          '  <path d="M35.4 21l22.6 9.5v2.5l-22.6-6V21z" fill="url(#bf)"/>',
+          // Engine nacelles — left wing
+          '  <ellipse cx="18" cy="27.5" rx="1.6" ry="3.2" fill="#BF360C"/>',
+          // Engine nacelles — right wing
+          '  <ellipse cx="46" cy="27.5" rx="1.6" ry="3.2" fill="#BF360C"/>',
+          // Horizontal tail stabilizers
+          '  <path d="M29 47l-8 5.5v1.8l8-3.8V47z" fill="url(#bf)"/>',
+          '  <path d="M35 47l8 5.5v1.8l-8-3.8V47z" fill="url(#bf)"/>',
+          // Fuselage center highlight
+          '  <path d="M31 8c-.1 0-.2.5-.2 1.5v30c0 1 .1 1.5.2 1.5h2c.1 0 .2-.5.2-1.5v-30c0-1-.1-1.5-.2-1.5h-2z" fill="rgba(255,255,255,.15)"/>',
+          '</g>',
+          '</svg>',
+        ].join('');
+
         const img = new Image(64, 64);
         img.onload = () => {
           if (map.getStyle()) map.addImage('plane-icon', img, { sdf: false });
