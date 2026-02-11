@@ -124,8 +124,10 @@ export function FlightMap({
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
+    const container = containerRef.current;
+
     const map = new maplibregl.Map({
-      container: containerRef.current,
+      container,
       style: MAP_STYLE,
       center: [10, 25],
       zoom: 1.8,
@@ -134,11 +136,15 @@ export function FlightMap({
       bearing: 0,
     });
 
+    // MapLibre's constructor sets container.style.position = 'relative' (inline),
+    // which overrides Tailwind's 'absolute' from 'absolute inset-0' and collapses
+    // the container height to 0. Restore absolute positioning immediately.
+    container.style.position = 'absolute';
+
     map.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'top-right');
     map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
 
     map.on('load', () => {
-      // Ensure the canvas matches the container size (fixes h-full timing)
       map.resize();
 
       // Add plane icon via SVG data URL (fully encoded to avoid parsing issues)
@@ -183,12 +189,23 @@ export function FlightMap({
 
     mapRef.current = map;
 
-    // Extra resize after a short delay to handle CSS h-full timing
-    const resizeTimer = setTimeout(() => { map.resize(); }, 100);
+    // Delayed resize with position guard
+    const resizeTimer = setTimeout(() => {
+      container.style.position = 'absolute';
+      map.resize();
+    }, 100);
 
-    // ResizeObserver to handle dynamic container changes
-    const ro = new ResizeObserver(() => { map.resize(); });
-    ro.observe(containerRef.current);
+    // ResizeObserver: recover from 0-height if position gets overridden again
+    const ro = new ResizeObserver((entries) => {
+      const r = entries[0]?.contentRect;
+      if (r && r.height === 0) {
+        container.style.position = 'absolute';
+        requestAnimationFrame(() => map.resize());
+        return;
+      }
+      map.resize();
+    });
+    ro.observe(container);
 
     return () => {
       clearTimeout(resizeTimer);
