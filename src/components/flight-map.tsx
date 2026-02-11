@@ -150,10 +150,28 @@ export function FlightMap({
     map.on('load', () => {
       map.resize();
 
-      // Add plane icon — sleek top-down jet silhouette (PlaneFinder style)
+      // Add plane icon — FlightRadar24-style wide commercial jet with engines
       try {
-        const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><path d="M24 1C23 1 22.4 3.5 22.4 6.5V16.5L7 25.5V28.5L22.4 23.5V35L17 39.5V42.5L24 39L31 42.5V39.5L25.6 35V23.5L41 28.5V25.5L25.6 16.5V6.5C25.6 3.5 25 1 24 1Z" fill="${PLANE_COLOR}" stroke="rgba(0,0,0,0.3)" stroke-width="0.5"/></svg>`;
-        const img = new Image(48, 48);
+        const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+          <defs><filter id="s" x="-10%" y="-10%" width="120%" height="120%"><feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="#000" flood-opacity="0.4"/></filter></defs>
+          <g filter="url(#s)">
+            <!-- Fuselage -->
+            <path d="M32 3C30.2 3 28.8 5 28.5 8L28 18L28.2 38L27 44L27 48L32 46L37 48L37 44L35.8 38L36 18L35.5 8C35.2 5 33.8 3 32 3Z" fill="${PLANE_COLOR}" stroke="rgba(0,0,0,0.35)" stroke-width="0.6"/>
+            <!-- Left wing -->
+            <path d="M28 20L6 30L6 32.5L28 27Z" fill="${PLANE_COLOR}" stroke="rgba(0,0,0,0.35)" stroke-width="0.6"/>
+            <!-- Right wing -->
+            <path d="M36 20L58 30L58 32.5L36 27Z" fill="${PLANE_COLOR}" stroke="rgba(0,0,0,0.35)" stroke-width="0.6"/>
+            <!-- Left engine -->
+            <ellipse cx="16" cy="25.5" rx="2" ry="3.5" fill="${PLANE_COLOR}" stroke="rgba(0,0,0,0.3)" stroke-width="0.5"/>
+            <!-- Right engine -->
+            <ellipse cx="48" cy="25.5" rx="2" ry="3.5" fill="${PLANE_COLOR}" stroke="rgba(0,0,0,0.3)" stroke-width="0.5"/>
+            <!-- Left tailfin -->
+            <path d="M28.2 38L21 43L21 44.5L28.5 41Z" fill="${PLANE_COLOR}" stroke="rgba(0,0,0,0.3)" stroke-width="0.4"/>
+            <!-- Right tailfin -->
+            <path d="M35.8 38L43 43L43 44.5L35.5 41Z" fill="${PLANE_COLOR}" stroke="rgba(0,0,0,0.3)" stroke-width="0.4"/>
+          </g>
+        </svg>`;
+        const img = new Image(64, 64);
         img.onload = () => {
           if (map.getStyle()) map.addImage('plane-icon', img, { sdf: false });
         };
