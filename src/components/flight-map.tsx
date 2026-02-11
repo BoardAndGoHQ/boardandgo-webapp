@@ -324,11 +324,17 @@ export function FlightMap({
       const isSelected = flight.id === selectedFlightId;
 
       if (trackerMode && (isActive || flight.flightStatus === 'landed')) {
-        // ── Tracker mode: split trail (flown magenta + remaining gray) ──
-        const { flown, remaining } = splitArcAtProgress(from, to, progress, 80);
+        // ── Tracker mode: trail through actual plane position ──
+        // When we have a live GPS position, draw DEP → plane → ARR
+        // so the trail always connects to where the plane actually is.
+        const planePos = livePos
+          ? { lat: livePos.latitude, lon: livePos.longitude }
+          : pointAlongArc(from, to, Math.max(0.02, Math.min(0.98, progress)));
+
+        const flown = greatCircleArc(from, planePos, 60);
+        const remainingArc = greatCircleArc(planePos, to, 60);
 
         if (flown.length > 1) {
-          // Trail glow
           map.addSource(`trail-${flight.id}`, {
             type: 'geojson',
             data: { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: flown } },
@@ -349,10 +355,10 @@ export function FlightMap({
           });
         }
 
-        if (remaining.length > 1) {
+        if (remainingArc.length > 1) {
           map.addSource(`remaining-${flight.id}`, {
             type: 'geojson',
-            data: { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: remaining } },
+            data: { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: remainingArc } },
           });
           map.addLayer({
             id: `remaining-${flight.id}`,
