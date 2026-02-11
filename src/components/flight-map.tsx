@@ -4,7 +4,7 @@ import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { TrackedFlight, FlightPosition } from '@/lib/api';
-import { greatCircleArc, pointAlongArc, bearing, type Coord } from '@/lib/arc-utils';
+import { greatCircleArc, pointAlongArc, bearing, splitArcAtProgress, type Coord } from '@/lib/arc-utils';
 
 /* ── Types ── */
 export interface AirportCoord {
@@ -14,12 +14,18 @@ export interface AirportCoord {
   longitude: number;
 }
 
+export type MapViewMode = 'route' | '3d' | 'follow';
+
 interface FlightMapProps {
   flights: TrackedFlight[];
   positions?: FlightPosition[];
   selectedFlightId?: string | null;
   onSelectFlight?: (id: string) => void;
   className?: string;
+  viewMode?: MapViewMode;
+  onAirportsResolved?: (airports: Map<string, AirportCoord>) => void;
+  /** When true, render for full-screen tracker (trail, popup, etc.) */
+  trackerMode?: boolean;
 }
 
 /* ── Airport coord cache ── */
@@ -37,9 +43,7 @@ async function resolveAirports(codes: string[]): Promise<Map<string, AirportCoor
           airportCache.set(code, a);
         }
       }
-    } catch {
-      // API failed, skip
-    }
+    } catch { /* skip */ }
   }
   const result = new Map<string, AirportCoord>();
   for (const code of codes) {
@@ -64,32 +68,38 @@ function getFlightProgress(flight: TrackedFlight): number {
   return (now - start) / (end - start);
 }
 
-/** Match a FlightPosition to a TrackedFlight by IATA code */
 function findPosition(flight: TrackedFlight, positions?: FlightPosition[]): FlightPosition | undefined {
   if (!positions || positions.length === 0) return undefined;
   const iata = `${flight.airlineCode}${flight.flightNumber.replace(/\D/g, '')}`;
   return positions.find((p) => p.flightIata === iata);
 }
 
-function statusColor(status: string): string {
-  switch (status) {
-    case 'active': return '#14b8a6';
-    case 'landed': return '#64748b';
-    case 'cancelled': return '#ef4444';
-    case 'delayed': return '#f59e0b';
-    default: return '#14b8a6';
-  }
-}
-
-/* ── Dark style (CartoDB Dark Matter — free, crisp vector tiles) ── */
+/* ── Style ── */
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
 
+/* ── Trail / route colors ── */
+const TRAIL_COLOR = '#e040fb';        // Magenta — flown path
+const REMAINING_COLOR = '#9e9e9e';    // Gray — remaining route
+const PLANE_COLOR = '#ff1744';        // Red plane icon (like PlaneFinder)
+
 /* ── Component ── */
-export function FlightMap({ flights, positions, selectedFlightId, onSelectFlight, className }: FlightMapProps) {
+export function FlightMap({
+  flights,
+  positions,
+  selectedFlightId,
+  onSelectFlight,
+  className,
+  viewMode = 'route',
+  onAirportsResolved,
+  trackerMode = false,
+}: FlightMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
+  const popupRef = useRef<maplibregl.Popup | null>(null);
   const [airports, setAirports] = useState<Map<string, AirportCoord>>(new Map());
   const [mapLoaded, setMapLoaded] = useState(false);
+  const followingRef = useRef(false);
+  const terrainActiveRef = useRef(false);
 
   /* Collect all airport codes */
   const airportCodes = useMemo(() => {
@@ -104,8 +114,11 @@ export function FlightMap({ flights, positions, selectedFlightId, onSelectFlight
   /* Resolve airport coordinates */
   useEffect(() => {
     if (airportCodes.length === 0) return;
-    resolveAirports(airportCodes).then(setAirports);
-  }, [airportCodes]);
+    resolveAirports(airportCodes).then((resolved) => {
+      setAirports(resolved);
+      onAirportsResolved?.(resolved);
+    });
+  }, [airportCodes, onAirportsResolved]);
 
   /* Initialize map */
   useEffect(() => {
@@ -117,40 +130,50 @@ export function FlightMap({ flights, positions, selectedFlightId, onSelectFlight
       center: [10, 25],
       zoom: 1.8,
       attributionControl: false,
+      pitch: 0,
+      bearing: 0,
     });
 
-    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+    map.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'top-right');
     map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
 
     map.on('load', () => {
-      // Create a plane icon via SVG data URL (more reliable than canvas across environments)
+      // Add plane icon via SVG data URL
       try {
-        const svgStr = '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M16 2L19 12L30 18V21L19 17V24L23 28V30L16 27L9 30V28L13 24V17L2 21V18L13 12Z" fill="%2314b8a6"/></svg>';
-        const img = new Image(32, 32);
+        const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><path d="M20 2L24 14L38 22V26L24 21V30L29 35V38L20 34L11 38V35L16 30V21L2 26V22L16 14Z" fill="${encodeURIComponent(PLANE_COLOR)}"/></svg>`;
+        const img = new Image(40, 40);
         img.onload = () => {
-          if (map.getStyle()) {
-            map.addImage('airport', img);
-          }
+          if (map.getStyle()) map.addImage('plane-icon', img);
         };
         img.src = `data:image/svg+xml;charset=utf-8,${svgStr}`;
-      } catch {
-        // Icon creation failed — map still works, just no plane icon
-      }
+      } catch { /* icon failed, map still works */ }
+
+      // Add terrain source (for 3D mode toggle)
+      try {
+        map.addSource('terrain-dem', {
+          type: 'raster-dem',
+          url: 'https://demotiles.maplibre.org/terrain-tiles/tiles.json',
+          tileSize: 256,
+        });
+      } catch { /* terrain source failed */ }
+
       setMapLoaded(true);
     });
 
-    // If style fails to load, still mark as loaded so UI isn't stuck
-    map.on('error', (e) => {
+    map.on('error', (e: { error?: { message?: string } }) => {
       console.warn('MapLibre error:', e.error?.message || e);
       setMapLoaded(true);
     });
 
-    // Fallback: if any image is referenced but missing, provide a 1px transparent placeholder
-    map.on('styleimagemissing', ({ id }) => {
+    map.on('styleimagemissing', ({ id }: { id: string }) => {
       if (!map.hasImage(id)) {
         map.addImage(id, { width: 1, height: 1, data: new Uint8Array(4) });
       }
     });
+
+    // Disable follow on user interaction
+    map.on('dragstart', () => { followingRef.current = false; });
+    map.on('zoomstart', () => { if (!followingRef.current) return; });
 
     mapRef.current = map;
 
@@ -161,28 +184,52 @@ export function FlightMap({ flights, positions, selectedFlightId, onSelectFlight
     };
   }, []);
 
+  /* Handle view mode changes (3D terrain, follow) */
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapLoaded) return;
+
+    if (viewMode === '3d') {
+      if (!terrainActiveRef.current && map.getSource('terrain-dem')) {
+        try {
+          map.setTerrain({ source: 'terrain-dem', exaggeration: 1.5 });
+          terrainActiveRef.current = true;
+        } catch { /* terrain not supported */ }
+      }
+      map.easeTo({ pitch: 60, duration: 1000 });
+    } else {
+      if (terrainActiveRef.current) {
+        try {
+          map.setTerrain(undefined as unknown as Parameters<typeof map.setTerrain>[0]);
+          terrainActiveRef.current = false;
+        } catch { /* ignore */ }
+      }
+      if (viewMode === 'route') {
+        map.easeTo({ pitch: 0, bearing: 0, duration: 800 });
+      }
+    }
+
+    followingRef.current = viewMode === 'follow';
+  }, [viewMode, mapLoaded]);
+
   /* Render flight layers */
   const renderFlights = useCallback(() => {
     const map = mapRef.current;
     if (!map || !mapLoaded || airports.size === 0) return;
 
     /* Clean previous layers */
-    const layerIds = flights.flatMap((f) => [
-      `arc-${f.id}`,
-      `arc-glow-${f.id}`,
-      `plane-${f.id}`,
-    ]);
-    const sourceIds = flights.flatMap((f) => [
-      `arc-${f.id}`,
-      `plane-${f.id}`,
-    ]);
-    layerIds.forEach((id) => { if (map.getLayer(id)) map.removeLayer(id); });
-    sourceIds.forEach((id) => { if (map.getSource(id)) map.removeSource(id); });
+    const layerPrefixes = ['trail-glow-', 'trail-', 'remaining-', 'arc-glow-', 'arc-', 'plane-'];
+    const srcPrefixes = ['trail-', 'remaining-', 'arc-', 'plane-'];
+    const staticLayers = ['airports-circle', 'airports-label'];
+    const staticSources = ['airports'];
 
-    // Also clean airport layers/sources from previous render
-    if (map.getLayer('airports-circle')) map.removeLayer('airports-circle');
-    if (map.getLayer('airports-label')) map.removeLayer('airports-label');
-    if (map.getSource('airports')) map.removeSource('airports');
+    // Remove existing layers/sources
+    flights.forEach((f) => {
+      layerPrefixes.forEach((p) => { if (map.getLayer(`${p}${f.id}`)) map.removeLayer(`${p}${f.id}`); });
+      srcPrefixes.forEach((p) => { if (map.getSource(`${p}${f.id}`)) map.removeSource(`${p}${f.id}`); });
+    });
+    staticLayers.forEach((id) => { if (map.getLayer(id)) map.removeLayer(id); });
+    staticSources.forEach((id) => { if (map.getSource(id)) map.removeSource(id); });
 
     /* Airport markers */
     const airportFeatures = Array.from(airports.entries()).map(([code, a]) => ({
@@ -201,7 +248,7 @@ export function FlightMap({ flights, positions, selectedFlightId, onSelectFlight
       type: 'circle',
       source: 'airports',
       paint: {
-        'circle-radius': 5,
+        'circle-radius': 6,
         'circle-color': '#14b8a6',
         'circle-stroke-color': '#0a1628',
         'circle-stroke-width': 2,
@@ -216,8 +263,8 @@ export function FlightMap({ flights, positions, selectedFlightId, onSelectFlight
       layout: {
         'text-field': ['get', 'code'],
         'text-font': ['Open Sans Bold'],
-        'text-size': 11,
-        'text-offset': [0, 1.5],
+        'text-size': 12,
+        'text-offset': [0, 1.6],
         'text-anchor': 'top',
       },
       paint: {
@@ -235,82 +282,113 @@ export function FlightMap({ flights, positions, selectedFlightId, onSelectFlight
 
       const from: Coord = { lat: depAirport.latitude, lon: depAirport.longitude };
       const to: Coord = { lat: arrAirport.latitude, lon: arrAirport.longitude };
-      const arcPoints = greatCircleArc(from, to, 80);
+
+      const livePos = findPosition(flight, positions);
+      const progress = getFlightProgress(flight);
+      const isActive = flight.flightStatus === 'active';
       const isSelected = flight.id === selectedFlightId;
-      const color = statusColor(flight.flightStatus);
 
-      // Arc glow (wider, transparent)
-      map.addSource(`arc-${flight.id}`, {
-        type: 'geojson',
-        data: {
-          type: 'Feature',
-          properties: {},
-          geometry: { type: 'LineString', coordinates: arcPoints },
-        },
-      });
+      if (trackerMode && (isActive || flight.flightStatus === 'landed')) {
+        // ── Tracker mode: split trail (flown magenta + remaining gray) ──
+        const { flown, remaining } = splitArcAtProgress(from, to, progress, 80);
 
-      map.addLayer({
-        id: `arc-glow-${flight.id}`,
-        type: 'line',
-        source: `arc-${flight.id}`,
-        layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: {
-          'line-color': color,
-          'line-width': isSelected ? 6 : 3,
-          'line-opacity': isSelected ? 0.25 : 0.1,
-          'line-blur': 4,
-        },
-      });
+        if (flown.length > 1) {
+          // Trail glow
+          map.addSource(`trail-${flight.id}`, {
+            type: 'geojson',
+            data: { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: flown } },
+          });
+          map.addLayer({
+            id: `trail-glow-${flight.id}`,
+            type: 'line',
+            source: `trail-${flight.id}`,
+            layout: { 'line-cap': 'round', 'line-join': 'round' },
+            paint: { 'line-color': TRAIL_COLOR, 'line-width': 6, 'line-opacity': 0.25, 'line-blur': 4 },
+          });
+          map.addLayer({
+            id: `trail-${flight.id}`,
+            type: 'line',
+            source: `trail-${flight.id}`,
+            layout: { 'line-cap': 'round', 'line-join': 'round' },
+            paint: { 'line-color': TRAIL_COLOR, 'line-width': 3, 'line-opacity': 0.9 },
+          });
+        }
 
-      map.addLayer({
-        id: `arc-${flight.id}`,
-        type: 'line',
-        source: `arc-${flight.id}`,
-        layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: {
-          'line-color': color,
-          'line-width': isSelected ? 3 : 1.5,
-          'line-opacity': isSelected ? 0.9 : 0.5,
-          'line-dasharray': flight.flightStatus === 'active' ? [1, 0] : [4, 3],
-        },
-      });
+        if (remaining.length > 1) {
+          map.addSource(`remaining-${flight.id}`, {
+            type: 'geojson',
+            data: { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: remaining } },
+          });
+          map.addLayer({
+            id: `remaining-${flight.id}`,
+            type: 'line',
+            source: `remaining-${flight.id}`,
+            layout: { 'line-cap': 'round', 'line-join': 'round' },
+            paint: { 'line-color': REMAINING_COLOR, 'line-width': 2, 'line-opacity': 0.3, 'line-dasharray': [4, 3] },
+          });
+        }
+      } else {
+        // ── Dashboard mode: single arc ──
+        const arcPoints = greatCircleArc(from, to, 80);
+        const color = isActive ? '#14b8a6' : flight.flightStatus === 'landed' ? '#64748b' : '#14b8a6';
 
-      // Make arcs clickable
-      map.on('click', `arc-${flight.id}`, () => {
-        onSelectFlight?.(flight.id);
-      });
-      map.on('mouseenter', `arc-${flight.id}`, () => {
-        map.getCanvas().style.cursor = 'pointer';
-      });
-      map.on('mouseleave', `arc-${flight.id}`, () => {
-        map.getCanvas().style.cursor = '';
-      });
+        map.addSource(`arc-${flight.id}`, {
+          type: 'geojson',
+          data: { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: arcPoints } },
+        });
+        map.addLayer({
+          id: `arc-glow-${flight.id}`,
+          type: 'line',
+          source: `arc-${flight.id}`,
+          layout: { 'line-cap': 'round', 'line-join': 'round' },
+          paint: { 'line-color': color, 'line-width': isSelected ? 6 : 3, 'line-opacity': isSelected ? 0.25 : 0.1, 'line-blur': 4 },
+        });
+        map.addLayer({
+          id: `arc-${flight.id}`,
+          type: 'line',
+          source: `arc-${flight.id}`,
+          layout: { 'line-cap': 'round', 'line-join': 'round' },
+          paint: { 'line-color': color, 'line-width': isSelected ? 3 : 1.5, 'line-opacity': isSelected ? 0.9 : 0.5, 'line-dasharray': isActive ? [1, 0] : [4, 3] },
+        });
 
-      // Plane icon for active flights
-      if (flight.flightStatus === 'active' || isSelected) {
-        const livePos = findPosition(flight, positions);
+        map.on('click', `arc-${flight.id}`, () => { onSelectFlight?.(flight.id); });
+        map.on('mouseenter', `arc-${flight.id}`, () => { map.getCanvas().style.cursor = 'pointer'; });
+        map.on('mouseleave', `arc-${flight.id}`, () => { map.getCanvas().style.cursor = ''; });
+      }
+
+      // ── Plane icon ──
+      if (isActive || isSelected) {
         let planeCoord: Coord;
         let planeBearingDeg: number;
 
         if (livePos) {
-          // Use real GPS from AirLabs
           planeCoord = { lat: livePos.latitude, lon: livePos.longitude };
           planeBearingDeg = livePos.heading;
         } else {
-          // Fallback: estimate from time-based progress
-          const progress = getFlightProgress(flight);
-          planeCoord = pointAlongArc(from, to, Math.max(0.02, Math.min(0.98, progress)));
+          const p = Math.max(0.02, Math.min(0.98, progress));
+          planeCoord = pointAlongArc(from, to, p);
           planeBearingDeg = bearing(
-            pointAlongArc(from, to, Math.max(0, progress - 0.02)),
-            pointAlongArc(from, to, Math.min(1, progress + 0.02))
+            pointAlongArc(from, to, Math.max(0, p - 0.02)),
+            pointAlongArc(from, to, Math.min(1, p + 0.02))
           );
+        }
+
+        const planeProps: Record<string, unknown> = {
+          bearing: planeBearingDeg,
+          flight: `${flight.airlineCode}${flight.flightNumber}`,
+        };
+        if (livePos) {
+          planeProps.altitude = livePos.altitude;
+          planeProps.speed = livePos.speed;
+          planeProps.route = `${depAirport.name ?? flight.departureAirport} to ${arrAirport.name ?? flight.arrivalAirport}`;
+          planeProps.aircraft = flight.aircraftType ?? '';
         }
 
         map.addSource(`plane-${flight.id}`, {
           type: 'geojson',
           data: {
             type: 'Feature',
-            properties: { bearing: planeBearingDeg, flight: `${flight.airlineCode}${flight.flightNumber}` },
+            properties: planeProps,
             geometry: { type: 'Point', coordinates: [planeCoord.lon, planeCoord.lat] },
           },
         });
@@ -320,15 +398,15 @@ export function FlightMap({ flights, positions, selectedFlightId, onSelectFlight
           type: 'symbol',
           source: `plane-${flight.id}`,
           layout: {
-            'icon-image': 'airport',
-            'icon-size': 1.2,
+            'icon-image': 'plane-icon',
+            'icon-size': trackerMode ? 0.9 : 0.8,
             'icon-rotate': ['get', 'bearing'],
             'icon-rotation-alignment': 'map',
             'icon-allow-overlap': true,
-            'text-field': ['get', 'flight'],
+            'text-field': trackerMode ? '' : ['get', 'flight'],
             'text-font': ['Open Sans Bold'],
             'text-size': 10,
-            'text-offset': [0, 1.8],
+            'text-offset': [0, 2],
             'text-anchor': 'top',
             'text-allow-overlap': true,
           },
@@ -338,9 +416,59 @@ export function FlightMap({ flights, positions, selectedFlightId, onSelectFlight
             'text-halo-width': 1,
           },
         });
+
+        // Click on plane → popup
+        map.on('click', `plane-${flight.id}`, (e) => {
+          if (popupRef.current) popupRef.current.remove();
+          const coords = e.lngLat;
+          const props = e.features?.[0]?.properties ?? {};
+          const alt = props.altitude ? Math.round(Number(props.altitude)) : null;
+          const spd = props.speed ? Math.round(Number(props.speed) * 0.539957) : null;
+
+          const html = `
+            <div style="background:#1a1f2e;border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 14px;min-width:200px;font-family:system-ui,sans-serif;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" stroke-width="2"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5Z"/></svg>
+                <span style="font-weight:700;color:#f1f5f9;font-size:14px;">${props.flight ?? ''}</span>
+                ${props.aircraft ? `<span style="background:rgba(255,255,255,0.1);padding:1px 6px;border-radius:4px;font-size:10px;color:#94a3b8;">${props.aircraft}</span>` : ''}
+              </div>
+              ${props.route ? `<div style="color:#94a3b8;font-size:12px;margin-bottom:6px;">${props.route}</div>` : ''}
+              <div style="background:rgba(255,255,255,0.05);border-radius:6px;height:4px;margin-bottom:8px;overflow:hidden;">
+                <div style="width:${Math.round(progress * 100)}%;height:100%;background:linear-gradient(90deg,#22c55e,#4ade80);border-radius:6px;"></div>
+              </div>
+              <div style="display:flex;gap:12px;color:#f1f5f9;font-size:13px;font-weight:600;">
+                ${alt ? `<span>${alt.toLocaleString()} ft</span>` : ''}
+                ${alt && spd ? '<span style="color:#64748b;">·</span>' : ''}
+                ${spd ? `<span>${spd} kts</span>` : ''}
+              </div>
+            </div>
+          `;
+
+          const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: true, className: 'plane-popup', offset: [0, -20] })
+            .setLngLat(coords)
+            .setHTML(html)
+            .addTo(map);
+
+          popupRef.current = popup;
+          onSelectFlight?.(flight.id);
+        });
+
+        map.on('mouseenter', `plane-${flight.id}`, () => { map.getCanvas().style.cursor = 'pointer'; });
+        map.on('mouseleave', `plane-${flight.id}`, () => { map.getCanvas().style.cursor = ''; });
+
+        // Follow mode: track the plane
+        if (followingRef.current) {
+          map.easeTo({
+            center: [planeCoord.lon, planeCoord.lat],
+            zoom: viewMode === '3d' ? 7 : 5,
+            bearing: planeBearingDeg,
+            pitch: viewMode === '3d' ? 60 : viewMode === 'follow' ? 45 : 0,
+            duration: 2000,
+          });
+        }
       }
     });
-  }, [flights, positions, airports, mapLoaded, selectedFlightId, onSelectFlight]);
+  }, [flights, positions, airports, mapLoaded, selectedFlightId, onSelectFlight, trackerMode, viewMode]);
 
   useEffect(() => {
     renderFlights();
@@ -350,6 +478,7 @@ export function FlightMap({ flights, positions, selectedFlightId, onSelectFlight
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !mapLoaded || airports.size === 0) return;
+    if (followingRef.current) return; // Don't refit if following
 
     const bounds = new maplibregl.LngLatBounds();
     let hasPoints = false;
@@ -359,9 +488,9 @@ export function FlightMap({ flights, positions, selectedFlightId, onSelectFlight
     });
 
     if (hasPoints) {
-      map.fitBounds(bounds, { padding: 80, maxZoom: 6, duration: 1200 });
+      map.fitBounds(bounds, { padding: trackerMode ? { top: 80, right: 80, bottom: 120, left: 420 } : 80, maxZoom: 6, duration: 1200 });
     }
-  }, [airports, mapLoaded]);
+  }, [airports, mapLoaded, trackerMode]);
 
   return (
     <div className={`relative w-full ${className ?? 'h-[500px]'}`}>

@@ -141,3 +141,21 @@ export function bearing(from: Coord, to: Coord): number {
 
   return (toDeg(Math.atan2(y, x)) + 360) % 360;
 }
+
+/**
+ * Split a great-circle arc into flown and remaining segments at a given fraction.
+ * Returns two arrays of [longitude, latitude] pairs (GeoJSON order).
+ */
+export function splitArcAtProgress(
+  from: Coord,
+  to: Coord,
+  fraction: number,
+  numPoints = 80
+): { flown: [number, number][]; remaining: [number, number][] } {
+  const clamped = Math.max(0, Math.min(1, fraction));
+  const splitIndex = Math.round(clamped * numPoints);
+  const full = greatCircleArc(from, to, numPoints);
+  const flown = full.slice(0, splitIndex + 1);
+  const remaining = full.slice(splitIndex);
+  return { flown, remaining };
+}

@@ -254,3 +254,31 @@ input:focus, select:focus, textarea:focus {
   background: rgba(148, 163, 184, 0.35);
 }
 
+/* ── MapLibre popup overrides (dark theme) ── */
+.maplibregl-popup-content {
+  background: transparent !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  border-radius: 12px !important;
+}
+
+.maplibregl-popup-tip {
+  border-top-color: #1a1f2e !important;
+}
+
+.maplibregl-popup-anchor-bottom .maplibregl-popup-tip {
+  border-top-color: #1a1f2e !important;
+}
+
+.maplibregl-popup-anchor-top .maplibregl-popup-tip {
+  border-bottom-color: #1a1f2e !important;
+}
+
+.maplibregl-popup-anchor-left .maplibregl-popup-tip {
+  border-right-color: #1a1f2e !important;
+}
+
+.maplibregl-popup-anchor-right .maplibregl-popup-tip {
+  border-left-color: #1a1f2e !important;
+}
+
