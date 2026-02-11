@@ -123,38 +123,33 @@ export function FlightMap({ flights, positions, selectedFlightId, onSelectFlight
     map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
 
     map.on('load', () => {
-      // Create a plane icon since CartoDB Dark Matter has no "airport" sprite
-      const size = 32;
-      const canvas = document.createElement('canvas');
-      canvas.width = size;
-      canvas.height = size;
-      const ctx = canvas.getContext('2d')!;
-      ctx.fillStyle = '#14b8a6';
-      ctx.beginPath();
-      // Simple airplane silhouette pointing up
-      ctx.moveTo(16, 2);   // nose
-      ctx.lineTo(19, 12);
-      ctx.lineTo(30, 18);  // right wing tip
-      ctx.lineTo(30, 21);
-      ctx.lineTo(19, 17);
-      ctx.lineTo(19, 24);
-      ctx.lineTo(23, 28);  // right tail
-      ctx.lineTo(23, 30);
-      ctx.lineTo(16, 27);
-      ctx.lineTo(9, 30);   // left tail
-      ctx.lineTo(9, 28);
-      ctx.lineTo(13, 24);
-      ctx.lineTo(13, 17);
-      ctx.lineTo(2, 21);   // left wing tip
-      ctx.lineTo(2, 18);
-      ctx.lineTo(13, 12);
-      ctx.closePath();
-      ctx.fill();
-
-      const imgData = ctx.getImageData(0, 0, size, size);
-      map.addImage('airport', imgData, { sdf: false });
-
+      // Create a plane icon via SVG data URL (more reliable than canvas across environments)
+      try {
+        const svgStr = '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M16 2L19 12L30 18V21L19 17V24L23 28V30L16 27L9 30V28L13 24V17L2 21V18L13 12Z" fill="%2314b8a6"/></svg>';
+        const img = new Image(32, 32);
+        img.onload = () => {
+          if (map.getStyle()) {
+            map.addImage('airport', img);
+          }
+        };
+        img.src = `data:image/svg+xml;charset=utf-8,${svgStr}`;
+      } catch {
+        // Icon creation failed — map still works, just no plane icon
+      }
       setMapLoaded(true);
+    });
+
+    // If style fails to load, still mark as loaded so UI isn't stuck
+    map.on('error', (e) => {
+      console.warn('MapLibre error:', e.error?.message || e);
+      setMapLoaded(true);
+    });
+
+    // Fallback: if any image is referenced but missing, provide a 1px transparent placeholder
+    map.on('styleimagemissing', ({ id }) => {
+      if (!map.hasImage(id)) {
+        map.addImage(id, { width: 1, height: 1, data: new Uint8Array(4) });
+      }
     });
 
     mapRef.current = map;
