@@ -138,14 +138,20 @@ export function FlightMap({
     map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
 
     map.on('load', () => {
-      // Add plane icon via SVG data URL
+      // Ensure the canvas matches the container size (fixes h-full timing)
+      map.resize();
+
+      // Add plane icon via SVG data URL (fully encoded to avoid parsing issues)
       try {
-        const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><path d="M20 2L24 14L38 22V26L24 21V30L29 35V38L20 34L11 38V35L16 30V21L2 26V22L16 14Z" fill="${encodeURIComponent(PLANE_COLOR)}"/></svg>`;
+        const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><path d="M20 2L24 14L38 22V26L24 21V30L29 35V38L20 34L11 38V35L16 30V21L2 26V22L16 14Z" fill="${PLANE_COLOR}"/></svg>`;
         const img = new Image(40, 40);
         img.onload = () => {
           if (map.getStyle()) map.addImage('plane-icon', img);
         };
-        img.src = `data:image/svg+xml;charset=utf-8,${svgStr}`;
+        img.onerror = () => {
+          console.warn('Plane icon SVG failed to load');
+        };
+        img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgStr)}`;
       } catch { /* icon failed, map still works */ }
 
       // Add terrain source (for 3D mode toggle)
@@ -177,7 +183,16 @@ export function FlightMap({
 
     mapRef.current = map;
 
+    // Extra resize after a short delay to handle CSS h-full timing
+    const resizeTimer = setTimeout(() => { map.resize(); }, 100);
+
+    // ResizeObserver to handle dynamic container changes
+    const ro = new ResizeObserver(() => { map.resize(); });
+    ro.observe(containerRef.current);
+
     return () => {
+      clearTimeout(resizeTimer);
+      ro.disconnect();
       map.remove();
       mapRef.current = null;
       setMapLoaded(false);
@@ -494,9 +509,9 @@ export function FlightMap({
 
   return (
     <div className={`relative w-full ${className ?? 'h-[500px]'}`}>
-      <div ref={containerRef} className="absolute inset-0 rounded-xl overflow-hidden" />
+      <div ref={containerRef} className={`absolute inset-0 overflow-hidden ${trackerMode ? '' : 'rounded-xl'}`} />
       {!mapLoaded && (
-        <div className="absolute inset-0 flex items-center justify-center bg-bg-elevated/50 rounded-xl">
+        <div className={`absolute inset-0 flex items-center justify-center bg-bg-elevated/50 ${trackerMode ? '' : 'rounded-xl'}`}>
           <div className="flex items-center gap-2 text-text-muted text-sm">
             <div className="w-4 h-4 border-2 border-accent-teal/30 border-t-accent-teal rounded-full animate-spin" />
             Loading map...
