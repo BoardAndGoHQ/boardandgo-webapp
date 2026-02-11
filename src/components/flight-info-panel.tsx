@@ -62,6 +62,9 @@ const statusColors: Record<string, { label: string; color: string }> = {
   unknown: { label: 'Unknown', color: 'text-text-muted' },
 };
 
+/* ── Airline logo CDN ── */
+const AIRLINE_LOGO_URL = (iata: string) => `https://images.kiwi.com/airlines/64/${iata}.png`;
+
 /* ── Component ── */
 interface FlightInfoPanelProps {
   flight: TrackedFlight & { statusEvents: FlightStatusEvent[] };
@@ -117,8 +120,20 @@ export function FlightInfoPanel({ flight, position, airports, collapsed, onToggl
       <div className="px-5 pt-4 pb-3 border-b border-white/5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            {/* Airline icon placeholder */}
-            <div className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center">
+            {/* Airline logo */}
+            <img
+              src={AIRLINE_LOGO_URL(flight.airlineCode)}
+              alt={flight.airlineCode}
+              width={36}
+              height={36}
+              className="w-9 h-9 rounded-lg object-contain bg-white/10 p-1"
+              onError={(e) => {
+                // Fallback to icon if logo fails
+                (e.target as HTMLImageElement).style.display = 'none';
+                (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+              }}
+            />
+            <div className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center hidden">
               <IconPlane className="w-5 h-5 text-accent-teal" />
             </div>
             <div>

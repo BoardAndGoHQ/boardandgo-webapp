@@ -80,7 +80,10 @@ const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.j
 /* ── Trail / route colors ── */
 const TRAIL_COLOR = '#e040fb';        // Magenta — flown path
 const REMAINING_COLOR = '#9e9e9e';    // Gray — remaining route
-const PLANE_COLOR = '#ff1744';        // Red plane icon (like PlaneFinder)
+const PLANE_COLOR = '#FFB300';        // Amber/yellow (PlaneFinder style)
+
+/* ── Airline logo CDN ── */
+const AIRLINE_LOGO_URL = (iata: string) => `https://images.kiwi.com/airlines/64/${iata}.png`;
 
 /* ── Component ── */
 export function FlightMap({
@@ -147,12 +150,12 @@ export function FlightMap({
     map.on('load', () => {
       map.resize();
 
-      // Add plane icon via SVG data URL (fully encoded to avoid parsing issues)
+      // Add plane icon — sleek top-down jet silhouette (PlaneFinder style)
       try {
-        const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><path d="M20 2L24 14L38 22V26L24 21V30L29 35V38L20 34L11 38V35L16 30V21L2 26V22L16 14Z" fill="${PLANE_COLOR}"/></svg>`;
-        const img = new Image(40, 40);
+        const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><path d="M24 1C23 1 22.4 3.5 22.4 6.5V16.5L7 25.5V28.5L22.4 23.5V35L17 39.5V42.5L24 39L31 42.5V39.5L25.6 35V23.5L41 28.5V25.5L25.6 16.5V6.5C25.6 3.5 25 1 24 1Z" fill="${PLANE_COLOR}" stroke="rgba(0,0,0,0.3)" stroke-width="0.5"/></svg>`;
+        const img = new Image(48, 48);
         img.onload = () => {
-          if (map.getStyle()) map.addImage('plane-icon', img);
+          if (map.getStyle()) map.addImage('plane-icon', img, { sdf: false });
         };
         img.onerror = () => {
           console.warn('Plane icon SVG failed to load');
@@ -408,6 +411,7 @@ export function FlightMap({
         const planeProps: Record<string, unknown> = {
           bearing: planeBearingDeg,
           flight: `${flight.airlineCode}${flight.flightNumber}`,
+          airlineCode: flight.airlineCode,
         };
         if (livePos) {
           planeProps.altitude = livePos.altitude;
@@ -457,10 +461,13 @@ export function FlightMap({
           const alt = props.altitude ? Math.round(Number(props.altitude)) : null;
           const spd = props.speed ? Math.round(Number(props.speed) * 0.539957) : null;
 
+          const airlineCode = String(props.airlineCode ?? '');
+          const logoUrl = airlineCode ? AIRLINE_LOGO_URL(airlineCode) : '';
+
           const html = `
-            <div style="background:#1a1f2e;border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 14px;min-width:200px;font-family:system-ui,sans-serif;">
-              <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" stroke-width="2"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5Z"/></svg>
+            <div style="background:#1a1f2e;border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 14px;min-width:220px;font-family:system-ui,sans-serif;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                ${logoUrl ? `<img src="${logoUrl}" alt="" width="24" height="24" style="border-radius:4px;object-fit:contain;background:rgba(255,255,255,0.08);" onerror="this.style.display='none'"/>` : ''}
                 <span style="font-weight:700;color:#f1f5f9;font-size:14px;">${props.flight ?? ''}</span>
                 ${props.aircraft ? `<span style="background:rgba(255,255,255,0.1);padding:1px 6px;border-radius:4px;font-size:10px;color:#94a3b8;">${props.aircraft}</span>` : ''}
               </div>
