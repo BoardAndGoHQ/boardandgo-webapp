@@ -16,6 +16,7 @@ import {
   IconArrowRight,
   IconMail,
 } from '@/components/icons';
+import { getTrackedDelayRisk } from '@/lib/insights';
 
 type FlightWithEvents = TrackedFlight & { statusEvents: FlightStatusEvent[] };
 
@@ -359,6 +360,7 @@ export default function DashboardPage() {
                     {flights.map((flight) => {
                       const isSelected = flight.id === selectedId;
                       const depTime = flight.actualDeparture ?? flight.estimatedDeparture ?? flight.scheduledDeparture;
+                      const delayRisk = getTrackedDelayRisk(flight);
                       return (
                         <button
                           key={flight.id}
@@ -375,6 +377,15 @@ export default function DashboardPage() {
                               <span className="text-sm font-semibold text-text-primary">
                                 {flight.airlineCode}{flight.flightNumber}
                               </span>
+                              {/* Delay risk dot */}
+                              <span
+                                className={`w-2 h-2 rounded-full ${
+                                  delayRisk.level === 'high' ? 'bg-red-400' :
+                                  delayRisk.level === 'medium' ? 'bg-amber-400' :
+                                  'bg-emerald-400'
+                                }`}
+                                title={delayRisk.reason}
+                              />
                             </div>
                             <StatusBadge status={flight.flightStatus} />
                           </div>

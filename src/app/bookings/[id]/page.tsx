@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '@/context/auth';
 import { api, type Booking } from '@/lib/api';
 import { IconPlane, IconLoader, IconClock, IconCalendar, IconUser, IconMail, IconSignal } from '@/components/icons';
+import { getSearchDelayRisk, getRecommendedArrival, formatRecommendedTime } from '@/lib/insights';
 
 function formatDate(dateStr: string) {
   const d = new Date(dateStr);
@@ -146,6 +147,43 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
           </div>
         </div>
       </div>
+
+      {/* Flight Intelligence */}
+      {booking && (() => {
+        const delayRisk = getSearchDelayRisk({ origin: booking.origin, destination: booking.destination, stops: 0 });
+        const arrival = getRecommendedArrival(booking.departureTime, booking.origin, booking.destination);
+        return (
+          <div className="mt-4 bg-bg-card border border-border-subtle rounded-xl p-5">
+            <h3 className="text-xs font-medium text-text-muted uppercase tracking-wider mb-4">Flight Intelligence</h3>
+            <div className="space-y-3">
+              {/* Delay Risk */}
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-text-secondary">Delay Risk</span>
+                <span className={`flex items-center gap-1.5 text-sm font-medium ${
+                  delayRisk.level === 'high' ? 'text-red-400' :
+                  delayRisk.level === 'medium' ? 'text-amber-400' :
+                  'text-emerald-400'
+                }`}>
+                  <span className={`w-2 h-2 rounded-full ${
+                    delayRisk.level === 'high' ? 'bg-red-400' :
+                    delayRisk.level === 'medium' ? 'bg-amber-400' :
+                    'bg-emerald-400'
+                  }`} />
+                  {delayRisk.level === 'high' ? 'High' : delayRisk.level === 'medium' ? 'Moderate' : 'Low'}
+                </span>
+              </div>
+
+              {/* Recommended Airport Arrival */}
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-text-secondary">Recommended Airport Arrival</span>
+                <span className="text-sm font-medium text-text-primary">
+                  {formatRecommendedTime(arrival)}
+                </span>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       <div className="mt-4 flex justify-center">
         <Link

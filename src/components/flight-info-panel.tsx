@@ -5,6 +5,7 @@ import type { TrackedFlight, FlightStatusEvent, FlightPosition } from '@/lib/api
 import type { AirportCoord } from '@/components/flight-map';
 import { IconChevronDown, IconChevronUp, IconPlane } from '@/components/icons';
 import { greatCircleDistance } from '@/lib/arc-utils';
+import { getTrackedDelayRisk, getRecommendedArrival } from '@/lib/insights';
 
 /* ── Helpers ── */
 function formatTime(iso: string | null) {
@@ -273,6 +274,53 @@ export function FlightInfoPanel({ flight, position, airports, collapsed, onToggl
                 )}
               </div>
             )}
+
+            {/* ── Flight Intelligence ── */}
+            {(() => {
+              const delayRisk = getTrackedDelayRisk(flight);
+              const arrival = getRecommendedArrival(
+                flight.scheduledDeparture,
+                flight.departureAirport,
+                flight.arrivalAirport,
+                flight.departureDelayMinutes
+              );
+              const arrivalTime = arrival.recommendedTime.toLocaleTimeString('en-US', {
+                hour: '2-digit', minute: '2-digit', hour12: false,
+              });
+
+              return (
+                <div className="bg-white/5 rounded-lg p-3 space-y-2.5">
+                  <div className="text-[10px] font-medium text-text-muted uppercase tracking-wider">
+                    Flight Intelligence
+                  </div>
+                  {/* Delay Risk */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-text-secondary">Delay Risk</span>
+                    <span className={`flex items-center gap-1.5 text-xs font-medium ${
+                      delayRisk.level === 'high' ? 'text-red-400' :
+                      delayRisk.level === 'medium' ? 'text-amber-400' :
+                      'text-emerald-400'
+                    }`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${
+                        delayRisk.level === 'high' ? 'bg-red-400' :
+                        delayRisk.level === 'medium' ? 'bg-amber-400' :
+                        'bg-emerald-400'
+                      }`} />
+                      {delayRisk.level === 'high' ? 'High' : delayRisk.level === 'medium' ? 'Moderate' : 'Low'}
+                    </span>
+                  </div>
+                  {/* Recommended Airport Arrival */}
+                  {flight.flightStatus === 'scheduled' && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-text-secondary">Arrive at Airport</span>
+                      <span className="text-xs font-medium text-text-primary">
+                        {arrivalTime} ({arrival.label} {arrival.bufferHours}h)
+                      </span>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
           </div>
         )}
       </div>

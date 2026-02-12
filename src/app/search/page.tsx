@@ -8,6 +8,7 @@ import { api } from '@/lib/api';
 import { FlightSearch } from '@/components/flight-search';
 import { AgentChat } from '@/components/agent-chat';
 import { IconLoader, IconPlane, IconArrowRight, IconExternalLink, IconClock, IconSearch, IconSparkles, IconX } from '@/components/icons';
+import { getSearchDelayRisk, estimateConnectionRiskFromStops } from '@/lib/insights';
 
 interface FlightOffer {
   id: string;
@@ -366,6 +367,8 @@ function SearchResults() {
           {paginatedFlights.map((flight) => {
             const dep = formatDateTime(flight.departureTime);
             const arr = formatDateTime(flight.arrivalTime);
+            const delayRisk = getSearchDelayRisk(flight);
+            const connectionRisk = estimateConnectionRiskFromStops(flight.stops, flight.duration);
             
             return (
               <div
@@ -374,8 +377,8 @@ function SearchResults() {
               >
                 <div className="flex flex-col md:flex-row md:items-center gap-4">
                   <div className="flex-1">
-                    {/* Airline Info */}
-                    <div className="flex items-center gap-2 mb-3">
+                    {/* Airline Info + Insight Badges */}
+                    <div className="flex items-center gap-2 mb-3 flex-wrap">
                       <span className="text-sm font-medium text-text-primary">{flight.airline}</span>
                       <span className="text-xs text-text-muted">({flight.flightNumber})</span>
                       {flight.stops === 0 ? (
@@ -388,6 +391,36 @@ function SearchResults() {
                       <span className="px-2 py-0.5 text-xs bg-bg-elevated text-text-muted rounded capitalize">
                         {flight.cabin.toLowerCase()}
                       </span>
+
+                      {/* Delay Risk Badge */}
+                      {delayRisk.level !== 'low' && (
+                        <span
+                          className={`px-2 py-0.5 text-xs rounded flex items-center gap-1 ${
+                            delayRisk.level === 'high'
+                              ? 'bg-red-400/10 text-red-400'
+                              : 'bg-amber-400/10 text-amber-400'
+                          }`}
+                          title="Based on current aircraft status and route history"
+                        >
+                          <span className={`w-1.5 h-1.5 rounded-full ${delayRisk.level === 'high' ? 'bg-red-400' : 'bg-amber-400'}`} />
+                          {delayRisk.level === 'high' ? 'High Delay Risk' : 'Moderate Delay Risk'}
+                        </span>
+                      )}
+
+                      {/* Connection Risk Badge */}
+                      {connectionRisk && connectionRisk.level !== 'safe' && (
+                        <span
+                          className={`px-2 py-0.5 text-xs rounded flex items-center gap-1 ${
+                            connectionRisk.level === 'high'
+                              ? 'bg-red-400/10 text-red-400'
+                              : 'bg-amber-400/10 text-amber-400'
+                          }`}
+                          title={`Estimated layover: ${connectionRisk.minutesBuffer} minutes`}
+                        >
+                          <span className={`w-1.5 h-1.5 rounded-full ${connectionRisk.level === 'high' ? 'bg-red-400' : 'bg-amber-400'}`} />
+                          {connectionRisk.level === 'high' ? 'High Risk Connection' : 'Tight Connection'}
+                        </span>
+                      )}
                     </div>
 
                     {/* Outbound Flight */}
