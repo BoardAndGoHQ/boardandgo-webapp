@@ -88,11 +88,11 @@ export default function TrackFlightPage({ params }: { params: Promise<{ id: stri
     fetchTracking();
   }, [user, authLoading, router, fetchTracking]);
 
-  /* ── Position polling (every 30s for active flights) ── */
+  /* ── Position polling (every 30s for active flights only) ── */
   useEffect(() => {
     if (!token || flights.length === 0) return;
     const hasActive = flights.some((f) => f.flightStatus === 'active');
-    if (!hasActive) return;
+    if (!hasActive) return; // Don't poll for scheduled/landed/cancelled
 
     const poll = () => {
       api.tracking.positions(token).then(({ positions: p }) => setPositions(p)).catch(() => {});
@@ -101,6 +101,8 @@ export default function TrackFlightPage({ params }: { params: Promise<{ id: stri
     const interval = setInterval(poll, 30_000);
     return () => clearInterval(interval);
   }, [token, flights]);
+
+  /* ── Detect landing and stop tracking ── */
 
   /* ── Share link ── */
   const handleShare = async () => {
@@ -132,6 +134,9 @@ export default function TrackFlightPage({ params }: { params: Promise<{ id: stri
   const primaryPosition = primaryFlight
     ? positions.find((p) => p.flightIata === `${primaryFlight.airlineCode}${primaryFlight.flightNumber.replace(/\D/g, '')}`)
     : undefined;
+  const isFlightComplete = primaryFlight
+    ? ['landed', 'cancelled'].includes(primaryFlight.flightStatus)
+    : false;
 
   /* ── Loading state ── */
   if (authLoading || loading) {
@@ -203,6 +208,35 @@ export default function TrackFlightPage({ params }: { params: Promise<{ id: stri
             collapsed={panelCollapsed}
             onToggleCollapse={() => setPanelCollapsed(!panelCollapsed)}
           />
+        </div>
+      )}
+
+      {/* ── Flight Complete Banner ── */}
+      {isFlightComplete && primaryFlight && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20">
+          <div className="bg-[#1a1f2e]/95 backdrop-blur-xl border border-white/10 rounded-xl px-5 py-3 shadow-2xl flex items-center gap-3">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+              primaryFlight.flightStatus === 'landed' ? 'bg-emerald-500/10' : 'bg-red-500/10'
+            }`}>
+              {primaryFlight.flightStatus === 'landed' ? (
+                <svg className="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 6L9 17l-5-5" /></svg>
+              ) : (
+                <svg className="w-4 h-4 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+              )}
+            </div>
+            <div>
+              <div className={`text-sm font-semibold ${primaryFlight.flightStatus === 'landed' ? 'text-emerald-400' : 'text-red-400'}`}>
+                {primaryFlight.flightStatus === 'landed' ? 'Flight Landed' : 'Flight Cancelled'}
+              </div>
+              <div className="text-[10px] text-text-muted">Tracking complete — moved to history</div>
+            </div>
+            <Link
+              href="/dashboard"
+              className="ml-2 px-3 py-1.5 text-xs font-medium bg-accent-teal/10 text-accent-teal rounded-lg hover:bg-accent-teal/15 transition-colors"
+            >
+              Dashboard
+            </Link>
+          </div>
         </div>
       )}
 

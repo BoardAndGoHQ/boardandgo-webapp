@@ -313,9 +313,9 @@ export const api = {
         '/api/flights/track-standalone', { method: 'POST', body: flight, token }
       ),
 
-    myFlights: (token: string) =>
+    myFlights: (token: string, status: 'active' | 'history' | 'all' = 'active') =>
       trackingRequest<{ flights: (TrackedFlight & { statusEvents: FlightStatusEvent[] })[] }>(
-        '/api/flights/my-flights', { token }
+        `/api/flights/my-flights?status=${status}`, { token }
       ),
 
     positions: (token: string) =>

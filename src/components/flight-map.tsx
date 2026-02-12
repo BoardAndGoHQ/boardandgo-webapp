@@ -447,12 +447,19 @@ export function FlightMap({
           bearing: planeBearingDeg,
           flight: `${flight.airlineCode}${flight.flightNumber}`,
           airlineCode: flight.airlineCode,
+          route: `${depAirport.name ?? flight.departureAirport} → ${arrAirport.name ?? flight.arrivalAirport}`,
+          aircraft: flight.aircraftType ?? '',
+          status: flight.flightStatus,
+          depCode: flight.departureAirport,
+          arrCode: flight.arrivalAirport,
+          eta: flight.estimatedArrival ?? flight.scheduledArrival ?? '',
+          gate: flight.departureGate ?? '',
+          terminal: flight.departureTerminal ?? '',
+          delay: flight.departureDelayMinutes ?? 0,
         };
         if (livePos) {
           planeProps.altitude = livePos.altitude;
           planeProps.speed = livePos.speed;
-          planeProps.route = `${depAirport.name ?? flight.departureAirport} to ${arrAirport.name ?? flight.arrivalAirport}`;
-          planeProps.aircraft = flight.aircraftType ?? '';
         }
 
         map.addSource(`plane-${flight.id}`, {
@@ -498,23 +505,54 @@ export function FlightMap({
 
           const airlineCode = String(props.airlineCode ?? '');
           const logoUrl = airlineCode ? AIRLINE_LOGO_URL(airlineCode) : '';
+          const flightStatus = String(props.status ?? 'unknown');
+          const delay = Number(props.delay ?? 0);
+          const eta = String(props.eta ?? '');
+          const gate = String(props.gate ?? '');
+          const terminal = String(props.terminal ?? '');
+
+          // Status badge
+          const statusLabel = flightStatus === 'active' ? 'In Flight' : flightStatus === 'scheduled' ? 'Scheduled' : flightStatus === 'landed' ? 'Landed' : flightStatus;
+          const statusColor = flightStatus === 'active' ? '#4ade80' : flightStatus === 'landed' ? '#94a3b8' : '#14b8a6';
+
+          // ETA display
+          let etaStr = '';
+          if (eta) {
+            try { etaStr = new Date(eta).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }); } catch { /* skip */ }
+          }
+
+          // Build info rows
+          const infoRows: string[] = [];
+          if (alt || spd) {
+            const parts = [];
+            if (alt) parts.push(`${alt.toLocaleString()} ft`);
+            if (spd) parts.push(`${spd} kts`);
+            infoRows.push(`<div style="display:flex;gap:10px;color:#f1f5f9;font-size:13px;font-weight:600;">${parts.map(p => `<span>${p}</span>`).join('<span style="color:#64748b;">·</span>')}</div>`);
+          }
+          if (gate || terminal) {
+            const parts = [];
+            if (terminal) parts.push(`Terminal ${terminal}`);
+            if (gate) parts.push(`Gate ${gate}`);
+            infoRows.push(`<div style="color:#94a3b8;font-size:11px;">${parts.join(' · ')}</div>`);
+          }
+          if (etaStr) {
+            infoRows.push(`<div style="color:#94a3b8;font-size:11px;">ETA: <span style="color:#f1f5f9;font-weight:600;">${etaStr}</span></div>`);
+          }
 
           const html = `
-            <div style="background:#1a1f2e;border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 14px;min-width:220px;font-family:system-ui,sans-serif;">
-              <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <div style="background:#1a1f2e;border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 14px;min-width:240px;font-family:system-ui,sans-serif;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
                 ${logoUrl ? `<img src="${logoUrl}" alt="" width="24" height="24" style="border-radius:4px;object-fit:contain;background:rgba(255,255,255,0.08);" onerror="this.style.display='none'"/>` : ''}
                 <span style="font-weight:700;color:#f1f5f9;font-size:14px;">${props.flight ?? ''}</span>
                 ${props.aircraft ? `<span style="background:rgba(255,255,255,0.1);padding:1px 6px;border-radius:4px;font-size:10px;color:#94a3b8;">${props.aircraft}</span>` : ''}
+                <span style="margin-left:auto;font-size:10px;font-weight:600;color:${statusColor};background:${statusColor}15;padding:1px 6px;border-radius:4px;">${statusLabel}</span>
               </div>
               ${props.route ? `<div style="color:#94a3b8;font-size:12px;margin-bottom:6px;">${props.route}</div>` : ''}
+              ${delay > 0 ? `<div style="color:#f87171;font-size:11px;margin-bottom:6px;">Delayed +${delay}min</div>` : ''}
               <div style="background:rgba(255,255,255,0.05);border-radius:6px;height:4px;margin-bottom:8px;overflow:hidden;">
                 <div style="width:${Math.round(progress * 100)}%;height:100%;background:linear-gradient(90deg,#22c55e,#4ade80);border-radius:6px;"></div>
               </div>
-              <div style="display:flex;gap:12px;color:#f1f5f9;font-size:13px;font-weight:600;">
-                ${alt ? `<span>${alt.toLocaleString()} ft</span>` : ''}
-                ${alt && spd ? '<span style="color:#64748b;">·</span>' : ''}
-                ${spd ? `<span>${spd} kts</span>` : ''}
-              </div>
+              ${infoRows.length > 0 ? `<div style="display:flex;flex-direction:column;gap:4px;">${infoRows.join('')}</div>` : ''}
             </div>
           `;
 
