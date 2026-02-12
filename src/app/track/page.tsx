@@ -29,14 +29,20 @@ export default function TrackFlightPage() {
 
   // My tracked flights
   const [myFlights, setMyFlights] = useState<(TrackedFlight & { statusEvents: FlightStatusEvent[] })[]>([]);
+  const [historyFlights, setHistoryFlights] = useState<(TrackedFlight & { statusEvents: FlightStatusEvent[] })[]>([]);
   const [loadingMyFlights, setLoadingMyFlights] = useState(true);
+  const [trackTab, setTrackTab] = useState<'live' | 'history'>('live');
 
   useEffect(() => {
     if (authLoading) return;
     // Load tracked flights only if logged in (tracking list requires auth)
     if (user && token) {
-      api.tracking.myFlights(token).then(({ flights }) => {
-        setMyFlights(flights);
+      Promise.all([
+        api.tracking.myFlights(token, 'active'),
+        api.tracking.myFlights(token, 'history'),
+      ]).then(([active, history]) => {
+        setMyFlights(active.flights);
+        setHistoryFlights(history.flights);
       }).catch(() => {}).finally(() => setLoadingMyFlights(false));
     } else {
       setLoadingMyFlights(false);
@@ -106,7 +112,7 @@ export default function TrackFlightPage() {
       }, token);
       setTrackedFlight(flight);
       // Refresh my flights list
-      const { flights } = await api.tracking.myFlights(token);
+      const { flights } = await api.tracking.myFlights(token, 'active');
       setMyFlights(flights);
     } catch (err: any) {
       setSearchError(err.message || 'Failed to start tracking');
@@ -285,55 +291,97 @@ export default function TrackFlightPage() {
           <IconSignal className="w-5 h-5 text-accent-teal" />
           My Tracked Flights
         </h2>
+
+        {/* Live / History Tabs */}
+        <div className="flex items-center gap-1 mb-4 bg-bg-elevated/50 rounded-lg p-1">
+          <button
+            onClick={() => setTrackTab('live')}
+            className={`flex-1 text-sm font-medium py-2 rounded-lg transition-colors ${
+              trackTab === 'live'
+                ? 'bg-accent-teal/10 text-accent-teal'
+                : 'text-text-muted hover:text-text-secondary'
+            }`}
+          >
+            Live ({myFlights.length})
+          </button>
+          <button
+            onClick={() => setTrackTab('history')}
+            className={`flex-1 text-sm font-medium py-2 rounded-lg transition-colors ${
+              trackTab === 'history'
+                ? 'bg-accent-teal/10 text-accent-teal'
+                : 'text-text-muted hover:text-text-secondary'
+            }`}
+          >
+            History ({historyFlights.length})
+          </button>
+        </div>
+
         {loadingMyFlights ? (
           <div className="flex items-center justify-center py-12">
             <IconLoader className="w-5 h-5 text-text-muted animate-spin" />
           </div>
-        ) : myFlights.length === 0 ? (
-          <div className="text-center py-12 bg-bg-elevated/30 border border-border-subtle rounded-xl">
-            <IconPlane className="w-10 h-10 text-text-muted/30 mx-auto mb-3" />
-            <p className="text-sm text-text-muted">No flights being tracked yet.</p>
-            <p className="text-xs text-text-muted/70 mt-1">Search for a flight above to start tracking.</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {myFlights.map((flight) => (
-              <Link
-                key={flight.id}
-                href={`/bookings/${flight.bookingId}/track`}
-                className="block group"
-              >
-                <div className="glass-card rounded-xl p-4 border border-border-subtle hover:border-accent-teal/30 transition-all">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-lg bg-bg-elevated flex items-center justify-center">
-                        <IconPlane className="w-4 h-4 text-text-muted" />
-                      </div>
-                      <div>
-                        <div className="text-sm font-medium text-text-primary">{flight.airlineCode}{flight.flightNumber}</div>
-                        <div className="text-xs text-text-muted">{flight.departureAirport} → {flight.arrivalAirport}</div>
+        ) : (() => {
+          const displayFlights = trackTab === 'live' ? myFlights : historyFlights;
+          if (displayFlights.length === 0) {
+            return (
+              <div className="text-center py-12 bg-bg-elevated/30 border border-border-subtle rounded-xl">
+                <IconPlane className="w-10 h-10 text-text-muted/30 mx-auto mb-3" />
+                <p className="text-sm text-text-muted">
+                  {trackTab === 'live' ? 'No active flights being tracked.' : 'No completed flights yet.'}
+                </p>
+                {trackTab === 'live' && (
+                  <p className="text-xs text-text-muted/70 mt-1">Search for a flight above to start tracking.</p>
+                )}
+              </div>
+            );
+          }
+          return (
+            <div className="space-y-4">
+              {displayFlights.map((flight) => {
+                const isHistory = ['landed', 'cancelled'].includes(flight.flightStatus);
+                return (
+                  <Link
+                    key={flight.id}
+                    href={`/bookings/${flight.bookingId}/track`}
+                    className={`block group ${isHistory ? 'opacity-75 hover:opacity-100' : ''}`}
+                  >
+                    <div className={`glass-card rounded-xl p-4 border transition-all ${
+                      isHistory
+                        ? 'border-border-subtle/50 hover:border-border-subtle'
+                        : 'border-border-subtle hover:border-accent-teal/30'
+                    }`}>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-lg bg-bg-elevated flex items-center justify-center">
+                            <IconPlane className="w-4 h-4 text-text-muted" />
+                          </div>
+                          <div>
+                            <div className="text-sm font-medium text-text-primary">{flight.airlineCode}{flight.flightNumber}</div>
+                            <div className="text-xs text-text-muted">{flight.departureAirport} → {flight.arrivalAirport}</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                            flight.flightStatus === 'landed' ? 'bg-emerald-500/10 text-emerald-400' :
+                            flight.flightStatus === 'active' ? 'bg-blue-500/10 text-blue-400' :
+                            flight.flightStatus === 'cancelled' ? 'bg-red-500/10 text-red-400' :
+                            'bg-amber-500/10 text-amber-400'
+                          }`}>
+                            {flight.flightStatus}
+                          </span>
+                          <div className="text-xs text-text-muted">
+                            {new Date(flight.scheduledDeparture).toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                          </div>
+                          <IconArrowRight className="w-3.5 h-3.5 text-text-muted group-hover:text-accent-teal transition-colors" />
+                        </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                        flight.flightStatus === 'landed' ? 'bg-emerald-500/10 text-emerald-400' :
-                        flight.flightStatus === 'active' ? 'bg-blue-500/10 text-blue-400' :
-                        flight.flightStatus === 'cancelled' ? 'bg-red-500/10 text-red-400' :
-                        'bg-amber-500/10 text-amber-400'
-                      }`}>
-                        {flight.flightStatus}
-                      </span>
-                      <div className="text-xs text-text-muted">
-                        {new Date(flight.scheduledDeparture).toLocaleDateString([], { month: 'short', day: 'numeric' })}
-                      </div>
-                      <IconArrowRight className="w-3.5 h-3.5 text-text-muted group-hover:text-accent-teal transition-colors" />
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
+                  </Link>
+                );
+              })}
+            </div>
+          );
+        })()}
       </div>
     </div>
   );
