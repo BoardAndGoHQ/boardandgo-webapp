@@ -7,6 +7,8 @@ import { useAuth } from '@/context/auth';
 import { api, type FlightLookupResult, type TrackedFlight, type FlightStatusEvent } from '@/lib/api';
 import { FlightStatusCard } from '@/components/flight-tracker';
 import { IconSearch, IconLoader, IconPlane, IconSignal, IconArrowRight } from '@/components/icons';
+import { getTrackedDelayRisk } from '@/lib/insights';
+import { trackEvent } from '@/lib/events';
 
 export default function TrackFlightPage() {
   const router = useRouter();
@@ -44,6 +46,7 @@ export default function TrackFlightPage() {
         setMyFlights(active.flights);
         setHistoryFlights(history.flights);
       }).catch(() => {}).finally(() => setLoadingMyFlights(false));
+      trackEvent('track_page_viewed', undefined, token);
     } else {
       setLoadingMyFlights(false);
     }
@@ -111,6 +114,7 @@ export default function TrackFlightPage() {
         scheduledArrival: lookupResult.scheduledArrival || new Date().toISOString(),
       }, token);
       setTrackedFlight(flight);
+      trackEvent('flight_tracked', { flightNumber: `${parsedCarrier}${parsedNumber}`, departureAirport: lookupResult.departureAirport, arrivalAirport: lookupResult.arrivalAirport }, token);
       // Refresh my flights list
       const { flights } = await api.tracking.myFlights(token, 'active');
       setMyFlights(flights);
@@ -339,6 +343,7 @@ export default function TrackFlightPage() {
             <div className="space-y-4">
               {displayFlights.map((flight) => {
                 const isHistory = ['landed', 'cancelled'].includes(flight.flightStatus);
+                const delayRisk = !isHistory ? getTrackedDelayRisk(flight) : null;
                 return (
                   <Link
                     key={flight.id}
@@ -369,6 +374,14 @@ export default function TrackFlightPage() {
                           }`}>
                             {flight.flightStatus}
                           </span>
+                          {delayRisk && delayRisk.level !== 'low' && (
+                            <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded flex items-center gap-1 ${
+                              delayRisk.level === 'high' ? 'bg-red-400/10 text-red-400' : 'bg-amber-400/10 text-amber-400'
+                            }`}>
+                              <span className={`w-1.5 h-1.5 rounded-full ${delayRisk.level === 'high' ? 'bg-red-400' : 'bg-amber-400'}`} />
+                              {delayRisk.probability}%
+                            </span>
+                          )}
                           <div className="text-xs text-text-muted">
                             {new Date(flight.scheduledDeparture).toLocaleDateString([], { month: 'short', day: 'numeric' })}
                           </div>

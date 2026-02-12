@@ -359,6 +359,13 @@ export const api = {
     streamUrl: (flightId: string, token: string) =>
       `${POST_BOOKING_API}/api/flights/${flightId}/stream?token=${encodeURIComponent(token)}`,
   },
+
+  events: {
+    track: (eventName: string, properties: Record<string, unknown> | undefined, token: string) =>
+      trackingRequest<{ ok: boolean }>(
+        '/api/events', { method: 'POST', body: { eventName, properties }, token }
+      ),
+  },
 };
 
 export { ApiError };

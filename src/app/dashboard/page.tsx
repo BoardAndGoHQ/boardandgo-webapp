@@ -16,7 +16,9 @@ import {
   IconArrowRight,
   IconMail,
 } from '@/components/icons';
-import { getTrackedDelayRisk } from '@/lib/insights';
+import { getTrackedDelayRisk, generateTravelInsights } from '@/lib/insights';
+import { DelayPredictionCard, InsightCard, IntelligenceSection } from '@/components/intelligence-card';
+import { trackEvent } from '@/lib/events';
 
 type FlightWithEvents = TrackedFlight & { statusEvents: FlightStatusEvent[] };
 
@@ -82,6 +84,7 @@ export default function DashboardPage() {
           clearInterval(checkClosed);
           setGmailConnecting(false);
           setGmailConnected(true);
+          trackEvent('gmail_connected', undefined, token);
         }
       }, 1000);
     } catch {
@@ -111,6 +114,7 @@ export default function DashboardPage() {
         })
         .catch(() => {})
         .finally(() => setLoading(false));
+      trackEvent('dashboard_viewed', undefined, token);
     }
   }, [user, authLoading, token, router]);
 
@@ -356,6 +360,18 @@ export default function DashboardPage() {
                       View Full Tracking
                       <IconArrowRight className="w-3 h-3" />
                     </Link>
+
+                    {/* Intelligence for selected flight */}
+                    {!['landed', 'cancelled'].includes(selectedFlight.flightStatus) && (() => {
+                      const prediction = getTrackedDelayRisk(selectedFlight);
+                      return (
+                        <div className="mt-3">
+                          <IntelligenceSection>
+                            <DelayPredictionCard prediction={prediction} />
+                          </IntelligenceSection>
+                        </div>
+                      );
+                    })()}
                   </div>
                 )}
 
@@ -416,16 +432,23 @@ export default function DashboardPage() {
                                   <span className="text-sm font-semibold text-text-primary">
                                     {flight.airlineCode}{flight.flightNumber}
                                   </span>
-                                  {/* Delay risk dot — only for upcoming */}
+                                  {/* Delay risk dot + probability — only for upcoming */}
                                   {!isHistory && (
                                     <span
-                                      className={`w-2 h-2 rounded-full ${
+                                      className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold ${
+                                        delayRisk.level === 'high' ? 'bg-red-400/10 text-red-400' :
+                                        delayRisk.level === 'medium' ? 'bg-amber-400/10 text-amber-400' :
+                                        'bg-emerald-400/10 text-emerald-400'
+                                      }`}
+                                      title={delayRisk.reason}
+                                    >
+                                      <span className={`w-1.5 h-1.5 rounded-full ${
                                         delayRisk.level === 'high' ? 'bg-red-400' :
                                         delayRisk.level === 'medium' ? 'bg-amber-400' :
                                         'bg-emerald-400'
-                                      }`}
-                                      title={delayRisk.reason}
-                                    />
+                                      }`} />
+                                      {delayRisk.probability}%
+                                    </span>
                                   )}
                                 </div>
                                 <StatusBadge status={flight.flightStatus} />
@@ -453,6 +476,22 @@ export default function DashboardPage() {
                     );
                   })()}
                 </div>
+
+                {/* Personal Travel Insights */}
+                {(() => {
+                  const allUserFlights = [...flights, ...historyFlights];
+                  const insights = generateTravelInsights(allUserFlights);
+                  if (insights.length === 0) return null;
+                  return (
+                    <div className="glass-card rounded-xl p-4 border border-border-subtle">
+                      <IntelligenceSection compact>
+                        {insights.map((insight, i) => (
+                          <InsightCard key={i} insight={insight} />
+                        ))}
+                      </IntelligenceSection>
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           )}

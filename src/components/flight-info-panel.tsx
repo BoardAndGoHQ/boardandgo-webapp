@@ -6,6 +6,7 @@ import type { AirportCoord } from '@/components/flight-map';
 import { IconChevronDown, IconChevronUp, IconPlane } from '@/components/icons';
 import { greatCircleDistance } from '@/lib/arc-utils';
 import { getTrackedDelayRisk, getRecommendedArrival } from '@/lib/insights';
+import { DelayPredictionCard, IntelligenceSection } from '@/components/intelligence-card';
 
 /* ── Helpers ── */
 function formatTime(iso: string | null) {
@@ -289,36 +290,25 @@ export function FlightInfoPanel({ flight, position, airports, collapsed, onToggl
               });
 
               return (
-                <div className="bg-white/5 rounded-lg p-3 space-y-2.5">
-                  <div className="text-[10px] font-medium text-text-muted uppercase tracking-wider">
-                    Flight Intelligence
-                  </div>
-                  {/* Delay Risk */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-text-secondary">Delay Risk</span>
-                    <span className={`flex items-center gap-1.5 text-xs font-medium ${
-                      delayRisk.level === 'high' ? 'text-red-400' :
-                      delayRisk.level === 'medium' ? 'text-amber-400' :
-                      'text-emerald-400'
-                    }`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${
-                        delayRisk.level === 'high' ? 'bg-red-400' :
-                        delayRisk.level === 'medium' ? 'bg-amber-400' :
-                        'bg-emerald-400'
-                      }`} />
-                      {delayRisk.level === 'high' ? 'High' : delayRisk.level === 'medium' ? 'Moderate' : 'Low'}
-                    </span>
-                  </div>
+                <IntelligenceSection>
+                  {/* Delay Prediction — expandable */}
+                  <DelayPredictionCard prediction={delayRisk} />
+
                   {/* Recommended Airport Arrival */}
                   {flight.flightStatus === 'scheduled' && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-text-secondary">Arrive at Airport</span>
-                      <span className="text-xs font-medium text-text-primary">
-                        {arrivalTime} ({arrival.label} {arrival.bufferHours}h)
-                      </span>
+                    <div className="bg-white/5 rounded-lg p-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm">🚗</span>
+                          <span className="text-xs text-text-secondary">Leave for Airport</span>
+                        </div>
+                        <span className="text-xs font-medium text-text-primary">
+                          {arrivalTime} ({arrival.label} {arrival.bufferHours}h)
+                        </span>
+                      </div>
                     </div>
                   )}
-                </div>
+                </IntelligenceSection>
               );
             })()}
           </div>

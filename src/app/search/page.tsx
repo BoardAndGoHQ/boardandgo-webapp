@@ -9,6 +9,7 @@ import { FlightSearch } from '@/components/flight-search';
 import { AgentChat } from '@/components/agent-chat';
 import { IconLoader, IconPlane, IconArrowRight, IconExternalLink, IconClock, IconSearch, IconSparkles, IconX } from '@/components/icons';
 import { getSearchDelayRisk, estimateConnectionRiskFromStops } from '@/lib/insights';
+import { trackEvent } from '@/lib/events';
 
 interface FlightOffer {
   id: string;
@@ -110,6 +111,7 @@ function SearchResults() {
 
     setLoading(true);
     setError('');
+    trackEvent('search_started', { origin, destination, tripType, departureDate }, token);
 
     try {
       const params: FlightSearchParams = {
@@ -177,6 +179,7 @@ function SearchResults() {
       setFlights(data.flights || []);
       setProvider(data.provider || 'amadeus');
       setCurrentPage(1);
+      trackEvent('search_completed', { origin, destination, resultCount: data.flights?.length ?? 0, provider: data.provider }, token);
     } catch (err) {
       if (err instanceof TypeError && err.message.includes('fetch')) {
         setError('Unable to reach our servers. Please check your internet connection and try again.');
@@ -241,6 +244,7 @@ function SearchResults() {
     api.flights.trackBookClick(trackParams, token).catch(() => {
       // Silent fail - don't block user experience
     });
+    trackEvent('book_clicked', { airline: handoffFlight.airline, flightNumber: handoffFlight.flightNumber, price: handoffFlight.price, origin, destination }, token);
     
     // Open affiliate URL
     window.open(handoffFlight.affiliateUrl, '_blank', 'noopener,noreferrer');
@@ -408,17 +412,17 @@ function SearchResults() {
                       )}
 
                       {/* Connection Risk Badge */}
-                      {connectionRisk && connectionRisk.level !== 'safe' && (
+                      {connectionRisk && connectionRisk.level !== 'low' && (
                         <span
                           className={`px-2 py-0.5 text-xs rounded flex items-center gap-1 ${
                             connectionRisk.level === 'high'
                               ? 'bg-red-400/10 text-red-400'
                               : 'bg-amber-400/10 text-amber-400'
                           }`}
-                          title={`Estimated layover: ${connectionRisk.minutesBuffer} minutes`}
+                          title={`Estimated layover: ${connectionRisk.effectiveMinutes} min`}
                         >
-                          <span className={`w-1.5 h-1.5 rounded-full ${connectionRisk.level === 'high' ? 'bg-red-400' : 'bg-amber-400'}`} />
-                          {connectionRisk.level === 'high' ? 'High Risk Connection' : 'Tight Connection'}
+                          <span className={`w-1.5 h-1.5 rounded-full ${connectionRisk.level === 'high' || connectionRisk.level === 'critical' ? 'bg-red-400' : 'bg-amber-400'}`} />
+                          {connectionRisk.level === 'high' || connectionRisk.level === 'critical' ? 'High Risk Connection' : 'Tight Connection'}
                         </span>
                       )}
                     </div>
