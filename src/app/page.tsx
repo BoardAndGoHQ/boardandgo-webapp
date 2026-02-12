@@ -1,15 +1,6 @@
-'use client';
-
-import { useState, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/auth';
-import { FlightSearch } from '@/components/flight-search';
-import { AgentChat } from '@/components/agent-chat';
 import {
-  IconSearch,
-  IconSparkles,
   IconPlane,
   IconRadar,
   IconRoute,
@@ -139,20 +130,6 @@ function FlightPath() {
 
 /* ── page ──────────────────────────────────────── */
 export default function Home() {
-  const { user } = useAuth();
-  const router = useRouter();
-  const [searchMode, setSearchMode] = useState<'manual' | 'ai'>('manual');
-  const searchRef = useRef<HTMLDivElement>(null);
-
-  const scrollToSearch = (mode: 'manual' | 'ai') => {
-    setSearchMode(mode);
-    searchRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
-
-  const handleFlightSearch = (params: URLSearchParams) => {
-    router.push(`/search?${params.toString()}`);
-  };
-
   return (
     <div className="flex flex-col">
       {/* ───────── Hero — Flight Intelligence Identity ───────── */}
@@ -188,13 +165,6 @@ export default function Home() {
               <IconSignal className="w-4 h-4" />
               Track a Flight
             </Link>
-            <button
-              onClick={() => scrollToSearch('manual')}
-              className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-bg-elevated/80 border border-border-subtle text-text-primary font-medium text-sm rounded-xl hover:bg-bg-card hover:border-accent-teal/20 transition-all duration-300"
-            >
-              <IconSearch className="w-4 h-4 text-accent-teal" />
-              Find Flights
-            </button>
           </div>
 
           {/* Trust indicators */}
@@ -221,130 +191,6 @@ export default function Home() {
               ))}
               <span className="text-xs ml-1">4.9/5 rating</span>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ───────── Embedded Search Experience ───────── */}
-      <section ref={searchRef} id="find-flights" className="py-12 md:py-20 scroll-mt-20 relative">
-        <div className="absolute inset-0 bg-linear-to-b from-transparent via-bg-secondary/30 to-transparent pointer-events-none" />
-
-        <div className="relative max-w-5xl mx-auto px-4">
-          {/* Section header */}
-          <div className="text-center mb-8">
-            <h2 className="text-2xl md:text-3xl font-bold text-text-primary mb-2">
-              Find Your Next Flight
-            </h2>
-            <p className="text-text-muted text-sm max-w-md mx-auto">
-              Search across hundreds of airlines or let our AI find the perfect flight for you.
-            </p>
-          </div>
-
-          {/* Mode Toggle — sliding pill */}
-          <div className="flex justify-center mb-8">
-            <div className="relative inline-flex p-1 bg-bg-elevated/60 border border-border-subtle rounded-full">
-              {/* Sliding indicator */}
-              <div
-                className="absolute top-1 bottom-1 rounded-full bg-accent-teal shadow-sm shadow-accent-teal/25 transition-all duration-300 ease-in-out"
-                style={{
-                  left: searchMode === 'manual' ? '4px' : '50%',
-                  width: 'calc(50% - 4px)',
-                }}
-              />
-              <button
-                onClick={() => setSearchMode('manual')}
-                className={`relative z-10 flex items-center gap-2 px-5 py-2 text-[13px] font-medium rounded-full transition-colors duration-300 ${
-                  searchMode === 'manual' ? 'text-bg-primary' : 'text-text-muted hover:text-text-primary'
-                }`}
-              >
-                <IconSearch className="w-3.5 h-3.5" />
-                Manual Search
-              </button>
-              <button
-                onClick={() => setSearchMode('ai')}
-                className={`relative z-10 flex items-center gap-2 px-5 py-2 text-[13px] font-medium rounded-full transition-colors duration-300 ${
-                  searchMode === 'ai' ? 'text-bg-primary' : 'text-text-muted hover:text-text-primary'
-                }`}
-              >
-                <IconSparkles className="w-3.5 h-3.5" />
-                AI Search
-              </button>
-            </div>
-          </div>
-
-          {/* ── Content area with slide transition ── */}
-          <div className="relative">
-            {/* Manual Mode */}
-            <div
-              className={`transition-all duration-500 ease-in-out ${
-                searchMode === 'manual'
-                  ? 'opacity-100 translate-x-0 relative'
-                  : 'opacity-0 -translate-x-8 absolute inset-x-0 top-0 pointer-events-none'
-              }`}
-            >
-              <FlightSearch onSearch={handleFlightSearch} />
-            </div>
-
-            {/* AI Mode */}
-            <div
-              className={`transition-all duration-500 ease-in-out ${
-                searchMode === 'ai'
-                  ? 'opacity-100 translate-x-0 relative'
-                  : 'opacity-0 translate-x-8 absolute inset-x-0 top-0 pointer-events-none'
-              }`}
-            >
-            <div className="flex flex-col md:flex-row gap-5">
-              {/* Chat panel */}
-              <div className="w-full md:w-[380px] lg:w-[420px] shrink-0">
-                <div className="h-[520px]">
-                  {user ? (
-                    <AgentChat />
-                  ) : (
-                    <div className="bg-bg-card border border-border-subtle rounded-xl h-full flex flex-col items-center justify-center text-center p-8 space-y-4">
-                      <div className="w-14 h-14 rounded-2xl bg-accent-teal/10 flex items-center justify-center">
-                        <IconSparkles className="w-7 h-7 text-accent-teal" />
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-medium text-text-primary mb-1">AI Flight Assistant</h4>
-                        <p className="text-xs text-text-muted max-w-xs">
-                          Sign in to chat with our AI and find the perfect flight for your next trip.
-                        </p>
-                      </div>
-                      <div className="flex gap-2">
-                        <Link
-                          href="/login"
-                          className="px-5 py-2 text-[13px] font-medium text-bg-primary bg-accent-teal rounded-lg hover:brightness-110 transition-all"
-                        >
-                          Log in
-                        </Link>
-                        <Link
-                          href="/register"
-                          className="px-5 py-2 text-[13px] font-medium text-text-primary bg-bg-elevated border border-border-subtle rounded-lg hover:bg-bg-card transition-colors"
-                        >
-                          Sign up
-                        </Link>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Preview panel */}
-              <div className="hidden md:flex flex-1 min-w-0">
-                <div className="w-full glass-card rounded-xl flex flex-col items-center justify-center text-center p-12 space-y-4">
-                  <div className="w-16 h-16 rounded-2xl bg-bg-elevated flex items-center justify-center">
-                    <IconPlane className="w-8 h-8 text-text-muted/30" />
-                  </div>
-                  <h3 className="text-base font-medium text-text-secondary">
-                    Your flights will appear here
-                  </h3>
-                  <p className="text-sm text-text-muted max-w-xs">
-                    Chat with the AI assistant to find flights. Once you confirm, you&apos;ll be taken to full results.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
           </div>
         </div>
       </section>
