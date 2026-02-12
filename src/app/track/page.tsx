@@ -121,7 +121,7 @@ export default function TrackFlightPage() {
         <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-accent-teal/10 mb-4">
           <IconSignal className="w-7 h-7 text-accent-teal" />
         </div>
-        <h1 className="text-2xl md:text-3xl font-bold text-text-primary mb-2">Track Any Flight</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-text-primary mb-2">Track My Flight</h1>
         <p className="text-text-muted text-sm max-w-md mx-auto">
           Enter a flight number to get real-time status. Start tracking with one click to get proactive alerts.
         </p>
