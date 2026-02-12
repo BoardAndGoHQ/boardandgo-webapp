@@ -15,6 +15,7 @@ import {
   IconRoute,
   IconHeadset,
   IconGrid,
+  IconSignal,
 } from '@/components/icons';
 
 /* ── data ──────────────────────────────────────── */
@@ -149,18 +150,12 @@ export default function Home() {
   };
 
   const handleFlightSearch = (params: URLSearchParams) => {
-    if (user) {
-      router.push(`/search?${params.toString()}`);
-    } else {
-      // Save intent and prompt login
-      const searchUrl = `/search?${params.toString()}`;
-      router.push(`/login?redirect=${encodeURIComponent(searchUrl)}`);
-    }
+    router.push(`/search?${params.toString()}`);
   };
 
   return (
     <div className="flex flex-col">
-      {/* ───────── Hero ───────── */}
+      {/* ───────── Hero — Flight Intelligence Identity ───────── */}
       <section className="relative py-16 md:py-24 overflow-hidden">
         {/* Atmospheric backgrounds */}
         <FlightPath />
@@ -173,33 +168,32 @@ export default function Home() {
           {/* Overline */}
           <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-accent-teal/8 border border-accent-teal/15 rounded-full mb-6">
             <div className="w-1.5 h-1.5 rounded-full bg-accent-teal animate-pulse" />
-            <span className="text-xs font-medium text-accent-teal tracking-wide">AI-Powered Flight Intelligence</span>
+            <span className="text-xs font-medium text-accent-teal tracking-wide">Flight Intelligence Platform</span>
           </div>
 
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-text-primary tracking-tight mb-5 leading-[1.1]">
-            Your AI Travel Concierge
-            <br />
-            <span className="gradient-text">Never Miss a Flight</span>
+            Your Flight. Fully Handled.
           </h1>
           <p className="text-text-muted text-base md:text-lg max-w-2xl mx-auto mb-10 leading-relaxed">
-            AI Agents that handle your entire travel experience &mdash; from finding the best fares
-            to real-time flight tracking. Just Board-and-Go.
+            Real-time tracking. Gate changes. Delay alerts. Cross-airline intelligence.
+            <br className="hidden sm:block" />
+            Never get surprised by a disruption again.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <button
-              onClick={() => scrollToSearch('manual')}
+            <Link
+              href="/track"
               className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-accent-teal text-bg-primary font-semibold text-sm rounded-xl glow-teal hover:brightness-110 transition-all duration-300"
             >
-              <IconSearch className="w-4 h-4" />
-              Search Flights
-            </button>
+              <IconSignal className="w-4 h-4" />
+              Track a Flight
+            </Link>
             <button
-              onClick={() => scrollToSearch('ai')}
+              onClick={() => scrollToSearch('manual')}
               className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-bg-elevated/80 border border-border-subtle text-text-primary font-medium text-sm rounded-xl hover:bg-bg-card hover:border-accent-teal/20 transition-all duration-300"
             >
-              <IconSparkles className="w-4 h-4 text-accent-teal" />
-              Try AI Search
+              <IconSearch className="w-4 h-4 text-accent-teal" />
+              Find Flights
             </button>
           </div>
 
@@ -519,12 +513,12 @@ export default function Home() {
                 Experience seamless flight tracking with real-time updates and AI-powered insights.
               </p>
               <div className="flex flex-col sm:flex-row gap-3">
-                <button
-                  onClick={() => scrollToSearch('manual')}
+                <Link
+                  href="/track"
                   className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-accent-teal text-bg-primary font-semibold text-sm rounded-xl glow-teal hover:brightness-110 transition-all duration-300"
                 >
-                  Get Started <span>&rarr;</span>
-                </button>
+                  Start Tracking <span>&rarr;</span>
+                </Link>
                 <Link
                   href="/about"
                   className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-bg-elevated border border-border-subtle text-text-primary text-sm rounded-xl hover:bg-bg-card hover:border-accent-teal/20 transition-all duration-300"
@@ -546,20 +540,20 @@ export default function Home() {
 
         <div className="relative max-w-6xl mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-5xl font-bold text-text-primary mb-4">
-            Never Miss a Flight
-            <span className="gradient-text block mt-2">Let AI Be Your Co-Pilot</span>
+            Your Flight. Our Watch.
+            <span className="gradient-text block mt-2">Never Be Caught Off Guard Again</span>
           </h2>
           <p className="text-text-muted text-base md:text-lg max-w-2xl mx-auto mb-8 leading-relaxed">
-            Join thousands of stress-free travelers who let our AI handle the complexities of flight
-            tracking. From gate changes to delay predictions, we&apos;ve got you covered.
+            From gate changes to delay predictions &mdash; we sit on top of every airline so you don&apos;t have to.
+            The unified flight intelligence layer for modern travelers.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <button
-              onClick={() => scrollToSearch('manual')}
+            <Link
+              href="/track"
               className="inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-accent-teal text-bg-primary font-semibold text-sm rounded-xl glow-teal hover:brightness-110 transition-all duration-300"
             >
-              Search Flights <span>&rarr;</span>
-            </button>
+              Track a Flight <span>&rarr;</span>
+            </Link>
             <Link
               href="/features"
               className="inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-bg-elevated border border-border-subtle text-text-primary text-sm rounded-xl hover:bg-bg-card hover:border-accent-teal/20 transition-all duration-300"

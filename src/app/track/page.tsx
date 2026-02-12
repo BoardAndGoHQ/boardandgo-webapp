@@ -33,13 +33,15 @@ export default function TrackFlightPage() {
 
   useEffect(() => {
     if (authLoading) return;
-    if (!user) { router.push('/login'); return; }
-    if (token) {
+    // Load tracked flights only if logged in (tracking list requires auth)
+    if (user && token) {
       api.tracking.myFlights(token).then(({ flights }) => {
         setMyFlights(flights);
       }).catch(() => {}).finally(() => setLoadingMyFlights(false));
+    } else {
+      setLoadingMyFlights(false);
     }
-  }, [user, authLoading, token, router]);
+  }, [user, authLoading, token]);
 
   // Set default date to today
   useEffect(() => {
@@ -56,7 +58,11 @@ export default function TrackFlightPage() {
 
   async function handleSearch(e: React.FormEvent) {
     e.preventDefault();
-    if (!token) return;
+    // Lookup requires auth — prompt login if needed
+    if (!token) {
+      router.push(`/login?redirect=${encodeURIComponent('/track')}`);
+      return;
+    }
 
     const parsed = parseFlightInput(flightInput);
     if (!parsed) {
@@ -82,7 +88,10 @@ export default function TrackFlightPage() {
   }
 
   async function handleTrack() {
-    if (!token || !lookupResult) return;
+    if (!token || !lookupResult) {
+      router.push(`/login?redirect=${encodeURIComponent('/track')}`);
+      return;
+    }
 
     setTracking(true);
     try {

@@ -15,10 +15,10 @@ const publicLinks = [
 ];
 
 const appLinks = [
-  { href: '/search', label: 'Search' },
-  { href: '/bookings', label: 'Bookings' },
   { href: '/dashboard', label: 'Dashboard' },
   { href: '/track', label: 'Track' },
+  { href: '/search', label: 'Flights' },
+  { href: '/bookings', label: 'Bookings' },
   { href: '/settings', label: 'Settings' },
 ];
 

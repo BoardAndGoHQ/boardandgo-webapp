@@ -1,12 +1,15 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useState, type FormEvent, Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/auth';
 import { IconMail, IconUser, IconLoader } from '@/components/icons';
 import type { AuthError } from '@supabase/supabase-js';
 
-export default function RegisterPage() {
+function RegisterForm() {
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get('redirect') || '/dashboard';
   const { signUpWithEmail, signInWithGoogle } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -35,6 +38,10 @@ export default function RegisterPage() {
   const handleGoogleSignIn = async () => {
     setError('');
     try {
+      // Store redirect target before OAuth takes us away
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('boardandgo_redirect', redirectTo);
+      }
       await signInWithGoogle();
     } catch (err) {
       const authError = err as AuthError;
@@ -158,11 +165,19 @@ export default function RegisterPage() {
 
         <p className="text-center text-sm text-text-muted mt-6">
           Already have an account?{' '}
-          <Link href="/login" className="text-accent-teal hover:underline">
+          <Link href={`/login${redirectTo !== '/dashboard' ? `?redirect=${encodeURIComponent(redirectTo)}` : ''}`} className="text-accent-teal hover:underline">
             Sign in
           </Link>
         </p>
       </div>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div className="min-h-[80vh] flex items-center justify-center"><IconLoader className="w-6 h-6 text-text-muted animate-spin" /></div>}>
+      <RegisterForm />
+    </Suspense>
   );
 }

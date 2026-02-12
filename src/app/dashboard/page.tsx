@@ -14,6 +14,7 @@ import {
   IconClock,
   IconMapPin,
   IconArrowRight,
+  IconMail,
 } from '@/components/icons';
 
 type FlightWithEvents = TrackedFlight & { statusEvents: FlightStatusEvent[] };
@@ -54,6 +55,41 @@ export default function DashboardPage() {
   const [positions, setPositions] = useState<FlightPosition[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  // Gmail connect state
+  const [gmailConnecting, setGmailConnecting] = useState(false);
+  const [gmailConnected, setGmailConnected] = useState(false);
+  const [gmailDismissed, setGmailDismissed] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem('boardandgo_gmail_dismissed') === '1';
+  });
+
+  const handleConnectGmail = async () => {
+    if (!token) return;
+    setGmailConnecting(true);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/gmail/authorize`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) throw new Error('Failed');
+      const data = await response.json();
+      const popup = window.open(data.authUrl, 'gmail-auth', 'width=600,height=700,popup=yes');
+      const checkClosed = setInterval(() => {
+        if (popup?.closed) {
+          clearInterval(checkClosed);
+          setGmailConnecting(false);
+          setGmailConnected(true);
+        }
+      }, 1000);
+    } catch {
+      setGmailConnecting(false);
+    }
+  };
+
+  const dismissGmail = () => {
+    setGmailDismissed(true);
+    localStorage.setItem('boardandgo_gmail_dismissed', '1');
+  };
 
   useEffect(() => {
     if (authLoading) return;
@@ -143,6 +179,56 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* Gmail Connect Card */}
+      {!gmailDismissed && !gmailConnected && (
+        <div className="px-4 md:px-6 mb-5">
+          <div className="max-w-7xl mx-auto">
+            <div className="glass-card rounded-xl p-4 border border-accent-teal/20 bg-accent-teal/[0.03] flex items-center gap-4">
+              <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0">
+                <IconMail className="w-5 h-5 text-red-400" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-sm font-medium text-text-primary">Connect Gmail to auto-import flights</h3>
+                <p className="text-xs text-text-muted mt-0.5">We&apos;ll scan for booking confirmations and add them to your dashboard automatically.</p>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={handleConnectGmail}
+                  disabled={gmailConnecting}
+                  className="flex items-center gap-2 px-4 py-2 bg-accent-teal text-bg-primary text-xs font-medium rounded-lg hover:brightness-110 transition-all disabled:opacity-50"
+                >
+                  {gmailConnecting ? (
+                    <><IconLoader className="w-3.5 h-3.5 animate-spin" /> Connecting...</>
+                  ) : (
+                    <><IconMail className="w-3.5 h-3.5" /> Connect Gmail</>
+                  )}
+                </button>
+                <button
+                  onClick={dismissGmail}
+                  className="p-1.5 text-text-muted hover:text-text-primary rounded-lg hover:bg-bg-elevated/50 transition-colors"
+                  title="Dismiss"
+                >
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {gmailConnected && (
+        <div className="px-4 md:px-6 mb-5">
+          <div className="max-w-7xl mx-auto">
+            <div className="glass-card rounded-xl p-4 border border-emerald-500/20 bg-emerald-500/[0.03] flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                <svg className="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 6L9 17l-5-5" /></svg>
+              </div>
+              <p className="text-sm text-emerald-400 font-medium">Gmail connected! Your booking emails will be imported automatically.</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main content: Map + sidebar */}
       <div className="px-4 md:px-6 pb-8">

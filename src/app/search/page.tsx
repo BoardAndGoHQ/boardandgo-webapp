@@ -7,7 +7,7 @@ import type { FlightSearchParams, TripType, CabinClass, TrackBookClickParams } f
 import { api } from '@/lib/api';
 import { FlightSearch } from '@/components/flight-search';
 import { AgentChat } from '@/components/agent-chat';
-import { IconLoader, IconPlane, IconArrowRight, IconExternalLink, IconClock, IconSearch, IconSparkles } from '@/components/icons';
+import { IconLoader, IconPlane, IconArrowRight, IconExternalLink, IconClock, IconSearch, IconSparkles, IconX } from '@/components/icons';
 
 interface FlightOffer {
   id: string;
@@ -102,7 +102,7 @@ function SearchResults() {
   const totalPassengers = adults + children + infants;
 
   const searchFlights = useCallback(async () => {
-    if (!token || !origin || !destination || !departureDate) {
+    if (!origin || !destination || !departureDate) {
       setLoading(false);
       return;
     }
@@ -123,12 +123,17 @@ function SearchResults() {
       if (children > 0) params.children = children;
       if (infants > 0) params.infants = infants;
 
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      // Attach token if logged in (for personalised affiliate tracking)
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/search/flights`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
+        headers,
         body: JSON.stringify(params),
       });
 
@@ -186,17 +191,27 @@ function SearchResults() {
 
   useEffect(() => {
     if (authLoading) return;
-    if (!user) {
+    // No login gate — search works for everyone
+    searchFlights();
+  }, [authLoading, searchFlights]);
+
+  // Booking handoff modal state
+  const [handoffFlight, setHandoffFlight] = useState<FlightOffer | null>(null);
+
+  const handleBookClick = async (flight: FlightOffer) => {
+    // If not logged in, prompt login (booking needs auth for affiliate tracking)
+    if (!token) {
       router.push(`/login?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`);
       return;
     }
-    searchFlights();
-  }, [user, authLoading, router, searchFlights]);
+    // Show handoff modal instead of immediate redirect
+    setHandoffFlight(flight);
+  };
 
-  const handleBookClick = async (flight: FlightOffer) => {
-    if (!token) return;
-    
-    // Track the click in background, don't wait
+  const confirmBooking = () => {
+    if (!handoffFlight || !token) return;
+
+    // Track the click in background
     const trackParams: TrackBookClickParams = {
       tripType,
       origin,
@@ -207,18 +222,18 @@ function SearchResults() {
       children,
       infants,
       cabin,
-      airline: flight.airline,
-      airlineCode: flight.airlineCode,
-      flightNumber: flight.flightNumber,
-      price: flight.price,
-      currency: flight.currency,
-      stops: flight.stops,
-      duration: flight.duration,
-      departureTime: flight.departureTime,
-      arrivalTime: flight.arrivalTime,
-      returnDepartureTime: flight.returnDepartureTime,
-      returnArrivalTime: flight.returnArrivalTime,
-      affiliateUrl: flight.affiliateUrl,
+      airline: handoffFlight.airline,
+      airlineCode: handoffFlight.airlineCode,
+      flightNumber: handoffFlight.flightNumber,
+      price: handoffFlight.price,
+      currency: handoffFlight.currency,
+      stops: handoffFlight.stops,
+      duration: handoffFlight.duration,
+      departureTime: handoffFlight.departureTime,
+      arrivalTime: handoffFlight.arrivalTime,
+      returnDepartureTime: handoffFlight.returnDepartureTime,
+      returnArrivalTime: handoffFlight.returnArrivalTime,
+      affiliateUrl: handoffFlight.affiliateUrl,
     };
     
     // Fire and forget - don't block the user
@@ -226,8 +241,9 @@ function SearchResults() {
       // Silent fail - don't block user experience
     });
     
-    // Open affiliate URL immediately
-    window.open(flight.affiliateUrl, '_blank', 'noopener,noreferrer');
+    // Open affiliate URL
+    window.open(handoffFlight.affiliateUrl, '_blank', 'noopener,noreferrer');
+    setHandoffFlight(null);
   };
 
   if (authLoading) {
@@ -435,7 +451,7 @@ function SearchResults() {
                       onClick={() => handleBookClick(flight)}
                       className="flex items-center gap-2 px-4 py-2.5 bg-accent-teal text-bg-primary text-sm font-medium rounded-lg hover:bg-accent-teal/90 transition-colors cursor-pointer"
                     >
-                      Book now
+                      Book
                       <IconExternalLink className="w-4 h-4" />
                     </button>
                   </div>
@@ -443,7 +459,7 @@ function SearchResults() {
 
                 {/* Urgency note */}
                 <p className="mt-3 text-xs text-text-muted">
-                  Complete your booking in this session to secure this fare.
+                  We&apos;ll automatically monitor this flight after booking.
                 </p>
               </div>
             );
@@ -487,6 +503,79 @@ function SearchResults() {
               </button>
             </div>
           )}
+        </div>
+      )}
+
+      {/* ── Booking Handoff Modal ── */}
+      {handoffFlight && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setHandoffFlight(null)}>
+          <div
+            className="relative w-full max-w-md bg-bg-card border border-border-subtle rounded-2xl shadow-2xl p-6 animate-in fade-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close */}
+            <button
+              onClick={() => setHandoffFlight(null)}
+              className="absolute top-4 right-4 p-1 text-text-muted hover:text-text-primary rounded-lg hover:bg-bg-elevated/50 transition-colors"
+            >
+              <IconX className="w-4 h-4" />
+            </button>
+
+            {/* Header */}
+            <div className="text-center mb-5">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-accent-teal/10 mb-3">
+                <IconPlane className="w-6 h-6 text-accent-teal" />
+              </div>
+              <h3 className="text-lg font-semibold text-text-primary">You&apos;re booking with Trip.com</h3>
+              <p className="text-sm text-text-muted mt-1">Secure payment handled by our trusted partner</p>
+            </div>
+
+            {/* Flight summary */}
+            <div className="bg-bg-elevated/50 rounded-xl p-4 mb-5 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-text-primary">{handoffFlight.airline}</span>
+                <span className="text-xs text-text-muted">{handoffFlight.flightNumber}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="text-center">
+                  <div className="text-lg font-bold text-text-primary">{handoffFlight.origin}</div>
+                  <div className="text-xs text-text-muted">{formatDateTime(handoffFlight.departureTime).time}</div>
+                </div>
+                <div className="flex-1 flex items-center gap-1">
+                  <div className="flex-1 h-px bg-border-subtle" />
+                  <IconPlane className="w-3 h-3 text-accent-teal rotate-90" />
+                  <div className="flex-1 h-px bg-border-subtle" />
+                </div>
+                <div className="text-center">
+                  <div className="text-lg font-bold text-text-primary">{handoffFlight.destination}</div>
+                  <div className="text-xs text-text-muted">{formatDateTime(handoffFlight.arrivalTime).time}</div>
+                </div>
+              </div>
+              <div className="flex items-center justify-between pt-2 border-t border-border-subtle">
+                <span className="text-xl font-bold text-text-primary">{formatPrice(handoffFlight.price, handoffFlight.currency)}</span>
+                <span className="text-xs text-text-muted">{tripType === 'return' ? 'roundtrip' : 'one-way'}</span>
+              </div>
+            </div>
+
+            {/* Monitoring note */}
+            <div className="flex items-start gap-3 bg-accent-teal/5 border border-accent-teal/15 rounded-xl p-3 mb-5">
+              <div className="w-8 h-8 rounded-lg bg-accent-teal/10 flex items-center justify-center shrink-0 mt-0.5">
+                <IconClock className="w-4 h-4 text-accent-teal" />
+              </div>
+              <p className="text-xs text-text-secondary leading-relaxed">
+                Your flight will be <span className="font-medium text-accent-teal">automatically monitored</span> after booking. We&apos;ll alert you about delays, gate changes, and cancellations.
+              </p>
+            </div>
+
+            {/* Actions */}
+            <button
+              onClick={confirmBooking}
+              className="w-full py-3 bg-accent-teal text-bg-primary font-semibold text-sm rounded-xl glow-teal hover:brightness-110 transition-all duration-300 flex items-center justify-center gap-2"
+            >
+              Continue to Secure Booking
+              <IconExternalLink className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       )}
     </div>

@@ -1,14 +1,16 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useState, type FormEvent, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/auth';
 import { IconMail, IconLoader } from '@/components/icons';
 import type { AuthError } from '@supabase/supabase-js';
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get('redirect') || '/dashboard';
   const { signInWithEmail, signInWithGoogle } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -22,7 +24,7 @@ export default function LoginPage() {
 
     try {
       await signInWithEmail(email, password);
-      router.push('/');
+      router.push(redirectTo);
     } catch (err) {
       const authError = err as AuthError;
       setError(authError.message || 'Unable to sign in. Please try again.');
@@ -34,6 +36,10 @@ export default function LoginPage() {
   const handleGoogleSignIn = async () => {
     setError('');
     try {
+      // Store redirect target before OAuth takes us away
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('boardandgo_redirect', redirectTo);
+      }
       await signInWithGoogle();
     } catch (err) {
       const authError = err as AuthError;
@@ -46,7 +52,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-semibold text-text-primary mb-2">Welcome back</h1>
-          <p className="text-sm text-text-muted">Sign in to access your bookings</p>
+          <p className="text-sm text-text-muted">Sign in to access your flights</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -135,11 +141,19 @@ export default function LoginPage() {
 
         <p className="text-center text-sm text-text-muted mt-6">
           No account yet?{' '}
-          <Link href="/register" className="text-accent-teal hover:underline">
+          <Link href={`/register${redirectTo !== '/dashboard' ? `?redirect=${encodeURIComponent(redirectTo)}` : ''}`} className="text-accent-teal hover:underline">
             Create one
           </Link>
         </p>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-[80vh] flex items-center justify-center"><IconLoader className="w-6 h-6 text-text-muted animate-spin" /></div>}>
+      <LoginForm />
+    </Suspense>
   );
 }

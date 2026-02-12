@@ -13,8 +13,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'BoardAndGo | End-to-End Travel',
-  description: 'Search flights, track bookings, and manage your travel — all in one place.',
+  title: 'BoardAndGo | Flight Intelligence Platform',
+  description: 'Real-time flight tracking, delay alerts, gate changes, and cross-airline intelligence. Your flight, fully handled.',
 };
 
 export default function RootLayout({

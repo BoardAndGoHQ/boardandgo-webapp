@@ -14,8 +14,10 @@ export default function AuthCallbackPage() {
     // Handle the OAuth callback
     supabase.auth.getSession().then(({ data: { session } }: { data: { session: Session | null } }) => {
       if (session) {
-        // Successfully authenticated
-        router.replace('/');
+        // Restore redirect target saved before OAuth redirect
+        const savedRedirect = localStorage.getItem('boardandgo_redirect');
+        localStorage.removeItem('boardandgo_redirect');
+        router.replace(savedRedirect || '/dashboard');
       } else {
         // Auth failed
         router.replace('/login?error=auth_failed');
