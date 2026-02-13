@@ -216,7 +216,7 @@ export function AirportAutocomplete({
         <ul
           ref={listRef}
           role="listbox"
-          className="absolute z-50 mt-1 w-full max-h-64 overflow-auto bg-bg-card border border-border-subtle rounded-lg shadow-lg py-1"
+          className="absolute z-50 mt-1 w-full max-h-64 overflow-auto glass-card rounded-xl shadow-lg py-1"
         >
           {results.map((airport, i) => (
             <li
@@ -230,11 +230,11 @@ export function AirportAutocomplete({
               onMouseEnter={() => setHighlightIndex(i)}
               className={`flex items-center gap-3 px-3 py-2.5 cursor-pointer transition-colors ${
                 i === highlightIndex
-                  ? 'bg-accent-teal/10 text-text-primary'
-                  : 'text-text-secondary hover:bg-bg-elevated'
+                  ? 'bg-accent-blue/10 text-text-primary'
+                  : 'text-text-secondary hover:bg-accent-blue/5'
               }`}
             >
-              <span className="font-mono font-bold text-accent-teal text-sm w-10 shrink-0">
+              <span className="font-mono font-bold text-accent-blue text-sm w-10 shrink-0">
                 {airport.iata}
               </span>
               <span className="flex-1 min-w-0 truncate text-sm">

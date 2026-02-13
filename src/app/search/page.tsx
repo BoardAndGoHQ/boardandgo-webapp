@@ -7,7 +7,16 @@ import type { FlightSearchParams, TripType, CabinClass, TrackBookClickParams } f
 import { api } from '@/lib/api';
 import { FlightSearch } from '@/components/flight-search';
 import { AgentChat } from '@/components/agent-chat';
-import { IconLoader, IconPlane, IconArrowRight, IconExternalLink, IconClock, IconSearch, IconSparkles, IconX } from '@/components/icons';
+import {
+  Loader2 as IconLoader,
+  Plane as IconPlane,
+  ArrowRight as IconArrowRight,
+  ExternalLink as IconExternalLink,
+  Clock as IconClock,
+  Search as IconSearch,
+  Sparkles as IconSparkles,
+  X as IconX,
+} from 'lucide-react';
 import { getSearchDelayRisk, estimateConnectionRiskFromStops } from '@/lib/insights';
 import { trackEvent } from '@/lib/events';
 
@@ -301,7 +310,7 @@ function SearchResults() {
   return (
     <div>
       {/* Search Summary */}
-      <div className="mb-6 p-4 bg-bg-card border border-border-subtle rounded-xl">
+      <div className="mb-6 p-4 glass-card rounded-xl">
         <div className="flex flex-wrap items-center gap-2 text-sm">
           <span className="font-medium text-text-primary">{origin}</span>
           <IconArrowRight className="w-4 h-4 text-text-muted" />
@@ -325,14 +334,14 @@ function SearchResults() {
       </div>
 
       {error && (
-        <div className="mb-6 px-4 py-3 text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg">
+        <div className="mb-6 px-4 py-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl">
           {error}
         </div>
       )}
 
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20">
-          <IconLoader className="w-6 h-6 text-accent-teal animate-spin mb-4" />
+          <IconLoader className="w-6 h-6 text-accent-blue animate-spin mb-4" />
           <p className="text-sm text-text-muted">Searching real-time flight prices...</p>
         </div>
       ) : flights.length === 0 ? (
@@ -346,7 +355,7 @@ function SearchResults() {
             href={fallbackUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-accent-teal text-bg-primary font-medium rounded-lg hover:bg-accent-teal/90 transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-accent-blue text-white font-medium rounded-lg hover:bg-accent-blue/90 transition-colors"
           >
             Search on Trip.com
             <IconExternalLink className="w-4 h-4" />
@@ -355,8 +364,8 @@ function SearchResults() {
       ) : (
         <div className="space-y-4">
           {/* Price Disclaimer */}
-          <div className="px-4 py-3 bg-accent-amber/5 border border-accent-amber/20 rounded-lg">
-            <p className="text-sm text-accent-amber">
+          <div className="px-4 py-3 bg-amber-50 border border-amber-200 rounded-xl">
+            <p className="text-sm text-amber-700">
               Fares update in real time. Final price confirmed at partner checkout.
             </p>
           </div>
@@ -377,7 +386,7 @@ function SearchResults() {
             return (
               <div
                 key={flight.id}
-                className="p-4 md:p-5 bg-bg-card border border-border-subtle rounded-xl hover:border-accent-teal/30 transition-colors"
+                className="p-4 md:p-5 glass-card rounded-2xl hover:shadow-lg transition-all duration-300"
               >
                 <div className="flex flex-col md:flex-row md:items-center gap-4">
                   <div className="flex-1">
@@ -386,7 +395,7 @@ function SearchResults() {
                       <span className="text-sm font-medium text-text-primary">{flight.airline}</span>
                       <span className="text-xs text-text-muted">({flight.flightNumber})</span>
                       {flight.stops === 0 ? (
-                        <span className="px-2 py-0.5 text-xs bg-accent-teal/10 text-accent-teal rounded">Direct</span>
+                        <span className="px-2 py-0.5 text-xs bg-accent-blue/10 text-accent-blue rounded">Direct</span>
                       ) : (
                         <span className="px-2 py-0.5 text-xs bg-accent-amber/10 text-accent-amber rounded">
                           {flight.stops} stop{flight.stops > 1 ? 's' : ''}
@@ -439,7 +448,7 @@ function SearchResults() {
                           {flight.duration}
                         </div>
                         <div className="w-full h-px bg-border-subtle relative">
-                          <IconPlane className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 text-accent-teal rotate-90" />
+                          <IconPlane className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 text-accent-blue rotate-90" />
                         </div>
                       </div>
                       <div className="text-center min-w-15">
@@ -460,7 +469,7 @@ function SearchResults() {
                           </div>
                           <div className="flex-1 flex flex-col items-center gap-1">
                             <div className="w-full h-px bg-border-subtle relative">
-                              <IconPlane className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 text-accent-teal -rotate-90" />
+                              <IconPlane className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 text-accent-blue -rotate-90" />
                             </div>
                           </div>
                           <div className="text-center min-w-15">
@@ -486,7 +495,7 @@ function SearchResults() {
                     </div>
                     <button
                       onClick={() => handleBookClick(flight)}
-                      className="flex items-center gap-2 px-4 py-2.5 bg-accent-teal text-bg-primary text-sm font-medium rounded-lg hover:bg-accent-teal/90 transition-colors cursor-pointer"
+                      className="flex items-center gap-2 px-4 py-2.5 bg-accent-blue text-white text-sm font-medium rounded-lg hover:bg-accent-blue/90 transition-colors cursor-pointer"
                     >
                       Book
                       <IconExternalLink className="w-4 h-4" />
@@ -522,7 +531,7 @@ function SearchResults() {
                     onClick={() => handlePageChange(page)}
                     className={`w-10 h-10 text-sm rounded-lg transition-colors ${
                       currentPage === page
-                        ? 'bg-accent-teal text-bg-primary font-medium'
+                        ? 'bg-accent-blue text-white font-medium'
                         : 'text-text-muted hover:text-text-primary bg-bg-card border border-border-subtle'
                     }`}
                   >
@@ -547,7 +556,7 @@ function SearchResults() {
       {handoffFlight && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setHandoffFlight(null)}>
           <div
-            className="relative w-full max-w-md bg-bg-card border border-border-subtle rounded-2xl shadow-2xl p-6 animate-in fade-in zoom-in-95 duration-200"
+            className="relative w-full max-w-md glass-card rounded-2xl shadow-2xl p-6 animate-in fade-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close */}
@@ -560,8 +569,8 @@ function SearchResults() {
 
             {/* Header */}
             <div className="text-center mb-5">
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-accent-teal/10 mb-3">
-                <IconPlane className="w-6 h-6 text-accent-teal" />
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-accent-blue/10 mb-3">
+                <IconPlane className="w-6 h-6 text-accent-blue" />
               </div>
               <h3 className="text-lg font-semibold text-text-primary">You&apos;re booking with Trip.com</h3>
               <p className="text-sm text-text-muted mt-1">Secure payment handled by our trusted partner</p>
@@ -580,7 +589,7 @@ function SearchResults() {
                 </div>
                 <div className="flex-1 flex items-center gap-1">
                   <div className="flex-1 h-px bg-border-subtle" />
-                  <IconPlane className="w-3 h-3 text-accent-teal rotate-90" />
+                  <IconPlane className="w-3 h-3 text-accent-blue rotate-90" />
                   <div className="flex-1 h-px bg-border-subtle" />
                 </div>
                 <div className="text-center">
@@ -595,19 +604,19 @@ function SearchResults() {
             </div>
 
             {/* Monitoring note */}
-            <div className="flex items-start gap-3 bg-accent-teal/5 border border-accent-teal/15 rounded-xl p-3 mb-5">
-              <div className="w-8 h-8 rounded-lg bg-accent-teal/10 flex items-center justify-center shrink-0 mt-0.5">
-                <IconClock className="w-4 h-4 text-accent-teal" />
+            <div className="flex items-start gap-3 bg-accent-blue/5 border border-accent-blue/15 rounded-xl p-3 mb-5">
+              <div className="w-8 h-8 rounded-lg bg-accent-blue/10 flex items-center justify-center shrink-0 mt-0.5">
+                <IconClock className="w-4 h-4 text-accent-blue" />
               </div>
               <p className="text-xs text-text-secondary leading-relaxed">
-                Your flight will be <span className="font-medium text-accent-teal">automatically monitored</span> after booking. We&apos;ll alert you about delays, gate changes, and cancellations.
+                Your flight will be <span className="font-medium text-accent-blue">automatically monitored</span> after booking. We&apos;ll alert you about delays, gate changes, and cancellations.
               </p>
             </div>
 
             {/* Actions */}
             <button
               onClick={confirmBooking}
-              className="w-full py-3 bg-accent-teal text-bg-primary font-semibold text-sm rounded-xl glow-teal hover:brightness-110 transition-all duration-300 flex items-center justify-center gap-2"
+              className="w-full py-3 bg-accent-blue text-white font-semibold text-sm rounded-xl shadow-lg shadow-accent-blue/25 hover:brightness-110 transition-all duration-300 flex items-center justify-center gap-2"
             >
               Continue to Secure Booking
               <IconExternalLink className="w-4 h-4" />
@@ -632,7 +641,7 @@ function SearchModeToggle({
         onClick={() => onChange('manual')}
         className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
           mode === 'manual'
-            ? 'bg-accent-teal text-bg-primary'
+            ? 'bg-accent-blue text-white'
             : 'text-text-muted hover:text-text-primary'
         }`}
       >
@@ -643,7 +652,7 @@ function SearchModeToggle({
         onClick={() => onChange('ai')}
         className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
           mode === 'ai'
-            ? 'bg-accent-teal text-bg-primary'
+            ? 'bg-accent-blue text-white'
             : 'text-text-muted hover:text-text-primary'
         }`}
       >

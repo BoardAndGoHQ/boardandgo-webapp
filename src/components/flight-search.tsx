@@ -146,7 +146,7 @@ function DatePicker({
         onClick={() => setOpen(!open)}
         className={`search-input flex items-center gap-2 text-left w-full ${required && !value ? 'border-red-400/0' : ''}`}
       >
-        <IconCalendar className="w-4 h-4 text-accent-teal shrink-0" />
+        <IconCalendar className="w-4 h-4 text-accent-blue shrink-0" />
         <span className={`text-sm font-medium ${value ? 'text-text-primary' : 'text-text-muted'}`}>
           {value ? formatDateDisplay(value) : (placeholder || 'Select date')}
         </span>
@@ -165,14 +165,14 @@ function DatePicker({
       )}
 
       {open && (
-        <div className="absolute left-0 bottom-full mb-2 w-[300px] bg-bg-card border border-border-subtle rounded-xl shadow-2xl shadow-black/40 z-[100] p-4">
+        <div className="absolute left-0 bottom-full mb-2 w-[300px] glass-card rounded-xl shadow-2xl z-[100] p-4">
           {/* Month/Year Header */}
           <div className="flex items-center justify-between mb-3">
             <button
               type="button"
               onClick={prevMonth}
               disabled={!canGoPrev()}
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-text-secondary hover:text-accent-teal hover:bg-bg-elevated transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-text-secondary hover:text-accent-blue hover:bg-accent-blue/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
             >
               <IconChevronUp className="w-4 h-4 -rotate-90" />
             </button>
@@ -182,7 +182,7 @@ function DatePicker({
             <button
               type="button"
               onClick={nextMonth}
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-text-secondary hover:text-accent-teal hover:bg-bg-elevated transition-colors"
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-text-secondary hover:text-accent-blue hover:bg-accent-blue/10 transition-colors"
             >
               <IconChevronDown className="w-4 h-4 -rotate-90" />
             </button>
@@ -217,16 +217,16 @@ function DatePicker({
                     relative w-full aspect-square rounded-lg text-[13px] font-medium transition-all duration-150
                     flex items-center justify-center
                     ${selected
-                      ? 'bg-accent-teal text-bg-primary shadow-sm shadow-accent-teal/30'
+                      ? 'bg-accent-blue text-white shadow-sm shadow-accent-blue/30'
                       : disabled
                         ? 'text-text-muted/30 cursor-not-allowed'
-                        : 'text-text-secondary hover:bg-accent-teal/10 hover:text-accent-teal cursor-pointer'
+                        : 'text-text-secondary hover:bg-accent-blue/10 hover:text-accent-blue cursor-pointer'
                     }
                   `}
                 >
                   {day}
                   {todayMark && !selected && (
-                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-accent-teal" />
+                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-accent-blue" />
                   )}
                 </button>
               );
@@ -245,7 +245,7 @@ function DatePicker({
                 setOpen(false);
               }}
               disabled={todayStr < effectiveMin}
-              className="text-xs font-medium text-accent-teal hover:text-accent-teal/80 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              className="text-xs font-medium text-accent-blue hover:text-accent-blue/80 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
             >
               Today
             </button>
@@ -292,7 +292,7 @@ function InlineStepper({
           type="button"
           onClick={() => onChange(Math.max(min, value - 1))}
           disabled={value <= min}
-          className="w-8 h-8 rounded-full border border-border-subtle flex items-center justify-center text-text-secondary hover:border-accent-teal hover:text-accent-teal transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          className="w-8 h-8 rounded-full border border-border-subtle flex items-center justify-center text-text-secondary hover:border-accent-blue hover:text-accent-blue transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
         >
           <IconMinus className="w-3.5 h-3.5" />
         </button>
@@ -301,7 +301,7 @@ function InlineStepper({
           type="button"
           onClick={() => onChange(Math.min(max, value + 1))}
           disabled={value >= max}
-          className="w-8 h-8 rounded-full border border-border-subtle flex items-center justify-center text-text-secondary hover:border-accent-teal hover:text-accent-teal transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          className="w-8 h-8 rounded-full border border-border-subtle flex items-center justify-center text-text-secondary hover:border-accent-blue hover:text-accent-blue transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
         >
           <IconPlus className="w-3.5 h-3.5" />
         </button>
@@ -348,7 +348,7 @@ function CabinDropdown({
       </button>
 
       {open && (
-        <div className="absolute left-0 bottom-full mb-2 w-full min-w-[180px] bg-bg-card border border-border-subtle rounded-xl shadow-2xl shadow-black/40 z-[100] py-1.5">
+        <div className="absolute left-0 bottom-full mb-2 w-full min-w-[180px] glass-card rounded-xl shadow-2xl z-[100] py-1.5">
           {cabinOptions.map((opt) => {
             const isActive = opt.value === value;
             return (
@@ -358,13 +358,13 @@ function CabinDropdown({
                 onClick={() => { onChange(opt.value); setOpen(false); }}
                 className={`w-full text-left px-4 py-2.5 text-sm transition-colors duration-150 flex items-center justify-between ${
                   isActive
-                    ? 'text-accent-teal bg-accent-teal/8 font-medium'
-                    : 'text-text-secondary hover:text-text-primary hover:bg-bg-elevated/60'
+                    ? 'text-accent-blue bg-accent-blue/8 font-medium'
+                    : 'text-text-secondary hover:text-text-primary hover:bg-accent-blue/5'
                 }`}
               >
                 {opt.label}
                 {isActive && (
-                  <svg className="w-4 h-4 text-accent-teal shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                  <svg className="w-4 h-4 text-accent-blue shrink-0" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 )}
@@ -454,8 +454,8 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
               onClick={() => setForm((f) => ({ ...f, tripType: type }))}
               className={`px-5 py-2 text-[13px] font-medium rounded-full transition-all duration-200 ${
                 form.tripType === type
-                  ? 'bg-accent-teal text-bg-primary shadow-sm shadow-accent-teal/25'
-                  : 'text-text-muted hover:text-text-primary bg-bg-elevated/50 border border-border-subtle'
+                  ? 'bg-accent-blue text-white shadow-sm shadow-accent-blue/25'
+                  : 'text-text-muted hover:text-text-primary glass-card'
               }`}
             >
               {type === 'return' ? 'Round Trip' : 'One Way'}
@@ -472,7 +472,7 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
               onChange={(iata) => setForm((f) => ({ ...f, origin: iata }))}
               placeholder="City or airport"
               required
-              icon={<IconMapPin className="w-4 h-4 text-accent-teal" />}
+              icon={<IconMapPin className="w-4 h-4 text-accent-blue" />}
               className="search-input"
               label="Origin airport"
               id="origin"
@@ -484,7 +484,7 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
             <button
               type="button"
               onClick={handleSwap}
-              className="w-10 h-10 rounded-full bg-bg-elevated border border-border-subtle flex items-center justify-center text-text-muted hover:text-accent-teal hover:border-accent-teal hover:rotate-180 transition-all duration-300"
+              className="w-10 h-10 rounded-full glass-card flex items-center justify-center text-text-muted hover:text-accent-blue hover:border-accent-blue hover:rotate-180 transition-all duration-300"
               title="Swap origin and destination"
             >
               <IconSwapHorizontal className="w-4 h-4" />
@@ -498,7 +498,7 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
               onChange={(iata) => setForm((f) => ({ ...f, destination: iata }))}
               placeholder="City or airport"
               required
-              icon={<IconMapPin className="w-4 h-4 text-accent-teal" />}
+              icon={<IconMapPin className="w-4 h-4 text-accent-blue" />}
               className="search-input"
               label="Destination airport"
               id="destination"
@@ -543,7 +543,7 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
               onClick={() => setTravelersOpen(!travelersOpen)}
               className="search-input flex items-center gap-2 text-left w-full"
             >
-              <IconUsers className="w-4 h-4 text-accent-teal shrink-0" />
+              <IconUsers className="w-4 h-4 text-accent-blue shrink-0" />
               <span className="text-sm font-medium text-text-primary truncate">
                 {form.adults} Adult{form.adults > 1 ? 's' : ''}
                 {form.children > 0 && `, ${form.children} Child`}
@@ -553,7 +553,7 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
             </button>
 
             {travelersOpen && (
-              <div className="absolute left-0 md:left-auto md:right-0 top-full mt-2 w-72 bg-bg-card border border-border-subtle rounded-xl shadow-2xl shadow-black/30 z-[100] p-4">
+              <div className="absolute left-0 md:left-auto md:right-0 top-full mt-2 w-72 glass-card rounded-xl shadow-2xl z-[100] p-4">
                 <InlineStepper label="Adults" sublabel="12+ years" value={form.adults} min={1} max={9} onChange={(v) => setForm((f) => ({ ...f, adults: v }))} />
                 <div className="border-t border-border-subtle" />
                 <InlineStepper label="Children" sublabel="2-11 years" value={form.children} min={0} max={6} onChange={(v) => setForm((f) => ({ ...f, children: v }))} />
@@ -563,7 +563,7 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
                   <button
                     type="button"
                     onClick={() => setTravelersOpen(false)}
-                    className="w-full py-2 text-xs font-medium text-accent-teal hover:bg-accent-teal/10 rounded-lg transition-colors"
+                    className="w-full py-2 text-xs font-medium text-accent-blue hover:bg-accent-blue/10 rounded-lg transition-colors"
                   >
                     Done
                   </button>
@@ -584,7 +584,7 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
         {/* ── Search Button ── */}
         <button
           type="submit"
-          className="w-full mt-5 py-3.5 bg-accent-teal text-bg-primary font-semibold text-sm rounded-xl glow-teal hover:brightness-110 transition-all duration-300 flex items-center justify-center gap-2.5"
+          className="w-full mt-5 py-3.5 bg-accent-blue text-white font-semibold text-sm rounded-xl hover:brightness-110 transition-all duration-300 flex items-center justify-center gap-2.5 shadow-lg shadow-accent-blue/25"
         >
           <IconSearch className="w-4.5 h-4.5" />
           Search {totalPassengers} Traveler{totalPassengers > 1 ? 's' : ''} &middot; {cabinLabel}

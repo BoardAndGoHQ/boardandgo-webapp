@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import type { TrackedFlight, FlightStatusEvent, FlightPosition } from '@/lib/api';
+import type { TrackedFlight, FlightStatusEvent, FlightPosition, JourneyConnectionReport, JourneyStatus } from '@/lib/api';
 import type { AirportCoord } from '@/components/flight-map';
 import { IconChevronDown, IconChevronUp, IconPlane } from '@/components/icons';
+import { Car } from 'lucide-react';
 import { greatCircleDistance } from '@/lib/arc-utils';
 import { getTrackedDelayRisk, getRecommendedArrival } from '@/lib/insights';
 import { DelayPredictionCard, IntelligenceSection } from '@/components/intelligence-card';
@@ -56,7 +57,7 @@ function remainingStr(flight: TrackedFlight, progress: number, totalDistanceMi: 
 }
 
 const statusColors: Record<string, { label: string; color: string }> = {
-  scheduled: { label: 'Scheduled', color: 'text-accent-teal' },
+  scheduled: { label: 'Scheduled', color: 'text-accent-blue' },
   active: { label: 'In Flight', color: 'text-green-400' },
   landed: { label: 'Landed', color: 'text-text-muted' },
   cancelled: { label: 'Cancelled', color: 'text-red-400' },
@@ -74,9 +75,15 @@ interface FlightInfoPanelProps {
   airports: Map<string, AirportCoord>;
   collapsed: boolean;
   onToggleCollapse: () => void;
+  /** All flights in booking (for multi-leg journey display) */
+  allFlights?: TrackedFlight[];
+  /** Connection analysis from backend */
+  connectionReport?: JourneyConnectionReport | null;
+  /** Journey-level status */
+  journeyStatus?: JourneyStatus | null;
 }
 
-export function FlightInfoPanel({ flight, position, airports, collapsed, onToggleCollapse }: FlightInfoPanelProps) {
+export function FlightInfoPanel({ flight, position, airports, collapsed, onToggleCollapse, allFlights, connectionReport, journeyStatus }: FlightInfoPanelProps) {
   const [statusOpen, setStatusOpen] = useState(true);
 
   const depAirport = airports.get(flight.departureAirport);
@@ -109,7 +116,7 @@ export function FlightInfoPanel({ flight, position, airports, collapsed, onToggl
         onClick={onToggleCollapse}
         className="bg-[#1a1f2e]/95 backdrop-blur-xl border border-white/10 rounded-xl px-4 py-3 shadow-2xl flex items-center gap-3 hover:bg-[#1e2438]/95 transition-colors"
       >
-        <IconPlane className="w-4 h-4 text-accent-teal" />
+        <IconPlane className="w-4 h-4 text-accent-blue" />
         <span className="text-sm font-semibold text-text-primary">{flight.airlineCode}{flight.flightNumber}</span>
         <span className={`text-xs ${statusCfg.color}`}>{statusCfg.label}</span>
       </button>
@@ -136,7 +143,7 @@ export function FlightInfoPanel({ flight, position, airports, collapsed, onToggl
               }}
             />
             <div className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center hidden">
-              <IconPlane className="w-5 h-5 text-accent-teal" />
+              <IconPlane className="w-5 h-5 text-accent-blue" />
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -177,11 +184,11 @@ export function FlightInfoPanel({ flight, position, airports, collapsed, onToggl
 
               <div className="flex-1 flex items-center justify-center px-3">
                 <div className="flex items-center gap-1">
-                  <div className="w-1.5 h-1.5 rounded-full bg-accent-teal" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-accent-blue" />
                   <div className="w-12 h-px bg-text-muted/30 relative">
                     <IconPlane className="w-3.5 h-3.5 text-text-secondary absolute -top-[7px] left-1/2 -translate-x-1/2 rotate-90" />
                   </div>
-                  <div className={`w-1.5 h-1.5 rounded-full ${flight.flightStatus === 'landed' ? 'bg-accent-teal' : 'bg-text-muted/40'}`} />
+                  <div className={`w-1.5 h-1.5 rounded-full ${flight.flightStatus === 'landed' ? 'bg-accent-blue' : 'bg-text-muted/40'}`} />
                 </div>
               </div>
 
@@ -226,8 +233,8 @@ export function FlightInfoPanel({ flight, position, airports, collapsed, onToggl
             {/* Departure details */}
             <div className="bg-white/5 rounded-lg p-3 space-y-1.5">
               <div className="flex items-center gap-2 mb-1">
-                <div className="w-5 h-5 rounded-full bg-accent-teal/20 flex items-center justify-center">
-                  <div className="w-2 h-2 rounded-full bg-accent-teal" />
+                <div className="w-5 h-5 rounded-full bg-accent-blue/20 flex items-center justify-center">
+                  <div className="w-2 h-2 rounded-full bg-accent-blue" />
                 </div>
                 <span className="text-xs font-medium text-text-primary">
                   {depAirport?.name ?? flight.departureAirportName ?? flight.departureAirport}
@@ -244,7 +251,7 @@ export function FlightInfoPanel({ flight, position, airports, collapsed, onToggl
             <div className="bg-white/5 rounded-lg p-3 space-y-1.5">
               <div className="flex items-center gap-2 mb-1">
                 <div className="w-5 h-5 rounded-full bg-text-muted/20 flex items-center justify-center">
-                  <div className={`w-2 h-2 rounded-full ${flight.flightStatus === 'landed' ? 'bg-accent-teal' : 'bg-text-muted'}`} />
+                  <div className={`w-2 h-2 rounded-full ${flight.flightStatus === 'landed' ? 'bg-accent-blue' : 'bg-text-muted'}`} />
                 </div>
                 <span className="text-xs font-medium text-text-primary">
                   {arrAirport?.name ?? flight.arrivalAirportName ?? flight.arrivalAirport}
@@ -299,7 +306,7 @@ export function FlightInfoPanel({ flight, position, airports, collapsed, onToggl
                     <div className="bg-white/5 rounded-lg p-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <span className="text-sm">🚗</span>
+                          <Car className="w-4 h-4 text-accent-blue" />
                           <span className="text-xs text-text-secondary">Leave for Airport</span>
                         </div>
                         <span className="text-xs font-medium text-text-primary">
@@ -311,6 +318,94 @@ export function FlightInfoPanel({ flight, position, airports, collapsed, onToggl
                 </IntelligenceSection>
               );
             })()}
+
+            {/* ── Connection Intelligence (multi-leg) ── */}
+            {connectionReport?.isMultiLeg && connectionReport.connections.length > 0 && (
+              <div className="space-y-3">
+                {/* Journey route strip */}
+                {allFlights && allFlights.length > 1 && (
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {[...allFlights]
+                      .sort((a, b) => (a.legIndex ?? 0) - (b.legIndex ?? 0))
+                      .map((f, i) => (
+                        <span key={f.id} className="flex items-center gap-1.5">
+                          <span className={`text-xs font-semibold ${
+                          f.id === flight.id ? 'text-accent-blue' : 'text-text-muted'
+                          }`}>
+                            {f.departureAirport}
+                          </span>
+                          {i < allFlights.length - 1 && (
+                            <IconPlane className="w-3 h-3 text-text-muted/50 rotate-90" />
+                          )}
+                          {i === allFlights.length - 1 && (
+                            <>
+                              <IconPlane className="w-3 h-3 text-text-muted/50 rotate-90" />
+                              <span className="text-xs font-semibold text-text-muted">{f.arrivalAirport}</span>
+                            </>
+                          )}
+                        </span>
+                      ))}
+                  </div>
+                )}
+
+                <div className="text-xs font-medium text-text-muted uppercase tracking-wider">Connections</div>
+
+                {connectionReport.connections.map((conn, i) => {
+                  const riskColor = conn.riskLevel === 'low' ? 'text-emerald-400'
+                    : conn.riskLevel === 'medium' ? 'text-amber-400' : 'text-red-400';
+                  const riskBg = conn.riskLevel === 'low' ? 'bg-emerald-400/10'
+                    : conn.riskLevel === 'medium' ? 'bg-amber-400/10' : 'bg-red-400/10';
+                  const riskEmoji = conn.riskLevel === 'low' ? ''
+                    : conn.riskLevel === 'medium' ? '' : '';
+
+                  return (
+                    <div key={i} className={`${riskBg} rounded-lg p-3 space-y-1.5`}>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium text-text-primary">
+                          {conn.connectionAirport} Connection
+                        </span>
+                        <span className={`text-xs font-medium ${riskColor}`}>
+                          {riskEmoji} {conn.humanStatus}
+                        </span>
+                      </div>
+                      <div className="text-xs text-text-secondary">
+                        Time to your next flight:{' '}
+                        <span className="font-semibold text-text-primary">
+                          {conn.minutesToNextFlight} min
+                        </span>
+                      </div>
+                      {conn.terminalChange && (
+                        <div className="text-xs text-text-muted">
+                          Terminal change: T{conn.arrivingTerminal ?? '?'} → T{conn.departingTerminal ?? '?'}
+                        </div>
+                      )}
+                      {conn.selfTransfer && (
+                        <div className="text-xs text-text-muted">
+                          Self-transfer — collect and recheck luggage
+                        </div>
+                      )}
+                      <div className="text-xs text-text-muted">{conn.humanExplanation}</div>
+                    </div>
+                  );
+                })}
+
+                {/* Journey status */}
+                {journeyStatus && journeyStatus !== 'upcoming' && (
+                  <div className="flex items-center gap-2 text-xs">
+                    <IconPlane className="w-3 h-3 text-accent-blue" />
+                    <span className="text-text-muted">Journey:</span>
+                    <span className="font-medium text-text-primary">
+                      {journeyStatus === 'connection_active' ? 'Connecting'
+                        : journeyStatus === 'checkin_window' ? 'Check-in Open'
+                        : journeyStatus === 'boarding_soon' ? 'Boarding Soon'
+                        : journeyStatus === 'in_air' ? 'In Flight'
+                        : journeyStatus === 'disrupted' ? 'Disruption'
+                        : journeyStatus}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>

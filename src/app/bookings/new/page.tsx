@@ -73,9 +73,14 @@ export default function NewBookingPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8 md:py-12">
-      <div className="mb-8">
-        <Link href="/bookings" className="text-sm text-text-muted hover:text-text-secondary transition-colors">
+    <div className="max-w-2xl mx-auto px-4 py-8 md:py-12 relative">
+      {/* Decorative background */}
+      <div className="fixed top-20 right-1/4 w-[500px] h-[500px] bg-accent-blue/3 rounded-full blur-3xl pointer-events-none" />
+      <div className="fixed bottom-20 left-1/4 w-[400px] h-[400px] bg-accent-blue/2 rounded-full blur-3xl pointer-events-none" />
+
+      <div className="mb-8 animate-fade-up">
+        <Link href="/bookings" className="inline-flex items-center gap-1.5 text-sm text-text-muted hover:text-accent-blue transition-colors">
+          <IconArrowRight className="w-3.5 h-3.5 rotate-180" />
           Back to Bookings
         </Link>
         <h1 className="text-2xl font-semibold text-text-primary mt-2">Add Booking</h1>
@@ -89,9 +94,9 @@ export default function NewBookingPage() {
           </div>
         )}
 
-        <div className="bg-bg-card border border-border-subtle rounded-xl p-5">
+        <div className="glass-card rounded-2xl p-5 animate-fade-up" style={{ animationDelay: '60ms' }}>
           <h2 className="text-sm font-medium text-text-primary mb-4 flex items-center gap-2">
-            <IconPlane className="w-4 h-4 text-accent-teal" />
+            <IconPlane className="w-4 h-4 text-accent-blue" />
             Flight Details
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -103,7 +108,7 @@ export default function NewBookingPage() {
                 onChange={(e) => setForm((f) => ({ ...f, airline: e.target.value }))}
                 required
                 placeholder="e.g., United Airlines"
-                className="w-full px-4 py-3 bg-bg-elevated border border-border-subtle rounded-lg text-sm text-text-primary placeholder:text-text-muted focus:border-accent-teal/50 transition-colors"
+                className="w-full px-4 py-3 glass-input rounded-xl text-sm text-text-primary placeholder:text-text-muted transition-colors"
               />
             </div>
             <div>
@@ -114,15 +119,15 @@ export default function NewBookingPage() {
                 onChange={(e) => setForm((f) => ({ ...f, flightNumber: e.target.value.toUpperCase() }))}
                 required
                 placeholder="e.g., UA123"
-                className="w-full px-4 py-3 bg-bg-elevated border border-border-subtle rounded-lg text-sm text-text-primary placeholder:text-text-muted focus:border-accent-teal/50 transition-colors"
+                className="w-full px-4 py-3 glass-input rounded-xl text-sm text-text-primary placeholder:text-text-muted transition-colors"
               />
             </div>
           </div>
         </div>
 
-        <div className="bg-bg-card border border-border-subtle rounded-xl p-5">
+        <div className="glass-card rounded-2xl p-5 animate-fade-up" style={{ animationDelay: '120ms' }}>
           <h2 className="text-sm font-medium text-text-primary mb-4 flex items-center gap-2">
-            <IconMapPin className="w-4 h-4 text-accent-teal" />
+            <IconMapPin className="w-4 h-4 text-accent-blue" />
             Route
           </h2>
           <div className="flex items-center gap-4">
@@ -133,7 +138,7 @@ export default function NewBookingPage() {
                 onChange={(iata) => setForm((f) => ({ ...f, origin: iata }))}
                 placeholder="City or airport"
                 required
-                className="w-full px-4 py-3 bg-bg-elevated border border-border-subtle rounded-lg text-sm text-text-primary placeholder:text-text-muted focus:border-accent-teal/50 transition-colors"
+                className="w-full px-4 py-3 glass-input rounded-xl text-sm text-text-primary placeholder:text-text-muted transition-colors"
                 label="Origin airport"
                 name="origin"
               />
@@ -146,7 +151,7 @@ export default function NewBookingPage() {
                 onChange={(iata) => setForm((f) => ({ ...f, destination: iata }))}
                 placeholder="City or airport"
                 required
-                className="w-full px-4 py-3 bg-bg-elevated border border-border-subtle rounded-lg text-sm text-text-primary placeholder:text-text-muted focus:border-accent-teal/50 transition-colors"
+                className="w-full px-4 py-3 glass-input rounded-xl text-sm text-text-primary placeholder:text-text-muted transition-colors"
                 label="Destination airport"
                 name="destination"
               />
@@ -154,9 +159,9 @@ export default function NewBookingPage() {
           </div>
         </div>
 
-        <div className="bg-bg-card border border-border-subtle rounded-xl p-5">
+        <div className="glass-card rounded-2xl p-5 animate-fade-up" style={{ animationDelay: '180ms' }}>
           <h2 className="text-sm font-medium text-text-primary mb-4 flex items-center gap-2">
-            <IconCalendar className="w-4 h-4 text-accent-teal" />
+            <IconCalendar className="w-4 h-4 text-accent-blue" />
             Schedule
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -167,7 +172,7 @@ export default function NewBookingPage() {
                 value={form.departureTime}
                 onChange={(e) => setForm((f) => ({ ...f, departureTime: e.target.value }))}
                 required
-                className="w-full px-4 py-3 bg-bg-elevated border border-border-subtle rounded-lg text-sm text-text-primary focus:border-accent-teal/50 transition-colors"
+                className="w-full px-4 py-3 glass-input rounded-xl text-sm text-text-primary transition-colors"
               />
             </div>
             <div>
@@ -177,15 +182,15 @@ export default function NewBookingPage() {
                 value={form.arrivalTime}
                 onChange={(e) => setForm((f) => ({ ...f, arrivalTime: e.target.value }))}
                 required
-                className="w-full px-4 py-3 bg-bg-elevated border border-border-subtle rounded-lg text-sm text-text-primary focus:border-accent-teal/50 transition-colors"
+                className="w-full px-4 py-3 glass-input rounded-xl text-sm text-text-primary transition-colors"
               />
             </div>
           </div>
         </div>
 
-        <div className="bg-bg-card border border-border-subtle rounded-xl p-5">
+        <div className="glass-card rounded-2xl p-5 animate-fade-up" style={{ animationDelay: '240ms' }}>
           <h2 className="text-sm font-medium text-text-primary mb-4 flex items-center gap-2">
-            <IconUser className="w-4 h-4 text-accent-teal" />
+            <IconUser className="w-4 h-4 text-accent-blue" />
             Additional Info (Optional)
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -196,7 +201,7 @@ export default function NewBookingPage() {
                 value={form.confirmationCode}
                 onChange={(e) => setForm((f) => ({ ...f, confirmationCode: e.target.value.toUpperCase() }))}
                 placeholder="ABC123"
-                className="w-full px-4 py-3 bg-bg-elevated border border-border-subtle rounded-lg text-sm text-text-primary placeholder:text-text-muted focus:border-accent-teal/50 transition-colors font-mono"
+                className="w-full px-4 py-3 glass-input rounded-xl text-sm text-text-primary placeholder:text-text-muted transition-colors font-mono"
               />
             </div>
             <div>
@@ -206,17 +211,17 @@ export default function NewBookingPage() {
                 value={form.passengerName}
                 onChange={(e) => setForm((f) => ({ ...f, passengerName: e.target.value }))}
                 placeholder="John Doe"
-                className="w-full px-4 py-3 bg-bg-elevated border border-border-subtle rounded-lg text-sm text-text-primary placeholder:text-text-muted focus:border-accent-teal/50 transition-colors"
+                className="w-full px-4 py-3 glass-input rounded-xl text-sm text-text-primary placeholder:text-text-muted transition-colors"
               />
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 animate-fade-up" style={{ animationDelay: '300ms' }}>
           <button
             type="submit"
             disabled={loading}
-            className="flex-1 py-3 bg-accent-teal text-bg-primary font-medium text-sm rounded-lg hover:bg-accent-teal/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="flex-1 py-3 bg-accent-blue text-white font-medium text-sm rounded-xl hover:bg-accent-blue/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-accent-blue/20"
           >
             {loading ? (
               <>
@@ -229,7 +234,7 @@ export default function NewBookingPage() {
           </button>
           <Link
             href="/bookings"
-            className="px-6 py-3 text-sm text-text-secondary bg-bg-elevated border border-border-subtle rounded-lg hover:bg-bg-card transition-colors"
+            className="px-6 py-3 text-sm text-text-secondary glass-card rounded-xl hover:bg-white/60 dark:hover:bg-white/10 transition-colors"
           >
             Cancel
           </Link>

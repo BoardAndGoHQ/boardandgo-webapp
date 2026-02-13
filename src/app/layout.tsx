@@ -23,8 +23,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={inter.variable}>
-      <body className="min-h-screen flex flex-col">
+    <html lang="en" className={`${inter.variable} light`}>
+      <body className="min-h-screen flex flex-col bg-bg-primary text-text-primary">
         <AuthProvider>
           <Header />
           <main className="flex-1">{children}</main>

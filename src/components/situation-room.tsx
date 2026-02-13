@@ -13,10 +13,12 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { api, type TrackedFlight, type FlightStatusEvent } from '@/lib/api';
+import { api, type TrackedFlight, type FlightStatusEvent, type JourneyConnectionReport, type JourneyStatus } from '@/lib/api';
 import { generateIntelligenceReport, type FlightIntelligenceReport, type AgentBriefing, type UserIntelligenceProfile } from '@/lib/insights';
 import { useIntelligenceMode } from '@/hooks/use-intelligence-mode';
 import { IconPlane, IconArrowRight, IconLoader } from '@/components/icons';
+import { ArrowRight, Layers, ChevronDown } from 'lucide-react';
+import { JourneyConnections } from '@/components/connection-card';
 
 type FlightWithEvents = TrackedFlight & { statusEvents: FlightStatusEvent[] };
 
@@ -25,6 +27,12 @@ interface SituationRoomProps {
   token: string;
   allFlightsCount: number;
   onViewAll?: () => void;
+  /** All flights in the booking (for multi-leg journey display) */
+  allFlights?: FlightWithEvents[];
+  /** Connection analysis from backend (if multi-leg) */
+  connectionReport?: JourneyConnectionReport | null;
+  /** Journey-level status from backend */
+  journeyStatus?: JourneyStatus | null;
 }
 
 function formatTime(iso: string | null) {
@@ -120,7 +128,7 @@ function getStatusLineFromReport(
   };
 }
 
-export function SituationRoom({ flight, token, allFlightsCount, onViewAll }: SituationRoomProps) {
+export function SituationRoom({ flight, token, allFlightsCount, onViewAll, allFlights, connectionReport, journeyStatus }: SituationRoomProps) {
   const [intelligenceMode] = useIntelligenceMode();
   const [briefing, setBriefing] = useState<AgentBriefing | null>(null);
   const [loading, setLoading] = useState(false);
@@ -141,7 +149,31 @@ export function SituationRoom({ flight, token, allFlightsCount, onViewAll }: Sit
           frequentTraveler: false, // TODO: Calculate from flight history
           preferredTone: 'professional',
         };
-        const result = await api.briefing.generate(report, profile, token);
+
+        // Build journey context for Amberlyn if multi-leg
+        const journeyCtx = connectionReport?.isMultiLeg && allFlights && allFlights.length > 1
+          ? {
+              isMultiLeg: true,
+              journeyStatus: journeyStatus ?? 'upcoming',
+              totalLegs: allFlights.length,
+              currentLegIndex: flight.legIndex ?? 0,
+              connections: connectionReport.connections.map((c) => ({
+                connectionAirport: c.connectionAirport,
+                minutesToNextFlight: c.minutesToNextFlight,
+                riskLevel: c.riskLevel,
+                humanStatus: c.humanStatus,
+                humanExplanation: c.humanExplanation,
+                terminalChange: c.terminalChange,
+                arrivingTerminal: c.arrivingTerminal ?? null,
+                departingTerminal: c.departingTerminal ?? null,
+                minimumConnectionTime: c.minimumConnectionTime,
+              })),
+              worstRiskLevel: connectionReport.worstRiskLevel,
+              overallHumanStatus: connectionReport.overallHumanStatus,
+            }
+          : undefined;
+
+        const result = await api.briefing.generate(report, profile, token, journeyCtx);
         if (!cancelled) setBriefing(result);
       } catch {
         // Fallback to deterministic
@@ -152,7 +184,7 @@ export function SituationRoom({ flight, token, allFlightsCount, onViewAll }: Sit
 
     fetchBriefing();
     return () => { cancelled = true; };
-  }, [flight.id, intelligenceMode, token]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [flight.id, intelligenceMode, token, connectionReport?.worstRiskLevel, journeyStatus]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Use AI briefing if available, otherwise deterministic
   const deterministicStatus = getStatusLineFromReport(report, flight);
@@ -229,15 +261,39 @@ export function SituationRoom({ flight, token, allFlightsCount, onViewAll }: Sit
                 key={i}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-bg-elevated/50 text-sm text-text-primary border border-border-subtle"
               >
-                <svg className="w-3.5 h-3.5 text-accent-teal" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M5 12h14M12 5l7 7-7 7" />
-                </svg>
+                <ArrowRight className="w-3.5 h-3.5 text-accent-blue" />
                 {action}
               </span>
             ))}
           </div>
         )}
       </div>
+
+      {/* Connection Intelligence (multi-leg journeys) */}
+      {connectionReport && connectionReport.isMultiLeg && allFlights && allFlights.length > 1 && (
+        <JourneyConnections
+          connectionReport={connectionReport}
+          flights={allFlights}
+          mode={intelligenceMode}
+        />
+      )}
+
+      {/* Journey Status Badge (multi-leg) */}
+      {journeyStatus && journeyStatus !== 'upcoming' && allFlights && allFlights.length > 1 && (
+        <div className="glass-card rounded-xl border border-border-subtle px-4 py-2.5 flex items-center gap-2">
+          <IconPlane className="w-4 h-4 text-accent-blue" />
+          <span className="text-sm text-text-secondary">
+            Journey: <span className="font-medium text-text-primary capitalize">
+              {journeyStatus === 'connection_active' ? 'Connecting' :
+               journeyStatus === 'checkin_window' ? 'Check-in Open' :
+               journeyStatus === 'boarding_soon' ? 'Boarding Soon' :
+               journeyStatus === 'in_air' ? 'In Flight' :
+               journeyStatus === 'disrupted' ? 'Disruption' :
+               journeyStatus}
+            </span>
+          </span>
+        </div>
+      )}
 
       {/* Intelligence Details (expandable, not in minimal mode) */}
       {intelligenceMode !== 'minimal' && report.monitoringLevel !== 'low' && (
@@ -247,21 +303,13 @@ export function SituationRoom({ flight, token, allFlightsCount, onViewAll }: Sit
             className="w-full px-4 py-3 flex items-center justify-between text-sm text-text-secondary hover:bg-bg-elevated/30 transition-colors"
           >
             <span className="flex items-center gap-2">
-              <svg className="w-4 h-4 text-accent-teal" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-              </svg>
+              <Layers className="w-4 h-4 text-accent-blue" />
               Flight Intelligence
-              <span className="text-xs px-1.5 py-0.5 bg-accent-teal/10 text-accent-teal rounded">Beta</span>
+              <span className="text-xs px-1.5 py-0.5 bg-accent-blue/10 text-accent-blue rounded">Beta</span>
             </span>
-            <svg
+            <ChevronDown
               className={`w-4 h-4 text-text-muted transition-transform ${expanded ? 'rotate-180' : ''}`}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M6 9l6 6 6-6" />
-            </svg>
+            />
           </button>
 
           {expanded && (
@@ -311,7 +359,7 @@ export function SituationRoom({ flight, token, allFlightsCount, onViewAll }: Sit
       {/* Quick link to full tracking */}
       <Link
         href={`/bookings/${flight.bookingId}/track`}
-        className="flex items-center justify-center gap-2 px-4 py-2.5 glass-card rounded-xl border border-border-subtle text-sm text-text-secondary hover:text-text-primary hover:border-accent-teal/30 transition-all"
+        className="flex items-center justify-center gap-2 px-4 py-2.5 glass-card rounded-xl border border-border-subtle text-sm text-text-secondary hover:text-text-primary hover:border-accent-blue/30 transition-all"
       >
         <span>View Full Tracking</span>
         <IconArrowRight className="w-4 h-4" />
@@ -326,8 +374,8 @@ export function SituationRoom({ flight, token, allFlightsCount, onViewAll }: Sit
 export function EmptySituationRoom() {
   return (
     <div className="rounded-2xl border border-border-subtle bg-bg-elevated/30 p-8 text-center">
-      <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-accent-teal/10 flex items-center justify-center">
-        <IconPlane className="w-8 h-8 text-accent-teal/50" />
+      <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-accent-blue/10 flex items-center justify-center">
+        <IconPlane className="w-8 h-8 text-accent-blue/50" />
       </div>
       <h2 className="text-2xl font-bold text-text-primary mb-2">No flights to monitor</h2>
       <p className="text-text-muted text-sm mb-6 max-w-sm mx-auto">
@@ -335,7 +383,7 @@ export function EmptySituationRoom() {
       </p>
       <Link
         href="/track"
-        className="inline-flex items-center gap-2 px-6 py-2.5 bg-accent-teal text-bg-primary font-medium text-sm rounded-xl hover:brightness-110 transition-all"
+        className="inline-flex items-center gap-2 px-6 py-2.5 bg-accent-blue text-white font-medium text-sm rounded-xl hover:brightness-110 transition-all shadow-lg shadow-accent-blue/20"
       >
         <IconPlane className="w-4 h-4" />
         Track a Flight

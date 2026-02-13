@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/auth';
 import { api, type Booking } from '@/lib/api';
-import { IconPlane, IconLoader, IconClock, IconCalendar, IconUser, IconMail, IconSignal } from '@/components/icons';
+import { IconPlane, IconLoader, IconClock, IconCalendar, IconUser, IconMail, IconSignal, IconArrowRight } from '@/components/icons';
+import { Car } from 'lucide-react';
 import { getSearchDelayRisk, getRecommendedArrival, formatRecommendedTime } from '@/lib/insights';
 import { DelayPredictionCard, IntelligenceSection } from '@/components/intelligence-card';
 
@@ -20,7 +21,7 @@ function formatTime(dateStr: string) {
 }
 
 const statusColors: Record<string, string> = {
-  upcoming: 'bg-accent-teal/10 text-accent-teal border-accent-teal/20',
+  upcoming: 'bg-accent-blue/10 text-accent-blue border-accent-blue/20',
   completed: 'bg-text-muted/10 text-text-muted border-text-muted/20',
   cancelled: 'bg-red-400/10 text-red-400 border-red-400/20',
 };
@@ -65,9 +66,11 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
   if (error || !booking) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-12 text-center">
-        <IconPlane className="w-12 h-12 text-text-muted/50 mx-auto mb-4" />
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-accent-blue/10 text-accent-blue mb-4">
+          <IconPlane className="w-8 h-8" />
+        </div>
         <h3 className="text-lg font-medium text-text-secondary mb-2">{error || 'Booking not found'}</h3>
-        <Link href="/bookings" className="text-accent-teal hover:underline">
+        <Link href="/bookings" className="text-accent-blue hover:underline">
           Back to Bookings
         </Link>
       </div>
@@ -75,14 +78,19 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8 md:py-12">
-      <div className="mb-8">
-        <Link href="/bookings" className="text-sm text-text-muted hover:text-text-secondary transition-colors">
+    <div className="max-w-2xl mx-auto px-4 py-8 md:py-12 relative">
+      {/* Decorative background */}
+      <div className="fixed top-20 right-1/4 w-[500px] h-[500px] bg-accent-blue/3 rounded-full blur-3xl pointer-events-none" />
+      <div className="fixed bottom-20 left-1/4 w-[400px] h-[400px] bg-accent-blue/2 rounded-full blur-3xl pointer-events-none" />
+
+      <div className="mb-8 animate-fade-up">
+        <Link href="/bookings" className="inline-flex items-center gap-1.5 text-sm text-text-muted hover:text-accent-blue transition-colors">
+          <IconArrowRight className="w-3.5 h-3.5 rotate-180" />
           Back to Bookings
         </Link>
       </div>
 
-      <div className="bg-bg-card border border-border-subtle rounded-xl overflow-hidden">
+      <div className="glass-card rounded-2xl overflow-hidden animate-fade-up" style={{ animationDelay: '60ms' }}>
         <div className="p-6 border-b border-border-subtle">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
@@ -100,7 +108,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
               <div className="text-sm text-text-muted mt-1">{formatTime(booking.departureTime)}</div>
             </div>
             <div className="flex flex-col items-center gap-2">
-              <IconPlane className="w-6 h-6 text-accent-teal rotate-90" />
+              <IconPlane className="w-6 h-6 text-accent-blue rotate-90" />
               <div className="w-24 h-px bg-border-subtle" />
             </div>
             <div className="text-center">
@@ -154,7 +162,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
         const delayRisk = getSearchDelayRisk({ origin: booking.origin, destination: booking.destination, stops: 0 });
         const arrival = getRecommendedArrival(booking.departureTime, booking.origin, booking.destination);
         return (
-          <div className="mt-4 bg-bg-card border border-border-subtle rounded-xl p-5">
+          <div className="mt-4 glass-card rounded-2xl p-5">
             <IntelligenceSection compact>
               {/* Delay Prediction — expandable */}
               <DelayPredictionCard prediction={delayRisk} />
@@ -163,7 +171,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
               <div className="bg-white/5 rounded-lg p-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm">🚗</span>
+                    <Car className="w-4 h-4 text-accent-blue" />
                     <span className="text-xs text-text-secondary">Leave for Airport</span>
                   </div>
                   <span className="text-xs font-medium text-text-primary">
@@ -179,7 +187,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
       <div className="mt-4 flex justify-center">
         <Link
           href={`/bookings/${id}/track`}
-          className="flex items-center gap-2 px-5 py-3 text-sm font-medium text-bg-primary bg-accent-teal rounded-xl hover:bg-accent-teal/90 transition-colors"
+          className="flex items-center gap-2 px-5 py-3 text-sm font-medium text-white bg-accent-blue rounded-xl hover:bg-accent-blue/90 transition-colors shadow-lg shadow-accent-blue/20"
         >
           <IconSignal className="w-4 h-4" />
           Track Flight

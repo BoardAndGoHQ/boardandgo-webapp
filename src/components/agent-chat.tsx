@@ -148,12 +148,12 @@ export function AgentChat() {
     cabin.charAt(0) + cabin.slice(1).toLowerCase().replace('_', ' ');
 
   return (
-    <div className="bg-bg-card border border-border-subtle rounded-xl overflow-hidden flex flex-col h-full">
+    <div className="glass-card rounded-2xl overflow-hidden flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-3.5 border-b border-border-subtle bg-bg-elevated/50">
+      <div className="flex items-center justify-between px-5 py-3.5 border-b border-border-subtle">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-accent-teal/10 flex items-center justify-center">
-            <IconSparkles className="w-4 h-4 text-accent-teal" />
+          <div className="w-8 h-8 rounded-lg bg-accent-blue/10 flex items-center justify-center">
+            <IconSparkles className="w-4 h-4 text-accent-blue" />
           </div>
           <div>
             <h3 className="text-sm font-medium text-text-primary">Amberlyn</h3>
@@ -174,8 +174,8 @@ export function AgentChat() {
       <div ref={chatScrollRef} className="flex-1 overflow-y-auto px-5 py-4 space-y-4 scrollbar-thin">
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center space-y-4">
-            <div className="w-14 h-14 rounded-2xl bg-accent-teal/10 flex items-center justify-center">
-              <IconBot className="w-7 h-7 text-accent-teal" />
+            <div className="w-14 h-14 rounded-2xl bg-accent-blue/10 flex items-center justify-center">
+              <IconBot className="w-7 h-7 text-accent-blue" />
             </div>
             <div>
               <h4 className="text-sm font-medium text-text-primary mb-1">Hi, I&apos;m Amberlyn</h4>
@@ -195,7 +195,7 @@ export function AgentChat() {
                     setInput(suggestion);
                     inputRef.current?.focus();
                   }}
-                  className="px-3 py-1.5 text-xs bg-bg-elevated border border-border-subtle rounded-full text-text-secondary hover:border-accent-teal/30 hover:text-text-primary transition-colors"
+                  className="px-3 py-1.5 text-xs glass-card rounded-full text-text-secondary hover:border-accent-blue/30 hover:text-text-primary transition-colors"
                 >
                   {suggestion}
                 </button>
@@ -209,25 +209,25 @@ export function AgentChat() {
             {msg.role === 'user' ? (
               /* User message */
               <div className="flex justify-end">
-                <div className="max-w-[80%] px-4 py-2.5 bg-accent-teal text-bg-primary rounded-2xl rounded-br-md text-sm">
+                <div className="max-w-[80%] px-4 py-2.5 bg-accent-blue text-white rounded-2xl rounded-br-md text-sm">
                   {msg.content}
                 </div>
               </div>
             ) : (
               /* Assistant message */
               <div className="flex gap-2.5">
-                <div className="w-7 h-7 rounded-lg bg-bg-elevated flex items-center justify-center shrink-0 mt-0.5">
-                  <IconBot className="w-3.5 h-3.5 text-accent-teal" />
+                <div className="w-7 h-7 rounded-lg bg-accent-blue/10 flex items-center justify-center shrink-0 mt-0.5">
+                  <IconBot className="w-3.5 h-3.5 text-accent-blue" />
                 </div>
                 <div className="max-w-[85%] space-y-3">
-                  <div className="px-4 py-2.5 bg-bg-elevated rounded-2xl rounded-bl-md text-sm text-text-primary leading-relaxed">
+                  <div className="px-4 py-2.5 glass-card rounded-2xl rounded-bl-md text-sm text-text-primary leading-relaxed">
                     {msg.content}
                   </div>
 
                   {/* Confirmation Card */}
                   {msg.searchIntent && (
-                    <div className="bg-bg-secondary border border-accent-teal/20 rounded-xl p-4 space-y-3">
-                      <div className="flex items-center gap-2 text-xs text-accent-teal font-medium uppercase tracking-wide">
+                    <div className="glass-card rounded-xl p-4 space-y-3 border-accent-blue/20">
+                      <div className="flex items-center gap-2 text-xs text-accent-blue font-medium uppercase tracking-wide">
                         <IconPlane className="w-3.5 h-3.5" />
                         Trip Summary
                       </div>
@@ -237,12 +237,12 @@ export function AgentChat() {
                           <span className="text-lg font-semibold text-text-primary">
                             {msg.searchIntent.origin}
                           </span>
-                          <IconArrowRight className="w-4 h-4 text-accent-teal" />
+                          <IconArrowRight className="w-4 h-4 text-accent-blue" />
                           <span className="text-lg font-semibold text-text-primary">
                             {msg.searchIntent.destination}
                           </span>
                           {msg.searchIntent.tripType === 'return' && (
-                            <span className="px-2 py-0.5 text-xs bg-accent-teal/10 text-accent-teal rounded">
+                            <span className="px-2 py-0.5 text-xs bg-accent-blue/10 text-accent-blue rounded">
                               Round trip
                             </span>
                           )}
@@ -270,7 +270,7 @@ export function AgentChat() {
                       <div className="flex gap-2 pt-1">
                         <button
                           onClick={() => handleConfirmSearch(msg.searchIntent!)}
-                          className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-accent-teal text-bg-primary text-sm font-medium rounded-lg hover:bg-accent-teal/90 transition-colors"
+                          className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-accent-blue text-white text-sm font-medium rounded-xl hover:bg-accent-blue/90 transition-colors shadow-lg shadow-accent-blue/20"
                         >
                           <IconSearch className="w-4 h-4" />
                           Confirm & Search
@@ -287,10 +287,10 @@ export function AgentChat() {
         {/* Typing indicator */}
         {isTyping && (
           <div className="flex gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-bg-elevated flex items-center justify-center shrink-0 mt-0.5">
-              <IconBot className="w-3.5 h-3.5 text-accent-teal" />
+            <div className="w-7 h-7 rounded-lg bg-accent-blue/10 flex items-center justify-center shrink-0 mt-0.5">
+              <IconBot className="w-3.5 h-3.5 text-accent-blue" />
             </div>
-            <div className="px-4 py-3 bg-bg-elevated rounded-2xl rounded-bl-md">
+            <div className="px-4 py-3 glass-card rounded-2xl rounded-bl-md">
               <div className="flex gap-1">
                 <div className="w-2 h-2 bg-text-muted rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                 <div className="w-2 h-2 bg-text-muted rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -304,7 +304,7 @@ export function AgentChat() {
       </div>
 
       {/* Input */}
-      <form onSubmit={handleSend} className="px-4 py-3 border-t border-border-subtle bg-bg-elevated/30">
+      <form onSubmit={handleSend} className="px-4 py-3 border-t border-border-subtle">
         <div className="flex gap-2">
           <input
             ref={inputRef}
@@ -313,12 +313,12 @@ export function AgentChat() {
             onChange={(e) => setInput(e.target.value)}
             placeholder="Tell me where you want to fly..."
             disabled={isTyping}
-            className="flex-1 px-4 py-2.5 bg-bg-elevated border border-border-subtle rounded-xl text-sm text-text-primary placeholder:text-text-muted focus:border-accent-teal/50 transition-colors disabled:opacity-50"
+            className="flex-1 px-4 py-2.5 glass-input rounded-xl text-sm text-text-primary placeholder:text-text-muted transition-colors disabled:opacity-50"
           />
           <button
             type="submit"
             disabled={!input.trim() || isTyping}
-            className="px-3.5 py-2.5 bg-accent-teal text-bg-primary rounded-xl hover:bg-accent-teal/90 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            className="px-3.5 py-2.5 bg-accent-blue text-white rounded-xl hover:bg-accent-blue/90 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
           >
             {isTyping ? (
               <IconLoader className="w-4 h-4 animate-spin" />

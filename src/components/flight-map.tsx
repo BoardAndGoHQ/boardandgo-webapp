@@ -610,7 +610,7 @@ export function FlightMap({
       {!mapLoaded && (
         <div className={`absolute inset-0 flex items-center justify-center bg-bg-elevated/50 ${trackerMode ? '' : 'rounded-xl'}`}>
           <div className="flex items-center gap-2 text-text-muted text-sm">
-            <div className="w-4 h-4 border-2 border-accent-teal/30 border-t-accent-teal rounded-full animate-spin" />
+            <div className="w-4 h-4 border-2 border-accent-blue/30 border-t-accent-blue rounded-full animate-spin" />
             Loading map...
           </div>
         </div>

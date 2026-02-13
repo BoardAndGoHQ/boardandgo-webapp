@@ -4,10 +4,11 @@ import { useEffect, useState, useCallback, useRef, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/auth';
-import { api, type TrackedFlight, type FlightStatusEvent, type FlightPosition } from '@/lib/api';
+import { api, type TrackedFlight, type FlightStatusEvent, type FlightPosition, type JourneyData } from '@/lib/api';
 import { FlightMap, type AirportCoord, type MapViewMode } from '@/components/flight-map';
 import { FlightInfoPanel } from '@/components/flight-info-panel';
 import { IconLoader, IconShare, IconCopy, IconArrowRight } from '@/components/icons';
+import { Check, X, Route, Mountain, Crosshair } from 'lucide-react';
 
 type FlightWithEvents = TrackedFlight & { statusEvents: FlightStatusEvent[] };
 
@@ -26,6 +27,7 @@ export default function TrackFlightPage({ params }: { params: Promise<{ id: stri
   const [isStandalone, setIsStandalone] = useState(false);
   const [viewMode, setViewMode] = useState<MapViewMode>('route');
   const [panelCollapsed, setPanelCollapsed] = useState(false);
+  const [journeyData, setJourneyData] = useState<JourneyData | null>(null);
 
   const eventSourceRef = useRef<EventSource | null>(null);
   const trackedBookingId = useRef<string>('');
@@ -102,6 +104,20 @@ export default function TrackFlightPage({ params }: { params: Promise<{ id: stri
     return () => clearInterval(interval);
   }, [token, flights]);
 
+  /* ── Fetch journey data for multi-leg bookings ── */
+  useEffect(() => {
+    if (!token || flights.length < 2) {
+      setJourneyData(null);
+      return;
+    }
+    const bookingId = flights[0]?.bookingId;
+    if (!bookingId) return;
+
+    api.tracking.getJourney(bookingId, token)
+      .then((data) => setJourneyData(data))
+      .catch(() => setJourneyData(null));
+  }, [token, flights]);
+
   /* ── Detect landing and stop tracking ── */
 
   /* ── Share link ── */
@@ -142,7 +158,7 @@ export default function TrackFlightPage({ params }: { params: Promise<{ id: stri
   if (authLoading || loading) {
     return (
       <div className="w-full h-[calc(100dvh-4rem)] flex items-center justify-center bg-bg-primary">
-        <IconLoader className="w-6 h-6 text-text-muted animate-spin" />
+        <IconLoader className="w-6 h-6 text-accent-blue animate-spin" />
       </div>
     );
   }
@@ -153,7 +169,7 @@ export default function TrackFlightPage({ params }: { params: Promise<{ id: stri
       <div className="w-full h-[calc(100dvh-4rem)] flex items-center justify-center bg-bg-primary">
         <div className="text-center space-y-3">
           <div className="text-text-muted text-sm">{error}</div>
-          <Link href={isStandalone ? '/track' : `/bookings/${id}`} className="text-sm text-accent-teal hover:underline">
+          <Link href={isStandalone ? '/track' : `/bookings/${id}`} className="text-sm text-accent-blue hover:underline">
             Go back
           </Link>
         </div>
@@ -178,7 +194,7 @@ export default function TrackFlightPage({ params }: { params: Promise<{ id: stri
       <div className="absolute top-4 left-4 z-20 md:hidden">
         <Link
           href={isStandalone ? '/track' : `/bookings/${id}`}
-          className="flex items-center gap-1.5 px-3 py-2 bg-[#1a1f2e]/90 backdrop-blur-xl border border-white/10 rounded-lg text-xs text-text-secondary hover:text-text-primary transition-colors"
+          className="flex items-center gap-1.5 px-3 py-2 bg-white/90 dark:bg-[#1a1f2e]/90 backdrop-blur-xl border border-black/5 dark:border-white/10 rounded-xl text-xs text-text-secondary hover:text-text-primary transition-colors shadow-lg"
         >
           <IconArrowRight className="w-3 h-3 rotate-180" />
           Back
@@ -194,6 +210,9 @@ export default function TrackFlightPage({ params }: { params: Promise<{ id: stri
             airports={airports}
             collapsed={panelCollapsed}
             onToggleCollapse={() => setPanelCollapsed(!panelCollapsed)}
+            allFlights={flights}
+            connectionReport={journeyData?.connectionReport}
+            journeyStatus={journeyData?.booking.journeyStatus}
           />
         </div>
       )}
@@ -207,6 +226,9 @@ export default function TrackFlightPage({ params }: { params: Promise<{ id: stri
             airports={airports}
             collapsed={panelCollapsed}
             onToggleCollapse={() => setPanelCollapsed(!panelCollapsed)}
+            allFlights={flights}
+            connectionReport={journeyData?.connectionReport}
+            journeyStatus={journeyData?.booking.journeyStatus}
           />
         </div>
       )}
@@ -219,9 +241,9 @@ export default function TrackFlightPage({ params }: { params: Promise<{ id: stri
               primaryFlight.flightStatus === 'landed' ? 'bg-emerald-500/10' : 'bg-red-500/10'
             }`}>
               {primaryFlight.flightStatus === 'landed' ? (
-                <svg className="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 6L9 17l-5-5" /></svg>
+                <Check className="w-4 h-4 text-emerald-400" />
               ) : (
-                <svg className="w-4 h-4 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                <X className="w-4 h-4 text-red-400" />
               )}
             </div>
             <div>
@@ -232,7 +254,7 @@ export default function TrackFlightPage({ params }: { params: Promise<{ id: stri
             </div>
             <Link
               href="/dashboard"
-              className="ml-2 px-3 py-1.5 text-xs font-medium bg-accent-teal/10 text-accent-teal rounded-lg hover:bg-accent-teal/15 transition-colors"
+              className="ml-2 px-3 py-1.5 text-xs font-medium bg-accent-blue/10 text-accent-blue rounded-lg hover:bg-accent-blue/15 transition-colors"
             >
               Dashboard
             </Link>
@@ -245,7 +267,7 @@ export default function TrackFlightPage({ params }: { params: Promise<{ id: stri
         {/* Share button */}
         <button
           onClick={handleShare}
-          className="flex items-center gap-1.5 px-3 py-2 bg-[#1a1f2e]/90 backdrop-blur-xl border border-white/10 rounded-lg text-xs text-text-secondary hover:text-text-primary transition-colors"
+          className="flex items-center gap-1.5 px-3 py-2 bg-white/90 dark:bg-[#1a1f2e]/90 backdrop-blur-xl border border-black/5 dark:border-white/10 rounded-xl text-xs text-text-secondary hover:text-text-primary transition-colors shadow-lg"
         >
           {copied ? <IconCopy className="w-3.5 h-3.5 text-green-400" /> : <IconShare className="w-3.5 h-3.5" />}
           {copied ? 'Copied!' : 'Share'}
@@ -253,7 +275,7 @@ export default function TrackFlightPage({ params }: { params: Promise<{ id: stri
         {/* Back (desktop) */}
         <Link
           href={isStandalone ? '/track' : `/bookings/${id}`}
-          className="hidden md:flex items-center gap-1.5 px-3 py-2 bg-[#1a1f2e]/90 backdrop-blur-xl border border-white/10 rounded-lg text-xs text-text-secondary hover:text-text-primary transition-colors"
+          className="hidden md:flex items-center gap-1.5 px-3 py-2 bg-white/90 dark:bg-[#1a1f2e]/90 backdrop-blur-xl border border-black/5 dark:border-white/10 rounded-xl text-xs text-text-secondary hover:text-text-primary transition-colors shadow-lg"
         >
           <IconArrowRight className="w-3 h-3 rotate-180" />
           {isStandalone ? 'Tracking' : 'Booking'}
@@ -265,7 +287,7 @@ export default function TrackFlightPage({ params }: { params: Promise<{ id: stri
         <div className="absolute top-16 right-16 z-20 animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="bg-[#1a1f2e]/95 backdrop-blur-xl border border-white/10 rounded-lg p-3 flex items-center gap-2 max-w-xs">
             <input readOnly value={shareUrl} className="flex-1 text-xs bg-transparent border-none text-text-primary outline-none min-w-0" />
-            <button onClick={handleCopy} className="shrink-0 px-2 py-1 text-xs bg-accent-teal text-bg-primary rounded">
+            <button onClick={handleCopy} className="shrink-0 px-2 py-1 text-xs bg-accent-blue text-white rounded-lg">
               Copy
             </button>
           </div>
@@ -274,7 +296,7 @@ export default function TrackFlightPage({ params }: { params: Promise<{ id: stri
 
       {/* ── Mode Bar (bottom center) ── */}
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10">
-        <div className="flex items-center bg-[#1a1f2e]/95 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden shadow-2xl">
+        <div className="flex items-center bg-white/90 dark:bg-[#1a1f2e]/95 backdrop-blur-xl border border-black/5 dark:border-white/10 rounded-2xl overflow-hidden shadow-2xl">
           <ModeButton
             icon={<RouteIcon />}
             label="Route"
@@ -307,7 +329,7 @@ function ModeButton({ icon, label, active, onClick }: { icon: React.ReactNode; l
     <button
       onClick={onClick}
       className={`flex flex-col items-center gap-1 px-5 py-2.5 transition-colors ${
-        active ? 'bg-white/10 text-accent-teal' : 'text-text-muted hover:text-text-secondary hover:bg-white/5'
+      active ? 'bg-accent-blue/10 text-accent-blue' : 'text-text-muted hover:text-text-secondary hover:bg-black/5 dark:hover:bg-white/5'
       }`}
     >
       {icon}
@@ -318,25 +340,13 @@ function ModeButton({ icon, label, active, onClick }: { icon: React.ReactNode; l
 
 /* ── Icons for mode bar ── */
 function RouteIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <circle cx="6" cy="19" r="3" /><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15" /><circle cx="18" cy="5" r="3" />
-    </svg>
-  );
+  return <Route className="w-[18px] h-[18px]" />;
 }
 
 function TerrainIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="m8 3 4 8 5-5 5 15H2L8 3z" /><path d="M4.14 15.08c2.62-1.57 5.24-1.43 7.86.42 2.74 1.94 5.49 2 8.23.19" />
-    </svg>
-  );
+  return <Mountain className="w-[18px] h-[18px]" />;
 }
 
 function FollowIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <circle cx="12" cy="12" r="3" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12" />
-    </svg>
-  );
+  return <Crosshair className="w-[18px] h-[18px]" />;
 }

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/auth';
 import { IconUser, IconLogout, IconMenu, IconX } from './icons';
 
@@ -26,14 +26,28 @@ export function Header() {
   const { user, signOut, loading } = useAuth();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   const navLinks = user ? appLinks : publicLinks;
 
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(href + '/') || (href === '/search' && pathname.startsWith('/search'));
 
+  // Scroll-aware header: increase glass effect on scroll
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   return (
-    <header className="sticky top-0 z-50">
+    <header
+      className={`sticky top-0 z-50 transition-all duration-300 ${
+        scrolled
+          ? 'glass-nav shadow-sm'
+          : 'bg-transparent'
+      }`}
+    >
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5 group">
@@ -50,14 +64,14 @@ export function Header() {
         </Link>
 
         {/* Desktop Nav — pill-style links */}
-        <nav className="hidden md:flex items-center bg-bg-elevated/40 border border-border-subtle rounded-full px-1 py-1">
+        <nav className="hidden md:flex items-center bg-white/50 dark:bg-bg-elevated/40 border border-black/[0.04] dark:border-border-subtle rounded-full px-1 py-1 backdrop-blur-sm">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               className={`relative px-4 py-1.5 text-[13px] font-medium rounded-full transition-all duration-200 ${
                 isActive(link.href)
-                  ? 'text-bg-primary bg-accent-teal shadow-sm shadow-accent-teal/25'
+                  ? 'text-white bg-accent-blue shadow-sm shadow-accent-blue/25'
                   : 'text-text-secondary hover:text-text-primary'
               }`}
             >
@@ -69,12 +83,12 @@ export function Header() {
         {/* Desktop Right */}
         <div className="hidden md:flex items-center gap-2">
           {loading ? (
-            <div className="w-20 h-8 bg-bg-elevated/50 rounded-full animate-pulse" />
+            <div className="w-20 h-8 bg-black/[0.04] dark:bg-bg-elevated/50 rounded-full animate-shimmer" />
           ) : user ? (
             <div className="flex items-center gap-2">
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-bg-elevated/40 border border-border-subtle rounded-full">
-                <div className="w-6 h-6 rounded-full bg-accent-teal/15 flex items-center justify-center">
-                  <span className="text-[10px] font-semibold text-accent-teal">
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-white/60 dark:bg-bg-elevated/40 border border-black/[0.04] dark:border-border-subtle rounded-full backdrop-blur-sm">
+                <div className="w-6 h-6 rounded-full bg-accent-blue/10 flex items-center justify-center">
+                  <span className="text-[10px] font-semibold text-accent-blue">
                     {user.email?.charAt(0).toUpperCase()}
                   </span>
                 </div>
@@ -84,7 +98,7 @@ export function Header() {
               </div>
               <button
                 onClick={signOut}
-                className="p-2 text-text-muted hover:text-text-primary hover:bg-bg-elevated/50 rounded-full transition-all duration-200"
+                className="p-2 text-text-muted hover:text-text-primary hover:bg-black/[0.04] dark:hover:bg-bg-elevated/50 rounded-full transition-all duration-200"
                 title="Sign out"
               >
                 <IconLogout className="w-4 h-4" />
@@ -100,7 +114,7 @@ export function Header() {
               </Link>
               <Link
                 href="/register"
-                className="flex items-center gap-1.5 px-4 py-1.5 text-[13px] font-medium text-bg-primary bg-accent-teal rounded-full hover:brightness-110 shadow-sm shadow-accent-teal/25 transition-all duration-200"
+                className="flex items-center gap-1.5 px-4 py-1.5 text-[13px] font-medium text-white bg-accent-blue rounded-full hover:bg-accent-blue/90 shadow-sm shadow-accent-blue/25 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
               >
                 <IconUser className="w-3.5 h-3.5" />
                 Get Started
@@ -112,7 +126,7 @@ export function Header() {
         {/* Mobile Toggle */}
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="md:hidden p-2 text-text-secondary hover:text-text-primary hover:bg-bg-elevated/50 rounded-lg transition-colors"
+          className="md:hidden p-2 text-text-secondary hover:text-text-primary hover:bg-black/[0.04] dark:hover:bg-bg-elevated/50 rounded-lg transition-colors"
         >
           {mobileOpen ? <IconX className="w-5 h-5" /> : <IconMenu className="w-5 h-5" />}
         </button>
@@ -120,18 +134,19 @@ export function Header() {
 
       {/* Mobile Menu */}
       {mobileOpen && (
-        <div className="md:hidden border-t border-border-subtle bg-bg-primary/95 backdrop-blur-xl">
+        <div className="md:hidden glass-nav animate-slide-down">
           <nav className="flex flex-col p-4 gap-1">
-            {navLinks.map((link) => (
+            {navLinks.map((link, i) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setMobileOpen(false)}
-                className={`px-4 py-3 text-sm rounded-xl transition-all ${
+                className={`px-4 py-3 text-sm rounded-xl transition-all animate-fade-up opacity-0 ${
                   isActive(link.href)
-                    ? 'text-bg-primary bg-accent-teal font-medium'
-                    : 'text-text-secondary hover:text-text-primary hover:bg-bg-elevated/50'
+                    ? 'text-white bg-accent-blue font-medium'
+                    : 'text-text-secondary hover:text-text-primary hover:bg-black/[0.03] dark:hover:bg-bg-elevated/50'
                 }`}
+                style={{ animationDelay: `${i * 50}ms`, animationFillMode: 'forwards' }}
               >
                 {link.label}
               </Link>
@@ -139,9 +154,9 @@ export function Header() {
             <div className="border-t border-border-subtle my-2" />
             {user ? (
               <>
-                <div className="flex items-center gap-2 px-4 py-2">
-                  <div className="w-7 h-7 rounded-full bg-accent-teal/15 flex items-center justify-center">
-                    <span className="text-xs font-semibold text-accent-teal">
+                <div className="flex items-center gap-2 px-4 py-2 animate-fade-up opacity-0" style={{ animationDelay: '250ms', animationFillMode: 'forwards' }}>
+                  <div className="w-7 h-7 rounded-full bg-accent-blue/10 flex items-center justify-center">
+                    <span className="text-xs font-semibold text-accent-blue">
                       {user.email?.charAt(0).toUpperCase()}
                     </span>
                   </div>
@@ -152,7 +167,8 @@ export function Header() {
                     signOut();
                     setMobileOpen(false);
                   }}
-                  className="px-4 py-3 text-sm text-text-secondary text-left rounded-xl hover:bg-bg-elevated/50 transition-colors"
+                  className="px-4 py-3 text-sm text-text-secondary text-left rounded-xl hover:bg-black/[0.03] dark:hover:bg-bg-elevated/50 transition-colors animate-fade-up opacity-0"
+                  style={{ animationDelay: '300ms', animationFillMode: 'forwards' }}
                 >
                   Sign out
                 </button>
@@ -162,14 +178,16 @@ export function Header() {
                 <Link
                   href="/login"
                   onClick={() => setMobileOpen(false)}
-                  className="py-2.5 text-sm text-text-secondary text-center rounded-xl hover:bg-bg-elevated/50 transition-colors"
+                  className="py-2.5 text-sm text-text-secondary text-center rounded-xl hover:bg-black/[0.03] dark:hover:bg-bg-elevated/50 transition-colors animate-fade-up opacity-0"
+                  style={{ animationDelay: '250ms', animationFillMode: 'forwards' }}
                 >
                   Log in
                 </Link>
                 <Link
                   href="/register"
                   onClick={() => setMobileOpen(false)}
-                  className="py-2.5 text-sm text-bg-primary bg-accent-teal text-center font-medium rounded-xl"
+                  className="py-2.5 text-sm text-white bg-accent-blue text-center font-medium rounded-xl animate-fade-up opacity-0"
+                  style={{ animationDelay: '300ms', animationFillMode: 'forwards' }}
                 >
                   Get Started
                 </Link>

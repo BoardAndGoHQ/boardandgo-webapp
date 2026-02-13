@@ -1,39 +1,39 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import {
-  IconPlane,
-  IconRadar,
-  IconRoute,
-  IconHeadset,
-  IconGrid,
-  IconSignal,
-} from '@/components/icons';
+  Radar,
+  Route,
+  Headset,
+  LayoutGrid,
+  Signal,
+  Star,
+} from 'lucide-react';
 
-/* ── data ──────────────────────────────────────── */
+/* -- data -- */
 const features = [
   {
     title: 'Real-Time Aircraft Tracking',
     description:
       "Track your flight with 98% accuracy, from takeoff to landing. Our AI agents monitor your aircraft's location, speed, and status in real-time.",
-    icon: IconRadar,
+    icon: Radar,
   },
   {
     title: 'Smart Connection Management',
     description:
       'Never miss a connection. Our AI calculates optimal routes through terminals and alerts you about gate changes or delays.',
-    icon: IconRoute,
+    icon: Route,
   },
   {
     title: 'Proactive AI Assistance',
     description:
       'Receive instant solutions for disruptions before they impact your journey. Our AI concierge is always one step ahead.',
-    icon: IconHeadset,
+    icon: Headset,
   },
   {
     title: 'Multi-Flight Monitoring',
     description:
       'Track multiple flights simultaneously. Perfect for complex itineraries and connecting flights across different airlines.',
-    icon: IconGrid,
+    icon: LayoutGrid,
   },
 ];
 
@@ -64,25 +64,24 @@ const testimonials = [
   },
 ];
 
-/* ── Animated flight path SVG ── */
+/* -- Animated flight path SVG -- */
 function FlightPath() {
-  const path1 = "M-100 300 C200 100, 400 500, 600 250 S900 400, 1300 150";
-  const path2 = "M-50 450 C150 200, 500 350, 700 150 S1000 300, 1350 100";
+  const path1 = 'M-100 300 C200 100, 400 500, 600 250 S900 400, 1300 150';
+  const path2 = 'M-50 450 C150 200, 500 350, 700 150 S1000 300, 1350 100';
 
   return (
     <svg
-      className="absolute inset-0 w-full h-full pointer-events-none opacity-[0.04]"
+      className="absolute inset-0 w-full h-full pointer-events-none opacity-[0.06]"
       viewBox="0 0 1200 600"
       fill="none"
       preserveAspectRatio="none"
     >
-      {/* Dashed trails */}
       <path
         d={path1}
         stroke="currentColor"
         strokeWidth="2"
         strokeDasharray="12 8"
-        className="text-accent-teal animate-dash"
+        className="text-accent-blue animate-dash"
       />
       <path
         d={path2}
@@ -92,89 +91,74 @@ function FlightPath() {
         className="text-text-muted animate-dash"
         style={{ animationDelay: '-15s' }}
       />
-
-      {/* Plane on path 1 */}
       <g opacity="0.7">
         <path
           d="M0 -6 L3 6 L0 4 L-3 6 Z"
           fill="currentColor"
-          className="text-accent-teal"
+          className="text-accent-blue"
         >
-          <animateMotion
-            dur="22s"
-            repeatCount="indefinite"
-            rotate="auto"
-            path={path1}
-          />
+          <animateMotion dur="22s" repeatCount="indefinite" rotate="auto" path={path1} />
         </path>
       </g>
-
-      {/* Plane on path 2 */}
       <g opacity="0.5">
         <path
           d="M0 -5 L2.5 5 L0 3.5 L-2.5 5 Z"
           fill="currentColor"
           className="text-text-muted"
         >
-          <animateMotion
-            dur="28s"
-            repeatCount="indefinite"
-            rotate="auto"
-            path={path2}
-          />
+          <animateMotion dur="28s" repeatCount="indefinite" rotate="auto" path={path2} />
         </path>
       </g>
     </svg>
   );
 }
 
-/* ── page ──────────────────────────────────────── */
+/* -- page -- */
 export default function Home() {
   return (
     <div className="flex flex-col">
-      {/* ───────── Hero — Flight Intelligence Identity ───────── */}
+      {/* ---- Hero ---- */}
       <section className="relative py-16 md:py-24 overflow-hidden">
-        {/* Atmospheric backgrounds */}
         <FlightPath />
-        <div className="absolute inset-0 bg-linear-to-b from-bg-secondary/50 to-transparent pointer-events-none" />
-        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-accent-teal/5 rounded-full blur-[120px] pointer-events-none animate-drift" />
-        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-accent-amber/4 rounded-full blur-[100px] pointer-events-none animate-drift-reverse" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-accent-teal/3 rounded-full blur-[80px] pointer-events-none animate-pulse-slow" />
+        {/* Soft background blobs */}
+        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-accent-blue/[0.06] rounded-full blur-[120px] pointer-events-none animate-drift" />
+        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-blue-300/[0.05] rounded-full blur-[100px] pointer-events-none animate-drift-reverse" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-accent-blue/[0.04] rounded-full blur-[80px] pointer-events-none animate-pulse-slow" />
 
         <div className="relative max-w-6xl mx-auto px-4 text-center">
           {/* Overline */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-accent-teal/8 border border-accent-teal/15 rounded-full mb-6">
-            <div className="w-1.5 h-1.5 rounded-full bg-accent-teal animate-pulse" />
-            <span className="text-xs font-medium text-accent-teal tracking-wide">Flight Intelligence Platform</span>
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-accent-blue/[0.06] border border-accent-blue/10 rounded-full mb-6 animate-fade-up opacity-0" style={{ animationDelay: '0ms', animationFillMode: 'forwards' }}>
+            <div className="w-1.5 h-1.5 rounded-full bg-accent-blue animate-pulse" />
+            <span className="text-xs font-medium text-accent-blue tracking-wide">Flight Intelligence Platform</span>
           </div>
 
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-text-primary tracking-tight mb-5 leading-[1.1]">
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-text-primary tracking-tight mb-5 leading-[1.1] animate-fade-up opacity-0" style={{ animationDelay: '60ms', animationFillMode: 'forwards' }}>
             Your Flight. Fully Handled.
           </h1>
-          <p className="text-text-muted text-base md:text-lg max-w-2xl mx-auto mb-10 leading-relaxed">
+          <p className="text-text-secondary text-base md:text-lg max-w-2xl mx-auto mb-10 leading-relaxed animate-fade-up opacity-0" style={{ animationDelay: '120ms', animationFillMode: 'forwards' }}>
             Real-time tracking. Gate changes. Delay alerts. Cross-airline intelligence.
             <br className="hidden sm:block" />
             Never get surprised by a disruption again.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 animate-fade-up opacity-0" style={{ animationDelay: '180ms', animationFillMode: 'forwards' }}>
             <Link
               href="/track"
-              className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-accent-teal text-bg-primary font-semibold text-sm rounded-xl glow-teal hover:brightness-110 transition-all duration-300"
+              className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-accent-blue text-white font-semibold text-sm rounded-xl glow-primary hover:brightness-110 transition-all duration-300 hover:scale-[1.03] active:scale-[0.97]"
             >
-              <IconSignal className="w-4 h-4" />
+              <Signal className="w-4 h-4" />
               Track a Flight
             </Link>
           </div>
 
           {/* Trust indicators */}
-          <div className="flex items-center justify-center gap-6 mt-12 text-text-muted">
+          <div className="flex items-center justify-center gap-6 mt-12 text-text-muted animate-fade-up opacity-0" style={{ animationDelay: '240ms', animationFillMode: 'forwards' }}>
             <div className="flex items-center gap-2">
               <div className="flex -space-x-2">
                 {['D', 'P', 'L', 'M'].map((initial, i) => (
                   <div
                     key={initial}
-                    className="w-7 h-7 rounded-full bg-gradient-to-br from-accent-teal/20 to-accent-amber/10 border-2 border-bg-primary flex items-center justify-center text-[10px] font-semibold text-accent-teal"
+                    className="w-7 h-7 rounded-full bg-gradient-to-br from-accent-blue/15 to-blue-300/10 border-2 border-bg-primary flex items-center justify-center text-[10px] font-semibold text-accent-blue hover:scale-110 transition-transform"
                     style={{ zIndex: 4 - i }}
                   >
                     {initial}
@@ -183,21 +167,19 @@ export default function Home() {
               </div>
               <span className="text-xs">Trusted by 2,000+ travelers</span>
             </div>
-            <div className="hidden sm:flex items-center gap-1.5">
+            <div className="hidden sm:flex items-center gap-1">
               {[...Array(5)].map((_, i) => (
-                <svg key={i} className="w-3.5 h-3.5 text-amber-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
+                <Star key={i} className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
               ))}
-              <span className="text-xs ml-1">4.9/5 rating</span>
+              <span className="text-xs ml-1.5">4.9/5 rating</span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ───────── Features ───────── */}
+      {/* ---- Features ---- */}
       <section className="py-16 md:py-24 border-t border-border-subtle relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-accent-teal/3 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-accent-blue/[0.04] rounded-full blur-[120px] pointer-events-none" />
 
         <div className="relative max-w-6xl mx-auto px-4">
           <div className="text-center mb-12">
@@ -210,15 +192,16 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {features.map((f) => {
+            {features.map((f, i) => {
               const Icon = f.icon;
               return (
                 <div
                   key={f.title}
-                  className="feature-card group p-6 rounded-xl border border-border-subtle bg-bg-secondary/50 hover:bg-bg-card/60 hover:border-accent-teal/15"
+                  className="feature-card group p-6 rounded-xl border border-border-subtle bg-white/60 dark:bg-bg-secondary/50 backdrop-blur-sm hover:bg-white/80 dark:hover:bg-bg-card/60 hover:border-accent-blue/15 animate-fade-up opacity-0"
+                  style={{ animationDelay: `${i * 80}ms`, animationFillMode: 'forwards' }}
                 >
-                  <div className="w-11 h-11 rounded-xl bg-accent-teal/8 border border-accent-teal/10 flex items-center justify-center mb-4 group-hover:bg-accent-teal/15 transition-colors duration-300">
-                    <Icon className="w-5 h-5 text-accent-teal" />
+                  <div className="w-11 h-11 rounded-xl bg-accent-blue/[0.08] border border-accent-blue/10 flex items-center justify-center mb-4 group-hover:bg-accent-blue/[0.12] group-hover:scale-110 transition-all duration-300">
+                    <Icon className="w-5 h-5 text-accent-blue" />
                   </div>
                   <h3 className="text-sm font-semibold text-text-primary mb-2">{f.title}</h3>
                   <p className="text-[13px] text-text-muted leading-relaxed">{f.description}</p>
@@ -229,7 +212,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ───────── Mobile App Preview ───────── */}
+      {/* ---- Mobile App Preview ---- */}
       <section className="py-16 md:py-24 border-t border-border-subtle">
         <div className="max-w-6xl mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -265,9 +248,8 @@ export default function Home() {
             </div>
 
             <div className="relative flex justify-center items-center gap-6">
-              <div className="absolute inset-0 bg-accent-teal/5 rounded-full blur-3xl pointer-events-none animate-pulse-slow" />
+              <div className="absolute inset-0 bg-accent-blue/[0.04] rounded-full blur-3xl pointer-events-none animate-pulse-slow" />
 
-              {/* iOS Device */}
               <div className="animate-float hover:scale-105 transition-transform duration-500">
                 <div className="glass-effect rounded-3xl p-1.5 shadow-xl">
                   <Image
@@ -281,7 +263,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Android Device */}
               <div className="animate-float-delay hover:scale-105 transition-transform duration-500">
                 <div className="glass-effect rounded-3xl p-1.5 shadow-xl">
                   <Image
@@ -299,7 +280,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ───────── Testimonials ───────── */}
+      {/* ---- Testimonials ---- */}
       <section className="py-16 md:py-24 border-t border-border-subtle">
         <div className="max-w-6xl mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
@@ -308,20 +289,21 @@ export default function Home() {
               {testimonials.map((t, i) => (
                 <div
                   key={t.name}
-                  className={`glass-effect rounded-xl p-5 group relative overflow-hidden hover:scale-[1.02] transition-all duration-300 ${
+                  className={`glass-effect rounded-xl p-5 group relative overflow-hidden hover:scale-[1.02] transition-all duration-300 animate-fade-up opacity-0 ${
                     i % 2 !== 0 ? 'sm:translate-y-6' : ''
                   }`}
+                  style={{ animationDelay: `${i * 100}ms`, animationFillMode: 'forwards' }}
                 >
                   {/* Hover gradient glow */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-accent-teal/10 via-accent-amber/5 to-transparent rounded-xl opacity-0 group-hover:opacity-50 transition-all duration-500" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-accent-blue/[0.08] via-blue-200/[0.04] to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-500" />
 
                   <div className="relative space-y-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-accent-teal/20 to-accent-amber/10 flex items-center justify-center text-xs font-semibold text-accent-teal shrink-0 group-hover:scale-110 transition-transform duration-300">
+                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-accent-blue/15 to-blue-300/10 flex items-center justify-center text-xs font-semibold text-accent-blue shrink-0 group-hover:scale-110 transition-transform duration-300">
                         {t.name.charAt(0)}
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-text-primary group-hover:text-accent-teal transition-colors duration-300">
+                        <p className="text-sm font-medium text-text-primary group-hover:text-accent-blue transition-colors duration-300">
                           {t.name}
                         </p>
                         <p className="text-xs text-text-muted">{t.role}</p>
@@ -332,15 +314,11 @@ export default function Home() {
                     </p>
                     <div className="flex gap-0.5">
                       {[...Array(5)].map((_, j) => (
-                        <svg
+                        <Star
                           key={j}
-                          className="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition-transform duration-300"
+                          className="w-3.5 h-3.5 text-amber-400 fill-amber-400 group-hover:scale-110 transition-transform duration-300"
                           style={{ transitionDelay: `${j * 50}ms` }}
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
+                        />
                       ))}
                     </div>
                   </div>
@@ -361,13 +339,13 @@ export default function Home() {
               <div className="flex flex-col sm:flex-row gap-3">
                 <Link
                   href="/track"
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-accent-teal text-bg-primary font-semibold text-sm rounded-xl glow-teal hover:brightness-110 transition-all duration-300"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-accent-blue text-white font-semibold text-sm rounded-xl glow-primary hover:brightness-110 transition-all duration-300 hover:scale-[1.03] active:scale-[0.97]"
                 >
                   Start Tracking <span>&rarr;</span>
                 </Link>
                 <Link
                   href="/about"
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-bg-elevated border border-border-subtle text-text-primary text-sm rounded-xl hover:bg-bg-card hover:border-accent-teal/20 transition-all duration-300"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white/60 dark:bg-bg-elevated border border-border-subtle text-text-primary text-sm rounded-xl hover:bg-white dark:hover:bg-bg-card hover:border-accent-blue/15 transition-all duration-300"
                 >
                   Learn More
                 </Link>
@@ -377,12 +355,12 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ───────── Final CTA ───────── */}
+      {/* ---- Final CTA ---- */}
       <section className="py-20 md:py-28 border-t border-border-subtle relative overflow-hidden">
         <FlightPath />
-        <div className="absolute inset-0 bg-linear-to-b from-transparent via-accent-teal/4 to-bg-primary pointer-events-none" />
-        <div className="absolute -left-20 bottom-0 w-80 h-80 bg-accent-teal/8 rounded-full blur-[100px] pointer-events-none animate-drift" />
-        <div className="absolute -right-20 bottom-0 w-80 h-80 bg-accent-amber/8 rounded-full blur-[100px] pointer-events-none animate-drift-reverse" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-accent-blue/[0.03] to-bg-primary pointer-events-none" />
+        <div className="absolute -left-20 bottom-0 w-80 h-80 bg-accent-blue/[0.06] rounded-full blur-[100px] pointer-events-none animate-drift" />
+        <div className="absolute -right-20 bottom-0 w-80 h-80 bg-blue-300/[0.06] rounded-full blur-[100px] pointer-events-none animate-drift-reverse" />
 
         <div className="relative max-w-6xl mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-5xl font-bold text-text-primary mb-4">
@@ -396,13 +374,13 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               href="/track"
-              className="inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-accent-teal text-bg-primary font-semibold text-sm rounded-xl glow-teal hover:brightness-110 transition-all duration-300"
+              className="inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-accent-blue text-white font-semibold text-sm rounded-xl glow-primary hover:brightness-110 transition-all duration-300 hover:scale-[1.03] active:scale-[0.97]"
             >
               Track a Flight <span>&rarr;</span>
             </Link>
             <Link
               href="/features"
-              className="inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-bg-elevated border border-border-subtle text-text-primary text-sm rounded-xl hover:bg-bg-card hover:border-accent-teal/20 transition-all duration-300"
+              className="inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-white/60 dark:bg-bg-elevated border border-border-subtle text-text-primary text-sm rounded-xl hover:bg-white dark:hover:bg-bg-card hover:border-accent-blue/15 transition-all duration-300"
             >
               Explore Features
             </Link>

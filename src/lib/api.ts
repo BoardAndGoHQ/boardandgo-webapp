@@ -180,6 +180,7 @@ export interface FlightLookupResult {
 export interface TrackedFlight {
   id: string;
   bookingId: string;
+  legIndex: number;
   flightNumber: string;
   airlineCode: string;
   airlineName: string | null;
@@ -224,6 +225,49 @@ export interface FlightPosition {
   verticalSpeed: number;
   status: string;
   updated: number;
+}
+
+/* ── Connection Intelligence Types ── */
+
+export type ConnectionRiskLevel = 'low' | 'medium' | 'high' | 'critical';
+export type HumanRiskLabel = 'You\'re on track' | 'Move quickly' | 'Very tight connection';
+
+export interface ConnectionAnalysis {
+  connectionAirport: string;
+  minutesToNextFlight: number;
+  minimumConnectionTime: number;
+  riskScore: number;
+  riskLevel: ConnectionRiskLevel;
+  humanStatus: HumanRiskLabel;
+  humanExplanation: string;
+  terminalChange: boolean;
+  arrivingTerminal: string | null;
+  departingTerminal: string | null;
+  selfTransfer: boolean;
+  factors: string[];
+  arrivingLegIndex: number;
+  departingLegIndex: number;
+}
+
+export interface JourneyConnectionReport {
+  isMultiLeg: boolean;
+  connectionCount: number;
+  connections: ConnectionAnalysis[];
+  worstRiskLevel: ConnectionRiskLevel;
+  overallHumanStatus: HumanRiskLabel;
+}
+
+export type JourneyStatus =
+  | 'upcoming' | 'checkin_window' | 'boarding_soon' | 'in_air'
+  | 'connection_active' | 'landed' | 'completed' | 'disrupted';
+
+export interface JourneyData {
+  booking: {
+    id: string;
+    journeyStatus: JourneyStatus;
+    flights: (TrackedFlight & { statusEvents: FlightStatusEvent[] })[];
+  };
+  connectionReport: JourneyConnectionReport;
 }
 
 async function trackingRequest<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
@@ -358,6 +402,14 @@ export const api = {
 
     streamUrl: (flightId: string, token: string) =>
       `${POST_BOOKING_API}/api/flights/${flightId}/stream?token=${encodeURIComponent(token)}`,
+
+    journeyStreamUrl: (bookingId: string, token: string) =>
+      `${POST_BOOKING_API}/api/flights/journey/${bookingId}/stream?token=${encodeURIComponent(token)}`,
+
+    getJourney: (bookingId: string, token: string) =>
+      trackingRequest<JourneyData>(
+        `/api/flights/journey/${bookingId}`, { token }
+      ),
   },
 
   events: {
@@ -371,10 +423,29 @@ export const api = {
     generate: (
       report: import('./insights').FlightIntelligenceReport,
       profile: import('./insights').UserIntelligenceProfile,
-      token: string
+      token: string,
+      journeyContext?: {
+        isMultiLeg: boolean;
+        journeyStatus: string;
+        totalLegs: number;
+        currentLegIndex: number;
+        connections: Array<{
+          connectionAirport: string;
+          minutesToNextFlight: number;
+          riskLevel: string;
+          humanStatus: string;
+          humanExplanation: string;
+          terminalChange: boolean;
+          arrivingTerminal: string | null;
+          departingTerminal: string | null;
+          minimumConnectionTime: number;
+        }>;
+        worstRiskLevel: string;
+        overallHumanStatus: string;
+      },
     ) =>
       trackingRequest<import('./insights').AgentBriefing>(
-        '/api/briefing', { method: 'POST', body: { report, profile }, token }
+        '/api/briefing', { method: 'POST', body: { report, profile, journeyContext }, token }
       ),
   },
 };

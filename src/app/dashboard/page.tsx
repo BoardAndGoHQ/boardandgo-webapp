@@ -4,18 +4,21 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/auth';
-import { api, type TrackedFlight, type FlightStatusEvent, type FlightPosition } from '@/lib/api';
+import { api, type TrackedFlight, type FlightStatusEvent, type FlightPosition, type JourneyData } from '@/lib/api';
 import { FlightMap } from '@/components/flight-map';
 import { StatusBadge } from '@/components/flight-tracker';
 import {
-  IconLoader,
-  IconPlane,
-  IconSignal,
-  IconClock,
-  IconMapPin,
-  IconArrowRight,
-  IconMail,
-} from '@/components/icons';
+  Loader2 as IconLoader,
+  Plane as IconPlane,
+  Radio as IconSignal,
+  Clock as IconClock,
+  MapPin as IconMapPin,
+  ArrowRight as IconArrowRight,
+  Mail as IconMail,
+  X as IconX,
+  Check as IconCheck,
+  ArrowLeft as IconArrowLeft,
+} from 'lucide-react';
 import { getTrackedDelayRisk, generateTravelInsights } from '@/lib/insights';
 import { DelayPredictionCard, InsightCard, IntelligenceSection } from '@/components/intelligence-card';
 import { SituationRoom, EmptySituationRoom } from '@/components/situation-room';
@@ -62,6 +65,7 @@ export default function DashboardPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showHistory, setShowHistory] = useState(false);
   const [showFullDashboard, setShowFullDashboard] = useState(false);
+  const [journeyData, setJourneyData] = useState<JourneyData | null>(null);
 
   // Gmail connect state
   const [gmailConnecting, setGmailConnecting] = useState(false);
@@ -155,6 +159,22 @@ export default function DashboardPage() {
       return new Date(a.scheduledDeparture).getTime() - new Date(b.scheduledDeparture).getTime();
     })[0] ?? null;
 
+  // Fetch journey data for multi-leg bookings (connection intelligence)
+  useEffect(() => {
+    if (!focusFlight || !token) {
+      setJourneyData(null);
+      return;
+    }
+    const bookingFlights = flights.filter((f) => f.bookingId === focusFlight.bookingId);
+    if (bookingFlights.length < 2) {
+      setJourneyData(null);
+      return;
+    }
+    api.tracking.getJourney(focusFlight.bookingId, token)
+      .then((data) => setJourneyData(data))
+      .catch(() => setJourneyData(null));
+  }, [focusFlight?.bookingId, token, flights]); // eslint-disable-line react-hooks/exhaustive-deps
+
   if (authLoading) {
     return (
       <div className="min-h-[80vh] flex items-center justify-center">
@@ -164,24 +184,27 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative">
+      {/* Decorative background */}
+      <div className="fixed top-20 right-1/4 w-[500px] h-[500px] bg-accent-blue/3 rounded-full blur-3xl pointer-events-none" />
+      <div className="fixed bottom-20 left-1/4 w-[400px] h-[400px] bg-accent-blue/2 rounded-full blur-3xl pointer-events-none" />
       {/* Header bar */}
-      <div className="px-4 md:px-6 py-5">
+      <div className="relative z-10 px-5 md:px-6 py-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div>
-            <h1 className="text-xl md:text-2xl font-bold text-text-primary flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-accent-teal/10 flex items-center justify-center">
-                <IconSignal className="w-5 h-5 text-accent-teal" />
+            <h1 className="text-xl md:text-2xl font-bold text-text-primary flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-accent-blue/10 flex items-center justify-center">
+                <IconSignal className="w-5 h-5 text-accent-blue" />
               </div>
               Flight Dashboard
             </h1>
-            <p className="text-sm text-text-muted mt-1 ml-12">
+            <p className="text-sm text-text-muted mt-1 ml-[52px]">
               Real-time tracking and visualization
             </p>
           </div>
           <Link
             href="/track"
-            className="flex items-center gap-2 px-4 py-2 bg-accent-teal text-bg-primary text-sm font-medium rounded-xl hover:brightness-110 transition-all"
+            className="flex items-center gap-2 px-5 py-2.5 bg-accent-blue text-white text-sm font-semibold rounded-xl hover:bg-accent-blue/90 transition-all hover:scale-105 glow-primary"
           >
             <IconPlane className="w-4 h-4" />
             Track Flight
@@ -194,7 +217,7 @@ export default function DashboardPage() {
         <div className="max-w-7xl mx-auto grid grid-cols-3 gap-3 md:gap-4">
           <div className="glass-card rounded-xl p-4 border border-border-subtle">
             <div className="text-xs text-text-muted uppercase tracking-wider mb-1">Active</div>
-            <div className="text-2xl font-bold text-accent-teal">{activeCount}</div>
+            <div className="text-2xl font-bold text-accent-blue">{activeCount}</div>
           </div>
           <div className="glass-card rounded-xl p-4 border border-border-subtle">
             <div className="text-xs text-text-muted uppercase tracking-wider mb-1">Scheduled</div>
@@ -211,7 +234,7 @@ export default function DashboardPage() {
       {!gmailDismissed && !gmailConnected && (
         <div className="px-4 md:px-6 mb-5">
           <div className="max-w-7xl mx-auto">
-            <div className="glass-card rounded-xl p-4 border border-accent-teal/20 bg-accent-teal/[0.03] flex items-center gap-4">
+            <div className="glass-card rounded-xl p-4 border border-accent-blue/20 bg-accent-blue/[0.03] flex items-center gap-4">
               <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0">
                 <IconMail className="w-5 h-5 text-red-400" />
               </div>
@@ -223,7 +246,7 @@ export default function DashboardPage() {
                 <button
                   onClick={handleConnectGmail}
                   disabled={gmailConnecting}
-                  className="flex items-center gap-2 px-4 py-2 bg-accent-teal text-bg-primary text-xs font-medium rounded-lg hover:brightness-110 transition-all disabled:opacity-50"
+                  className="flex items-center gap-2 px-4 py-2 bg-accent-blue text-white text-xs font-medium rounded-lg hover:brightness-110 transition-all disabled:opacity-50"
                 >
                   {gmailConnecting ? (
                     <><IconLoader className="w-3.5 h-3.5 animate-spin" /> Connecting...</>
@@ -236,7 +259,7 @@ export default function DashboardPage() {
                   className="p-1.5 text-text-muted hover:text-text-primary rounded-lg hover:bg-bg-elevated/50 transition-colors"
                   title="Dismiss"
                 >
-                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                  <IconX className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
@@ -249,7 +272,7 @@ export default function DashboardPage() {
           <div className="max-w-7xl mx-auto">
             <div className="glass-card rounded-xl p-4 border border-emerald-500/20 bg-emerald-500/[0.03] flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center">
-                <svg className="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 6L9 17l-5-5" /></svg>
+                <IconCheck className="w-4 h-4 text-emerald-400" />
               </div>
               <p className="text-sm text-emerald-400 font-medium">Gmail connected! Your booking emails will be imported automatically.</p>
             </div>
@@ -277,13 +300,16 @@ export default function DashboardPage() {
                 token={token}
                 allFlightsCount={flights.length}
                 onViewAll={() => setShowFullDashboard(true)}
+                allFlights={flights.filter((f) => f.bookingId === focusFlight.bookingId)}
+                connectionReport={journeyData?.connectionReport}
+                journeyStatus={journeyData?.booking.journeyStatus}
               />
 
               {/* Toggle to full dashboard */}
               {flights.length > 1 && (
                 <button
                   onClick={() => setShowFullDashboard(true)}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 glass-card rounded-xl border border-border-subtle text-sm text-text-muted hover:text-text-secondary hover:border-accent-teal/20 transition-all"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 glass-card rounded-xl border border-border-subtle text-sm text-text-muted hover:text-text-secondary hover:border-accent-blue/20 transition-all"
                 >
                   <IconSignal className="w-4 h-4" />
                   <span>View all {flights.length} flights on map</span>
@@ -315,9 +341,7 @@ export default function DashboardPage() {
                   onClick={() => setShowFullDashboard(false)}
                   className="flex items-center gap-2 text-sm text-text-muted hover:text-text-secondary transition-colors"
                 >
-                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M19 12H5M12 19l-7-7 7-7" />
-                  </svg>
+                  <IconArrowLeft className="w-4 h-4" />
                   Back to Concierge
                 </button>
               )}
@@ -340,10 +364,10 @@ export default function DashboardPage() {
               <div className="lg:w-80 xl:w-96 flex flex-col gap-3">
                 {/* Selected flight detail */}
                 {selectedFlight && (
-                  <div className="glass-card rounded-xl p-5 border border-accent-teal/20 animate-in fade-in slide-in-from-right-2 duration-200">
+                  <div className="glass-card rounded-xl p-5 border border-accent-blue/20 animate-in fade-in slide-in-from-right-2 duration-200">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-2">
-                        <IconPlane className="w-4 h-4 text-accent-teal" />
+                        <IconPlane className="w-4 h-4 text-accent-blue" />
                         <span className="text-base font-semibold text-text-primary">
                           {selectedFlight.airlineCode}{selectedFlight.flightNumber}
                         </span>
@@ -357,7 +381,7 @@ export default function DashboardPage() {
                         <div className="text-xl font-bold text-text-primary">{selectedFlight.departureAirport}</div>
                         <div className="text-xs text-text-muted">{formatTime(selectedFlight.actualDeparture ?? selectedFlight.estimatedDeparture ?? selectedFlight.scheduledDeparture)}</div>
                         {selectedFlight.departureGate && (
-                          <div className="text-xs text-accent-teal">Gate {selectedFlight.departureGate}</div>
+                          <div className="text-xs text-accent-blue">Gate {selectedFlight.departureGate}</div>
                         )}
                       </div>
                       <div className="flex items-center gap-1 text-text-muted">
@@ -369,7 +393,7 @@ export default function DashboardPage() {
                         <div className="text-xl font-bold text-text-primary">{selectedFlight.arrivalAirport}</div>
                         <div className="text-xs text-text-muted">{formatTime(selectedFlight.actualArrival ?? selectedFlight.estimatedArrival ?? selectedFlight.scheduledArrival)}</div>
                         {selectedFlight.arrivalGate && (
-                          <div className="text-xs text-accent-teal">Gate {selectedFlight.arrivalGate}</div>
+                          <div className="text-xs text-accent-blue">Gate {selectedFlight.arrivalGate}</div>
                         )}
                       </div>
                     </div>
@@ -406,7 +430,7 @@ export default function DashboardPage() {
                     {/* View full tracking */}
                     <Link
                       href={`/bookings/${selectedFlight.bookingId}/track`}
-                      className="mt-4 flex items-center justify-center gap-2 w-full py-2 text-xs font-medium text-accent-teal bg-accent-teal/10 rounded-lg hover:bg-accent-teal/15 transition-colors"
+                      className="mt-4 flex items-center justify-center gap-2 w-full py-2 text-xs font-medium text-accent-blue bg-accent-blue/10 rounded-lg hover:bg-accent-blue/15 transition-colors"
                     >
                       View Full Tracking
                       <IconArrowRight className="w-3 h-3" />
@@ -433,7 +457,7 @@ export default function DashboardPage() {
                     <button
                       onClick={() => setShowHistory(false)}
                       className={`flex-1 text-xs font-medium py-1.5 rounded-md transition-colors ${
-                        !showHistory ? 'bg-accent-teal/10 text-accent-teal' : 'text-text-muted hover:text-text-secondary'
+                        !showHistory ? 'bg-accent-blue/10 text-accent-blue' : 'text-text-muted hover:text-text-secondary'
                       }`}
                     >
                       Upcoming ({flights.length})
@@ -441,7 +465,7 @@ export default function DashboardPage() {
                     <button
                       onClick={() => setShowHistory(true)}
                       className={`flex-1 text-xs font-medium py-1.5 rounded-md transition-colors ${
-                        showHistory ? 'bg-accent-teal/10 text-accent-teal' : 'text-text-muted hover:text-text-secondary'
+                        showHistory ? 'bg-accent-blue/10 text-accent-blue' : 'text-text-muted hover:text-text-secondary'
                       }`}
                     >
                       History ({historyFlights.length})
@@ -471,15 +495,15 @@ export default function DashboardPage() {
                               onClick={() => setSelectedId(isSelected ? null : flight.id)}
                               className={`w-full text-left glass-card rounded-xl p-3.5 border transition-all duration-150 ${
                                 isSelected
-                                  ? 'border-accent-teal/40 bg-accent-teal/5'
+                                  ? 'border-accent-blue/40 bg-accent-blue/5'
                                   : isHistory
                                     ? 'border-border-subtle/50 opacity-75 hover:opacity-100 hover:border-border-subtle'
-                                    : 'border-border-subtle hover:border-accent-teal/20'
+                                    : 'border-border-subtle hover:border-accent-blue/20'
                               }`}
                             >
                               <div className="flex items-center justify-between mb-1.5">
                                 <div className="flex items-center gap-2">
-                                  <IconPlane className={`w-3.5 h-3.5 ${isSelected ? 'text-accent-teal' : 'text-text-muted'}`} />
+                                  <IconPlane className={`w-3.5 h-3.5 ${isSelected ? 'text-accent-blue' : 'text-text-muted'}`} />
                                   <span className="text-sm font-semibold text-text-primary">
                                     {flight.airlineCode}{flight.flightNumber}
                                   </span>

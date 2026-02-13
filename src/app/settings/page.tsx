@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth';
-import { IconMail, IconLoader, IconCheck } from '@/components/icons';
+import { Mail as IconMail, Loader2 as IconLoader, Check as IconCheck, Settings, Layers, AlertTriangle } from 'lucide-react';
 
 type IntelligenceMode = 'minimal' | 'balanced' | 'deep';
 
@@ -81,23 +81,31 @@ export default function SettingsPage() {
   if (authLoading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-        <IconLoader className="w-6 h-6 text-accent-teal animate-spin" />
+        <IconLoader className="w-6 h-6 text-accent-blue animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-12">
-      <h1 className="text-2xl font-semibold text-text-primary mb-2">Settings</h1>
-      <p className="text-text-muted mb-8">Manage your account and integrations</p>
+    <div className="max-w-2xl mx-auto px-5 py-12 relative">
+      <div className="absolute -top-20 left-0 w-[400px] h-[400px] bg-accent-blue/3 rounded-full blur-3xl pointer-events-none" />
+
+      <div className="relative">
+      <div className="flex items-center gap-3 mb-2">
+        <div className="w-10 h-10 rounded-2xl bg-accent-blue/10 flex items-center justify-center">
+          <Settings className="w-5 h-5 text-accent-blue" />
+        </div>
+        <h1 className="text-2xl font-bold text-text-primary">Settings</h1>
+      </div>
+      <p className="text-text-muted ml-[52px] mb-8">Manage your account and integrations</p>
 
       {/* Account Section */}
       <section className="mb-8">
         <h2 className="text-lg font-medium text-text-primary mb-4">Account</h2>
-        <div className="bg-bg-card border border-border-subtle rounded-xl p-6">
+        <div className="glass-card rounded-2xl p-6">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-accent-teal/10 rounded-full flex items-center justify-center">
-              <span className="text-accent-teal text-xl font-semibold">
+            <div className="w-12 h-12 bg-accent-blue/10 rounded-full flex items-center justify-center">
+              <span className="text-accent-blue text-xl font-semibold">
                 {user?.email?.charAt(0).toUpperCase()}
               </span>
             </div>
@@ -114,7 +122,7 @@ export default function SettingsPage() {
       {/* Gmail Integration Section */}
       <section className="mb-8">
         <h2 className="text-lg font-medium text-text-primary mb-4">Gmail Integration</h2>
-        <div className="bg-bg-card border border-border-subtle rounded-xl p-6">
+        <div className="glass-card rounded-2xl p-6">
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center shrink-0">
               <IconMail className="w-6 h-6 text-red-400" />
@@ -166,12 +174,10 @@ export default function SettingsPage() {
       {/* Flight Intelligence Mode */}
       <section className="mb-8">
         <h2 className="text-lg font-medium text-text-primary mb-4">Flight Intelligence</h2>
-        <div className="bg-bg-card border border-border-subtle rounded-xl p-6">
+        <div className="glass-card rounded-2xl p-6">
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 bg-accent-teal/10 rounded-full flex items-center justify-center shrink-0">
-              <svg className="w-6 h-6 text-accent-teal" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-              </svg>
+            <div className="w-12 h-12 bg-accent-blue/10 rounded-full flex items-center justify-center shrink-0">
+              <Layers className="w-6 h-6 text-accent-blue" />
             </div>
             <div className="flex-1">
               <h3 className="text-text-primary font-medium mb-1">
@@ -182,13 +188,13 @@ export default function SettingsPage() {
               </p>
               
               <div className="space-y-2">
-                <label className="flex items-start gap-3 p-3 rounded-lg border border-border-subtle bg-bg-elevated/30 cursor-pointer hover:bg-bg-elevated/50 transition-colors">
+                <label className="flex items-start gap-3 p-3 rounded-xl glass cursor-pointer hover:shadow-md transition-all">
                   <input
                     type="radio"
                     name="intelligenceMode"
                     checked={intelligenceMode === 'minimal'}
                     onChange={() => handleModeChange('minimal')}
-                    className="mt-0.5 accent-accent-teal"
+                    className="mt-0.5 accent-accent-blue"
                   />
                   <div>
                     <div className="text-sm font-medium text-text-primary">Minimal</div>
@@ -196,27 +202,27 @@ export default function SettingsPage() {
                   </div>
                 </label>
                 
-                <label className="flex items-start gap-3 p-3 rounded-lg border border-border-subtle bg-bg-elevated/30 cursor-pointer hover:bg-bg-elevated/50 transition-colors">
+                <label className="flex items-start gap-3 p-3 rounded-xl glass cursor-pointer hover:shadow-md transition-all">
                   <input
                     type="radio"
                     name="intelligenceMode"
                     checked={intelligenceMode === 'balanced'}
                     onChange={() => handleModeChange('balanced')}
-                    className="mt-0.5 accent-accent-teal"
+                    className="mt-0.5 accent-accent-blue"
                   />
                   <div>
-                    <div className="text-sm font-medium text-text-primary">Balanced <span className="text-xs text-accent-teal">(Recommended)</span></div>
+                    <div className="text-sm font-medium text-text-primary">Balanced <span className="text-xs text-accent-blue">(Recommended)</span></div>
                     <div className="text-xs text-text-muted">Risk assessment, delay predictions, smart suggestions. Brief but informative.</div>
                   </div>
                 </label>
                 
-                <label className="flex items-start gap-3 p-3 rounded-lg border border-border-subtle bg-bg-elevated/30 cursor-pointer hover:bg-bg-elevated/50 transition-colors">
+                <label className="flex items-start gap-3 p-3 rounded-xl glass cursor-pointer hover:shadow-md transition-all">
                   <input
                     type="radio"
                     name="intelligenceMode"
                     checked={intelligenceMode === 'deep'}
                     onChange={() => handleModeChange('deep')}
-                    className="mt-0.5 accent-accent-teal"
+                    className="mt-0.5 accent-accent-blue"
                   />
                   <div>
                     <div className="text-sm font-medium text-text-primary">Deep Ops</div>
@@ -232,13 +238,18 @@ export default function SettingsPage() {
       {/* Danger Zone */}
       <section>
         <h2 className="text-lg font-medium text-text-primary mb-4">Danger Zone</h2>
-        <div className="bg-bg-card border border-red-500/20 rounded-xl p-6">
+        <div className="glass-card rounded-2xl p-6 border border-red-500/20">
           <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-text-primary font-medium mb-1">Delete Account</h3>
-              <p className="text-text-muted text-sm">
-                Permanently delete your account and all associated data.
-              </p>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center">
+                <AlertTriangle className="w-5 h-5 text-red-400" />
+              </div>
+              <div>
+                <h3 className="text-text-primary font-medium mb-1">Delete Account</h3>
+                <p className="text-text-muted text-sm">
+                  Permanently delete your account and all associated data.
+                </p>
+              </div>
             </div>
             <button
               className="px-4 py-2 bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-lg hover:bg-red-500/20 transition-colors"
@@ -248,6 +259,7 @@ export default function SettingsPage() {
           </div>
         </div>
       </section>
+      </div>
     </div>
   );
 }

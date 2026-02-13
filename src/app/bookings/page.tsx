@@ -18,7 +18,7 @@ function formatTime(dateStr: string) {
 }
 
 const statusColors: Record<string, string> = {
-  upcoming: 'bg-accent-teal/10 text-accent-teal',
+  upcoming: 'bg-accent-blue/10 text-accent-blue',
   completed: 'bg-text-muted/10 text-text-muted',
   cancelled: 'bg-red-400/10 text-red-400',
 };
@@ -73,8 +73,12 @@ export default function BookingsPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 md:py-12">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+    <div className="max-w-6xl mx-auto px-4 py-8 md:py-12 relative">
+      {/* Decorative background */}
+      <div className="fixed top-20 right-1/4 w-[500px] h-[500px] bg-accent-blue/3 rounded-full blur-3xl pointer-events-none" />
+      <div className="fixed bottom-20 left-1/4 w-[400px] h-[400px] bg-accent-blue/2 rounded-full blur-3xl pointer-events-none" />
+
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8 animate-fade-up">
         <div>
           <h1 className="text-2xl font-semibold text-text-primary">Your Bookings</h1>
           <p className="text-sm text-text-muted mt-1">Manage all your flight reservations</p>
@@ -83,7 +87,7 @@ export default function BookingsPage() {
           <button
             onClick={handleConnectGmail}
             disabled={connectingGmail}
-            className="flex items-center gap-2 px-4 py-2.5 text-sm text-text-secondary bg-bg-elevated border border-border-subtle rounded-lg hover:bg-bg-card transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2.5 text-sm text-text-secondary glass-card rounded-xl hover:bg-white/60 dark:hover:bg-white/10 transition-colors disabled:opacity-50"
           >
             {connectingGmail ? (
               <IconLoader className="w-4 h-4 animate-spin" />
@@ -94,7 +98,7 @@ export default function BookingsPage() {
           </button>
           <Link
             href="/bookings/new"
-            className="flex items-center gap-2 px-4 py-2.5 text-sm text-bg-primary bg-accent-teal rounded-lg hover:bg-accent-teal/90 transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 text-sm text-white bg-accent-blue rounded-xl hover:bg-accent-blue/90 transition-colors shadow-lg shadow-accent-blue/20"
           >
             <IconPlus className="w-4 h-4" />
             Add Booking
@@ -113,8 +117,10 @@ export default function BookingsPage() {
           <IconLoader className="w-6 h-6 text-text-muted animate-spin" />
         </div>
       ) : bookings.length === 0 ? (
-        <div className="text-center py-20">
-          <IconPlane className="w-12 h-12 text-text-muted/50 mx-auto mb-4" />
+        <div className="text-center py-20 animate-fade-up">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-accent-blue/10 text-accent-blue mb-4">
+            <IconPlane className="w-8 h-8" />
+          </div>
           <h3 className="text-lg font-medium text-text-secondary mb-2">No bookings yet</h3>
           <p className="text-sm text-text-muted mb-6">
             Search for flights or connect Gmail to import your reservations automatically.
@@ -122,14 +128,14 @@ export default function BookingsPage() {
           <div className="flex items-center justify-center gap-3">
             <Link
               href="/"
-              className="px-4 py-2.5 text-sm text-bg-primary bg-accent-teal rounded-lg hover:bg-accent-teal/90 transition-colors"
+              className="px-4 py-2.5 text-sm text-white bg-accent-blue rounded-xl hover:bg-accent-blue/90 transition-colors shadow-lg shadow-accent-blue/20"
             >
               Search Flights
             </Link>
             <button
               onClick={handleConnectGmail}
               disabled={connectingGmail}
-              className="flex items-center gap-2 px-4 py-2.5 text-sm text-text-secondary bg-bg-elevated border border-border-subtle rounded-lg hover:bg-bg-card transition-colors"
+              className="flex items-center gap-2 px-4 py-2.5 text-sm text-text-secondary glass-card rounded-xl hover:bg-white/60 dark:hover:bg-white/10 transition-colors"
             >
               <IconMail className="w-4 h-4" />
               Connect Gmail
@@ -142,7 +148,7 @@ export default function BookingsPage() {
             <Link
               key={booking.id}
               href={`/bookings/${booking.id}`}
-              className="block p-4 md:p-5 bg-bg-card border border-border-subtle rounded-xl hover:bg-bg-elevated transition-colors group"
+              className="block p-4 md:p-5 glass-card rounded-2xl hover:shadow-lg transition-all duration-300 group"
             >
               <div className="flex flex-col md:flex-row md:items-center gap-4">
                 <div className="flex-1 min-w-0">
@@ -177,7 +183,7 @@ export default function BookingsPage() {
                   <Link
                     href={`/bookings/${booking.id}/track`}
                     onClick={(e) => e.stopPropagation()}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-accent-teal bg-accent-teal/10 rounded-lg hover:bg-accent-teal/20 transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-accent-blue bg-accent-blue/10 rounded-lg hover:bg-accent-blue/20 transition-colors"
                   >
                     <IconSignal className="w-3.5 h-3.5" />
                     Track

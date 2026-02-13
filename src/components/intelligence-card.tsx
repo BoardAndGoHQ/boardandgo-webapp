@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Timer, Link2, ChevronDown, Sparkles } from 'lucide-react';
 import type { DelayPrediction } from '@/lib/insights/delay-risk';
 import type { ConnectionRiskResult } from '@/lib/insights/connection-risk';
 import type { TravelInsight } from '@/lib/insights/personal-insights';
@@ -25,7 +26,7 @@ export function DelayPredictionCard({ prediction }: { prediction: DelayPredictio
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-sm">⏳</span>
+          <Timer className="w-4 h-4 text-accent-blue" />
           <span className="text-xs text-text-secondary">Delay Probability</span>
         </div>
         <div className="flex items-center gap-2">
@@ -33,12 +34,9 @@ export function DelayPredictionCard({ prediction }: { prediction: DelayPredictio
             {prediction.probability}%
           </span>
           <span className={`w-1.5 h-1.5 rounded-full ${colors.dot}`} />
-          <svg
+          <ChevronDown
             className={`w-3 h-3 text-text-muted transition-transform ${expanded ? 'rotate-180' : ''}`}
-            viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-          >
-            <path d="M6 9l6 6 6-6" />
-          </svg>
+          />
         </div>
       </div>
 
@@ -76,7 +74,7 @@ export function ConnectionRiskCard({ risk }: { risk: ConnectionRiskResult }) {
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-sm">🔗</span>
+          <Link2 className="w-4 h-4 text-accent-blue" />
           <span className="text-xs text-text-secondary">Connection Risk</span>
         </div>
         <div className="flex items-center gap-2">
@@ -84,12 +82,9 @@ export function ConnectionRiskCard({ risk }: { risk: ConnectionRiskResult }) {
             {risk.score}%
           </span>
           <span className={`w-1.5 h-1.5 rounded-full ${colors.dot}`} />
-          <svg
+          <ChevronDown
             className={`w-3 h-3 text-text-muted transition-transform ${expanded ? 'rotate-180' : ''}`}
-            viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-          >
-            <path d="M6 9l6 6 6-6" />
-          </svg>
+          />
         </div>
       </div>
 
@@ -143,7 +138,7 @@ export function IntelligenceSection({
         <span className="text-[10px] font-medium text-text-muted uppercase tracking-wider">
           Flight Intelligence
         </span>
-        <span className="px-1.5 py-0.5 text-[9px] font-semibold bg-accent-teal/10 text-accent-teal rounded">
+        <span className="px-1.5 py-0.5 text-[9px] font-semibold bg-accent-blue/10 text-accent-blue rounded">
           Beta
         </span>
       </div>
