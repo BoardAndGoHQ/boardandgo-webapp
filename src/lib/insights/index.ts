@@ -25,3 +25,12 @@ export type { AirportArrivalResult } from './airport-arrival';
 // Personal insights
 export { generateTravelInsights } from './personal-insights';
 export type { TravelInsight } from './personal-insights';
+
+// Intelligence report (canonical contract for Gemini)
+export { generateIntelligenceReport } from './intelligence-report';
+export type {
+  FlightIntelligenceReport,
+  UserIntelligenceProfile,
+  AgentBriefing,
+  MonitoringLevel,
+} from './intelligence-report';

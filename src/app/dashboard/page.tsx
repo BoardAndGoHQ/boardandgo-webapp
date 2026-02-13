@@ -18,6 +18,7 @@ import {
 } from '@/components/icons';
 import { getTrackedDelayRisk, generateTravelInsights } from '@/lib/insights';
 import { DelayPredictionCard, InsightCard, IntelligenceSection } from '@/components/intelligence-card';
+import { SituationRoom, EmptySituationRoom } from '@/components/situation-room';
 import { trackEvent } from '@/lib/events';
 
 type FlightWithEvents = TrackedFlight & { statusEvents: FlightStatusEvent[] };
@@ -60,6 +61,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showHistory, setShowHistory] = useState(false);
+  const [showFullDashboard, setShowFullDashboard] = useState(false);
 
   // Gmail connect state
   const [gmailConnecting, setGmailConnecting] = useState(false);
@@ -140,6 +142,18 @@ export default function DashboardPage() {
   const activeCount = flights.filter((f) => f.flightStatus === 'active').length;
   const scheduledCount = flights.filter((f) => f.flightStatus === 'scheduled').length;
   const historyCount = historyFlights.length;
+
+  // Find the "focus flight" — the next upcoming flight that needs attention
+  // Priority: active flights first, then scheduled by departure time
+  const focusFlight = flights
+    .filter((f) => ['active', 'scheduled', 'en-route'].includes(f.flightStatus))
+    .sort((a, b) => {
+      // Active flights come first
+      if (a.flightStatus === 'active' && b.flightStatus !== 'active') return -1;
+      if (b.flightStatus === 'active' && a.flightStatus !== 'active') return 1;
+      // Then sort by departure time
+      return new Date(a.scheduledDeparture).getTime() - new Date(b.scheduledDeparture).getTime();
+    })[0] ?? null;
 
   if (authLoading) {
     return (
@@ -243,35 +257,72 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Main content: Map + sidebar */}
+      {/* Main content: Situation Room first, Dashboard second */}
       <div className="px-4 md:px-6 pb-8">
         <div className="max-w-7xl mx-auto">
           {loading ? (
-            <div className="h-[500px] flex items-center justify-center bg-bg-elevated/30 border border-border-subtle rounded-xl">
+            <div className="h-[400px] flex items-center justify-center">
               <div className="flex flex-col items-center gap-3">
                 <IconLoader className="w-6 h-6 text-text-muted animate-spin" />
                 <p className="text-sm text-text-muted">Loading your flights...</p>
               </div>
             </div>
           ) : flights.length === 0 && historyFlights.length === 0 ? (
-            <div className="h-[500px] flex items-center justify-center bg-bg-elevated/30 border border-border-subtle rounded-xl">
-              <div className="text-center">
-                <IconPlane className="w-12 h-12 text-text-muted/20 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-text-primary mb-2">No flights being tracked</h3>
-                <p className="text-sm text-text-muted mb-6 max-w-sm mx-auto">
-                  Search for any flight by number and start tracking with one click to see it visualized here.
-                </p>
-                <Link
-                  href="/track"
-                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-accent-teal text-bg-primary font-medium text-sm rounded-xl hover:brightness-110 transition-all"
+            <EmptySituationRoom />
+          ) : !showFullDashboard && focusFlight && token ? (
+            /* Concierge Mode: Situation Room */
+            <div className="space-y-6">
+              <SituationRoom
+                flight={focusFlight}
+                token={token}
+                allFlightsCount={flights.length}
+                onViewAll={() => setShowFullDashboard(true)}
+              />
+
+              {/* Toggle to full dashboard */}
+              {flights.length > 1 && (
+                <button
+                  onClick={() => setShowFullDashboard(true)}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 glass-card rounded-xl border border-border-subtle text-sm text-text-muted hover:text-text-secondary hover:border-accent-teal/20 transition-all"
                 >
-                  <IconPlane className="w-4 h-4" />
-                  Track Your First Flight
-                </Link>
-              </div>
+                  <IconSignal className="w-4 h-4" />
+                  <span>View all {flights.length} flights on map</span>
+                </button>
+              )}
+
+              {/* Personal Travel Insights - compact at bottom */}
+              {(() => {
+                const allUserFlights = [...flights, ...historyFlights];
+                const insights = generateTravelInsights(allUserFlights);
+                if (insights.length === 0) return null;
+                return (
+                  <div className="glass-card rounded-xl p-4 border border-border-subtle">
+                    <IntelligenceSection compact>
+                      {insights.map((insight, i) => (
+                        <InsightCard key={i} insight={insight} />
+                      ))}
+                    </IntelligenceSection>
+                  </div>
+                );
+              })()}
             </div>
           ) : (
-            <div className="flex flex-col lg:flex-row gap-4">
+            /* Full Dashboard Mode: Map + sidebar */
+            <div className="space-y-4">
+              {/* Back to concierge button */}
+              {focusFlight && (
+                <button
+                  onClick={() => setShowFullDashboard(false)}
+                  className="flex items-center gap-2 text-sm text-text-muted hover:text-text-secondary transition-colors"
+                >
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7" />
+                  </svg>
+                  Back to Concierge
+                </button>
+              )}
+
+              <div className="flex flex-col lg:flex-row gap-4">
               {/* Map */}
               <div className="flex-1 min-w-0">
                 <div className="glass-card rounded-xl border border-border-subtle overflow-hidden">
@@ -493,6 +544,7 @@ export default function DashboardPage() {
                   );
                 })()}
               </div>
+            </div>
             </div>
           )}
         </div>

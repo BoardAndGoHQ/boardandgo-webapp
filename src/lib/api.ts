@@ -366,6 +366,17 @@ export const api = {
         '/api/events', { method: 'POST', body: { eventName, properties }, token }
       ),
   },
+
+  briefing: {
+    generate: (
+      report: import('./insights').FlightIntelligenceReport,
+      profile: import('./insights').UserIntelligenceProfile,
+      token: string
+    ) =>
+      trackingRequest<import('./insights').AgentBriefing>(
+        '/api/briefing', { method: 'POST', body: { report, profile }, token }
+      ),
+  },
 };
 
 export { ApiError };

@@ -1,9 +1,22 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth';
 import { IconMail, IconLoader, IconCheck } from '@/components/icons';
+
+type IntelligenceMode = 'minimal' | 'balanced' | 'deep';
+
+const INTELLIGENCE_MODE_KEY = 'boardandgo_intelligence_mode';
+
+function getStoredMode(): IntelligenceMode {
+  if (typeof window === 'undefined') return 'balanced';
+  return (localStorage.getItem(INTELLIGENCE_MODE_KEY) as IntelligenceMode) || 'balanced';
+}
+
+function setStoredMode(mode: IntelligenceMode) {
+  localStorage.setItem(INTELLIGENCE_MODE_KEY, mode);
+}
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -11,6 +24,17 @@ export default function SettingsPage() {
   const [gmailConnecting, setGmailConnecting] = useState(false);
   const [gmailConnected, setGmailConnected] = useState(false);
   const [error, setError] = useState('');
+  const [intelligenceMode, setIntelligenceMode] = useState<IntelligenceMode>('balanced');
+
+  // Load stored mode on mount
+  useEffect(() => {
+    setIntelligenceMode(getStoredMode());
+  }, []);
+
+  const handleModeChange = (mode: IntelligenceMode) => {
+    setIntelligenceMode(mode);
+    setStoredMode(mode);
+  };
 
   // Redirect if not authenticated
   if (!authLoading && !user) {
@@ -134,6 +158,72 @@ export default function SettingsPage() {
                   )}
                 </button>
               )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Flight Intelligence Mode */}
+      <section className="mb-8">
+        <h2 className="text-lg font-medium text-text-primary mb-4">Flight Intelligence</h2>
+        <div className="bg-bg-card border border-border-subtle rounded-xl p-6">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 bg-accent-teal/10 rounded-full flex items-center justify-center shrink-0">
+              <svg className="w-6 h-6 text-accent-teal" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-text-primary font-medium mb-1">
+                Intelligence Briefing Mode
+              </h3>
+              <p className="text-text-muted text-sm mb-4">
+                Control how much detail your flight concierge provides.
+              </p>
+              
+              <div className="space-y-2">
+                <label className="flex items-start gap-3 p-3 rounded-lg border border-border-subtle bg-bg-elevated/30 cursor-pointer hover:bg-bg-elevated/50 transition-colors">
+                  <input
+                    type="radio"
+                    name="intelligenceMode"
+                    checked={intelligenceMode === 'minimal'}
+                    onChange={() => handleModeChange('minimal')}
+                    className="mt-0.5 accent-accent-teal"
+                  />
+                  <div>
+                    <div className="text-sm font-medium text-text-primary">Minimal</div>
+                    <div className="text-xs text-text-muted">Only critical alerts: time to leave, gate changes, cancellations. No noise.</div>
+                  </div>
+                </label>
+                
+                <label className="flex items-start gap-3 p-3 rounded-lg border border-border-subtle bg-bg-elevated/30 cursor-pointer hover:bg-bg-elevated/50 transition-colors">
+                  <input
+                    type="radio"
+                    name="intelligenceMode"
+                    checked={intelligenceMode === 'balanced'}
+                    onChange={() => handleModeChange('balanced')}
+                    className="mt-0.5 accent-accent-teal"
+                  />
+                  <div>
+                    <div className="text-sm font-medium text-text-primary">Balanced <span className="text-xs text-accent-teal">(Recommended)</span></div>
+                    <div className="text-xs text-text-muted">Risk assessment, delay predictions, smart suggestions. Brief but informative.</div>
+                  </div>
+                </label>
+                
+                <label className="flex items-start gap-3 p-3 rounded-lg border border-border-subtle bg-bg-elevated/30 cursor-pointer hover:bg-bg-elevated/50 transition-colors">
+                  <input
+                    type="radio"
+                    name="intelligenceMode"
+                    checked={intelligenceMode === 'deep'}
+                    onChange={() => handleModeChange('deep')}
+                    className="mt-0.5 accent-accent-teal"
+                  />
+                  <div>
+                    <div className="text-sm font-medium text-text-primary">Deep Ops</div>
+                    <div className="text-xs text-text-muted">Full analysis: historical performance, congestion patterns, all contributing factors explained.</div>
+                  </div>
+                </label>
+              </div>
             </div>
           </div>
         </div>
