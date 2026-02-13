@@ -331,7 +331,7 @@ export function EmptySituationRoom() {
       </div>
       <h2 className="text-2xl font-bold text-text-primary mb-2">No flights to monitor</h2>
       <p className="text-text-muted text-sm mb-6 max-w-sm mx-auto">
-        Track a flight to see your personalized briefing and get proactive updates.
+        Track a flight and Amberlyn will give you a personalized briefing with proactive updates.
       </p>
       <Link
         href="/track"

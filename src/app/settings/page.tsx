@@ -178,7 +178,7 @@ export default function SettingsPage() {
                 Intelligence Briefing Mode
               </h3>
               <p className="text-text-muted text-sm mb-4">
-                Control how much detail your flight concierge provides.
+                Control how much detail Amberlyn provides in your briefings.
               </p>
               
               <div className="space-y-2">

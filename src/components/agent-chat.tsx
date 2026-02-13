@@ -156,8 +156,8 @@ export function AgentChat() {
             <IconSparkles className="w-4 h-4 text-accent-teal" />
           </div>
           <div>
-            <h3 className="text-sm font-medium text-text-primary">AI Flight Assistant</h3>
-            <p className="text-xs text-text-muted">Powered by Gemini</p>
+            <h3 className="text-sm font-medium text-text-primary">Amberlyn</h3>
+            <p className="text-xs text-text-muted">AI Flight Assistant</p>
           </div>
         </div>
         {messages.length > 0 && (
@@ -178,7 +178,7 @@ export function AgentChat() {
               <IconBot className="w-7 h-7 text-accent-teal" />
             </div>
             <div>
-              <h4 className="text-sm font-medium text-text-primary mb-1">Where are you flying?</h4>
+              <h4 className="text-sm font-medium text-text-primary mb-1">Hi, I&apos;m Amberlyn</h4>
               <p className="text-xs text-text-muted max-w-xs">
                 Tell me your travel plans and I&apos;ll find the best flights for you.
               </p>
