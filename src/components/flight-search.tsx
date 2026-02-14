@@ -165,7 +165,7 @@ function DatePicker({
       )}
 
       {open && (
-        <div className="absolute left-0 bottom-full mb-2 w-[300px] glass-card rounded-xl shadow-2xl z-[100] p-4">
+        <div className="absolute left-0 bottom-full mb-2 w-75 glass-card rounded-xl shadow-2xl z-100 p-4">
           {/* Month/Year Header */}
           <div className="flex items-center justify-between mb-3">
             <button
@@ -348,7 +348,7 @@ function CabinDropdown({
       </button>
 
       {open && (
-        <div className="absolute left-0 bottom-full mb-2 w-full min-w-[180px] glass-card rounded-xl shadow-2xl z-[100] py-1.5">
+        <div className="absolute left-0 bottom-full mb-2 w-full min-w-45 glass-card rounded-xl shadow-2xl z-100 py-1.5">
           {cabinOptions.map((opt) => {
             const isActive = opt.value === value;
             return (
@@ -553,7 +553,7 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
             </button>
 
             {travelersOpen && (
-              <div className="absolute left-0 md:left-auto md:right-0 top-full mt-2 w-72 glass-card rounded-xl shadow-2xl z-[100] p-4">
+              <div className="absolute left-0 md:left-auto md:right-0 top-full mt-2 w-72 glass-card rounded-xl shadow-2xl z-100 p-4">
                 <InlineStepper label="Adults" sublabel="12+ years" value={form.adults} min={1} max={9} onChange={(v) => setForm((f) => ({ ...f, adults: v }))} />
                 <div className="border-t border-border-subtle" />
                 <InlineStepper label="Children" sublabel="2-11 years" value={form.children} min={0} max={6} onChange={(v) => setForm((f) => ({ ...f, children: v }))} />

@@ -80,8 +80,8 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 md:py-12 relative">
       {/* Decorative background */}
-      <div className="fixed top-20 right-1/4 w-[500px] h-[500px] bg-accent-blue/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="fixed bottom-20 left-1/4 w-[400px] h-[400px] bg-accent-blue/8 rounded-full blur-3xl pointer-events-none" />
+      <div className="fixed top-20 right-1/4 w-125 h-125 bg-accent-blue/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="fixed bottom-20 left-1/4 w-100 h-100 bg-accent-blue/8 rounded-full blur-3xl pointer-events-none" />
 
       <div className="mb-8 animate-fade-up">
         <Link href="/bookings" className="inline-flex items-center gap-1.5 text-sm text-text-muted hover:text-accent-blue transition-colors">

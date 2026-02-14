@@ -64,7 +64,7 @@ export function Header() {
         </Link>
 
         {/* Desktop Nav — pill-style links */}
-        <nav className="hidden md:flex items-center bg-white/50 dark:bg-bg-elevated/40 border border-black/[0.04] dark:border-border-subtle rounded-full px-1 py-1 backdrop-blur-sm">
+        <nav className="hidden md:flex items-center bg-white/50 dark:bg-bg-elevated/40 border border-black/4 dark:border-border-subtle rounded-full px-1 py-1 backdrop-blur-sm">
           {navLinks.map((link) => (
             <Link
               key={link.href}
@@ -83,22 +83,22 @@ export function Header() {
         {/* Desktop Right */}
         <div className="hidden md:flex items-center gap-2">
           {loading ? (
-            <div className="w-20 h-8 bg-black/[0.04] dark:bg-bg-elevated/50 rounded-full animate-shimmer" />
+            <div className="w-20 h-8 bg-black/4 dark:bg-bg-elevated/50 rounded-full animate-shimmer" />
           ) : user ? (
             <div className="flex items-center gap-2">
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-white/60 dark:bg-bg-elevated/40 border border-black/[0.04] dark:border-border-subtle rounded-full backdrop-blur-sm">
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-white/60 dark:bg-bg-elevated/40 border border-black/4 dark:border-border-subtle rounded-full backdrop-blur-sm">
                 <div className="w-6 h-6 rounded-full bg-accent-blue/10 flex items-center justify-center">
                   <span className="text-[10px] font-semibold text-accent-blue">
                     {user.email?.charAt(0).toUpperCase()}
                   </span>
                 </div>
-                <span className="text-[13px] text-text-secondary max-w-[140px] truncate">
+                <span className="text-[13px] text-text-secondary max-w-35 truncate">
                   {user.email}
                 </span>
               </div>
               <button
                 onClick={signOut}
-                className="p-2 text-text-muted hover:text-text-primary hover:bg-black/[0.04] dark:hover:bg-bg-elevated/50 rounded-full transition-all duration-200"
+                className="p-2 text-text-muted hover:text-text-primary hover:bg-black/4 dark:hover:bg-bg-elevated/50 rounded-full transition-all duration-200"
                 title="Sign out"
               >
                 <IconLogout className="w-4 h-4" />
@@ -126,7 +126,7 @@ export function Header() {
         {/* Mobile Toggle */}
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="md:hidden p-2 text-text-secondary hover:text-text-primary hover:bg-black/[0.04] dark:hover:bg-bg-elevated/50 rounded-lg transition-colors"
+          className="md:hidden p-2 text-text-secondary hover:text-text-primary hover:bg-black/4:hover:bg-bg-elevated/50 rounded-lg transition-colors"
         >
           {mobileOpen ? <IconX className="w-5 h-5" /> : <IconMenu className="w-5 h-5" />}
         </button>
@@ -144,7 +144,7 @@ export function Header() {
                 className={`px-4 py-3 text-sm rounded-xl transition-all animate-fade-up opacity-0 ${
                   isActive(link.href)
                     ? 'text-white bg-accent-blue font-medium'
-                    : 'text-text-secondary hover:text-text-primary hover:bg-black/[0.03] dark:hover:bg-bg-elevated/50'
+                    : 'text-text-secondary hover:text-text-primary hover:bg-black/3 dark:hover:bg-bg-elevated/50'
                 }`}
                 style={{ animationDelay: `${i * 50}ms`, animationFillMode: 'forwards' }}
               >
@@ -167,7 +167,7 @@ export function Header() {
                     signOut();
                     setMobileOpen(false);
                   }}
-                  className="px-4 py-3 text-sm text-text-secondary text-left rounded-xl hover:bg-black/[0.03] dark:hover:bg-bg-elevated/50 transition-colors animate-fade-up opacity-0"
+                  className="px-4 py-3 text-sm text-text-secondary text-left rounded-xl hover:bg-black/3 dark:hover:bg-bg-elevated/50 transition-colors animate-fade-up opacity-0"
                   style={{ animationDelay: '300ms', animationFillMode: 'forwards' }}
                 >
                   Sign out
@@ -178,7 +178,7 @@ export function Header() {
                 <Link
                   href="/login"
                   onClick={() => setMobileOpen(false)}
-                  className="py-2.5 text-sm text-text-secondary text-center rounded-xl hover:bg-black/[0.03] dark:hover:bg-bg-elevated/50 transition-colors animate-fade-up opacity-0"
+                  className="py-2.5 text-sm text-text-secondary text-center rounded-xl hover:bg-black/3 dark:hover:bg-bg-elevated/50 transition-colors animate-fade-up opacity-0"
                   style={{ animationDelay: '250ms', animationFillMode: 'forwards' }}
                 >
                   Log in

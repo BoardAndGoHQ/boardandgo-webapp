@@ -27,7 +27,7 @@ export default function StatusPage() {
     <div className="flex flex-col">
       {/* ═══ Hero ═══ */}
       <section className="relative pt-20 md:pt-28 pb-16 overflow-hidden">
-        <div className="absolute top-16 left-1/4 w-[380px] h-[380px] bg-emerald-500/5 rounded-full blur-3xl pointer-events-none animate-drift" />
+        <div className="absolute top-16 left-1/4 w-95 h-95 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none animate-drift" />
 
         <div ref={heroRef} className="scroll-reveal max-w-6xl mx-auto px-5 text-center space-y-6">
           <div className="inline-flex items-center gap-2 glass-card rounded-full px-4 py-1.5 text-xs font-medium text-emerald-600">
@@ -67,7 +67,7 @@ export default function StatusPage() {
                   {/* Progress bar */}
                   <div className="h-2 bg-bg-elevated rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-gradient-to-r from-accent-blue to-emerald-400 rounded-full transition-all duration-700"
+                      className="h-full bg-linear-to-r from-accent-blue to-emerald-400 rounded-full transition-all duration-700"
                       style={{ width: `${s.uptime}%` }}
                     />
                   </div>

@@ -340,13 +340,13 @@ function ModeButton({ icon, label, active, onClick }: { icon: React.ReactNode; l
 
 /* ── Icons for mode bar ── */
 function RouteIcon() {
-  return <Route className="w-[18px] h-[18px]" />;
+  return <Route className="w-4.5 h-4.5" />;
 }
 
 function TerrainIcon() {
-  return <Mountain className="w-[18px] h-[18px]" />;
+  return <Mountain className="w-4.5 h-4.5" />;
 }
 
 function FollowIcon() {
-  return <Crosshair className="w-[18px] h-[18px]" />;
+  return <Crosshair className="w-4.5 h-4.5" />;
 }

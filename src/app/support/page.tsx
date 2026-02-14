@@ -63,7 +63,7 @@ export default function SupportPage() {
     <div className="flex flex-col">
       {/* ═══ Hero ═══ */}
       <section className="relative pt-20 md:pt-28 pb-16 overflow-hidden">
-        <div className="absolute top-16 left-1/3 w-[380px] h-[380px] bg-accent-blue/5 rounded-full blur-3xl pointer-events-none animate-drift" />
+        <div className="absolute top-16 left-1/3 w-95 h-95 bg-accent-blue/5 rounded-full blur-3xl pointer-events-none animate-drift" />
 
         <div ref={heroRef} className="scroll-reveal max-w-6xl mx-auto px-5 text-center space-y-6">
           <div className="inline-flex items-center gap-2 glass-card rounded-full px-4 py-1.5 text-xs font-medium text-accent-blue">

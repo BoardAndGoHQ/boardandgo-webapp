@@ -71,7 +71,7 @@ export default function PrivacyPage() {
 
   return (
     <div className="relative pt-16 md:pt-24 pb-20">
-      <div className="absolute top-16 left-1/4 w-[400px] h-[400px] bg-accent-blue/5 rounded-full blur-3xl pointer-events-none animate-drift" />
+      <div className="absolute top-16 left-1/4 w-100 h-100 bg-accent-blue/5 rounded-full blur-3xl pointer-events-none animate-drift" />
 
       <div className="max-w-4xl mx-auto px-5">
         {/* Header */}

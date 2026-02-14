@@ -2,6 +2,7 @@
 
 import type { TrackedFlight, FlightStatusEvent } from '@/lib/api';
 import { IconPlane, IconClock, IconSignal } from '@/components/icons';
+import { AlertTriangle, Map, Radio, Plane } from 'lucide-react';
 
 const statusConfig: Record<string, { label: string; color: string; bg: string }> = {
   scheduled: { label: 'Scheduled', color: 'text-accent-blue', bg: 'bg-accent-blue/10' },
@@ -30,6 +31,33 @@ function formatEventType(type: string): string {
     landed: 'Flight landed',
   };
   return map[type] ?? type;
+}
+
+function relativeTime(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  if (diff < 0) return 'just now';
+  const mins = Math.floor(diff / 60_000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+}
+
+function eventIcon(type: string) {
+  switch (type) {
+    case 'gate_change':
+      return <Map className="w-3 h-3 text-accent-blue" />;
+    case 'delay':
+      return <AlertTriangle className="w-3 h-3 text-amber-400" />;
+    case 'cancellation':
+      return <AlertTriangle className="w-3 h-3 text-red-400" />;
+    case 'landed':
+      return <Plane className="w-3 h-3 text-emerald-400" />;
+    default:
+      return <Radio className="w-3 h-3 text-text-muted" />;
+  }
 }
 
 export function StatusBadge({ status }: { status: string }) {
@@ -147,7 +175,7 @@ export function FlightStatusCard({ flight }: { flight: TrackedFlight }) {
   );
 }
 
-export function FlightTimeline({ events }: { events: FlightStatusEvent[] }) {
+export function FlightTimeline({ events, isActive = false }: { events: FlightStatusEvent[]; isActive?: boolean }) {
   if (events.length === 0) {
     return (
       <div className="text-center py-8 text-sm text-text-muted">
@@ -161,7 +189,18 @@ export function FlightTimeline({ events }: { events: FlightStatusEvent[] }) {
       {events.map((event, i) => (
         <div key={event.id} className="flex gap-3">
           <div className="flex flex-col items-center">
-            <div className={`w-2.5 h-2.5 rounded-full mt-1.5 ${i === 0 ? 'bg-accent-blue' : 'bg-border-subtle'}`} />
+            <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
+              i === 0 ? 'bg-accent-blue/10' : 'bg-bg-elevated/50'
+            }`}>
+              {i === 0 && isActive ? (
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-accent-blue opacity-75 animate-ping" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-accent-blue" />
+                </span>
+              ) : (
+                eventIcon(event.eventType)
+              )}
+            </div>
             {i < events.length - 1 && <div className="w-px flex-1 bg-border-subtle my-1" />}
           </div>
           <div className="pb-4">
@@ -172,12 +211,12 @@ export function FlightTimeline({ events }: { events: FlightStatusEvent[] }) {
               </div>
             )}
             {event.delayMinutes && (
-              <div className="text-xs text-orange-400 mt-0.5">+{event.delayMinutes} min delay</div>
+              <div className={`text-xs mt-0.5 ${event.delayMinutes > 30 ? 'text-red-400' : 'text-amber-400'}`}>
+                +{event.delayMinutes} min delay
+              </div>
             )}
-            <div className="text-xs text-text-muted mt-1">
-              {new Date(event.eventTime).toLocaleString('en-US', {
-                month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true,
-              })}
+            <div className="text-[10px] text-text-muted mt-1">
+              {relativeTime(event.eventTime)}
             </div>
           </div>
         </div>

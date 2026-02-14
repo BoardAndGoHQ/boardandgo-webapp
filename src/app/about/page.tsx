@@ -41,7 +41,7 @@ export default function AboutPage() {
     <div className="flex flex-col">
       {/* Hero */}
       <section className="relative pt-16 md:pt-24 pb-12 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-accent-blue/[0.05] rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-accent-blue/5 rounded-full blur-3xl pointer-events-none" />
         <div className="max-w-6xl mx-auto px-4 text-center space-y-6">
           <h1 className="text-4xl md:text-5xl font-bold text-text-primary leading-tight">
             Your Personal AI
@@ -93,7 +93,7 @@ export default function AboutPage() {
                 height={400}
                 className="w-full h-auto"
               />
-              <div className="absolute inset-0 bg-gradient-to-tr from-accent-blue/10 via-transparent to-transparent mix-blend-overlay" />
+              <div className="absolute inset-0 bg-linear-to-tr from-accent-blue/10 via-transparent to-transparent mix-blend-overlay" />
             </div>
           </div>
         </div>
@@ -130,7 +130,7 @@ export default function AboutPage() {
                   key={v.title}
                   className="glass-effect rounded-2xl p-6 hover:scale-[1.02] transition-all duration-300 group"
                 >
-                  <div className="w-12 h-12 rounded-xl bg-accent-blue/[0.08] border border-accent-blue/10 flex items-center justify-center mb-4 group-hover:bg-accent-blue/[0.12] group-hover:scale-110 transition-all duration-300">
+                  <div className="w-12 h-12 rounded-xl bg-accent-blue/8 border border-accent-blue/10 flex items-center justify-center mb-4 group-hover:bg-accent-blue/12 group-hover:scale-110 transition-all duration-300">
                     <Icon className="w-6 h-6 text-accent-blue" />
                   </div>
                   <h3 className="text-lg font-semibold text-text-primary mb-2">{v.title}</h3>

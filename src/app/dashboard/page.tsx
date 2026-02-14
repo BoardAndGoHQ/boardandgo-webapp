@@ -186,8 +186,8 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen relative">
       {/* Decorative background */}
-      <div className="fixed top-20 right-1/4 w-[500px] h-[500px] bg-accent-blue/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="fixed bottom-20 left-1/4 w-[400px] h-[400px] bg-accent-blue/8 rounded-full blur-3xl pointer-events-none" />
+      <div className="fixed top-20 right-1/4 w-125 h-125 bg-accent-blue/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="fixed bottom-20 left-1/4 w-100 h-100 bg-accent-blue/8 rounded-full blur-3xl pointer-events-none" />
       {/* Header bar */}
       <div className="relative z-10 px-5 md:px-6 py-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -198,7 +198,7 @@ export default function DashboardPage() {
               </div>
               Flight Dashboard
             </h1>
-            <p className="text-sm text-text-muted mt-1 ml-[52px]">
+            <p className="text-sm text-text-muted mt-1 ml-13">
               Real-time tracking and visualization
             </p>
           </div>
@@ -234,7 +234,7 @@ export default function DashboardPage() {
       {!gmailDismissed && !gmailConnected && (
         <div className="px-4 md:px-6 mb-5">
           <div className="max-w-7xl mx-auto">
-            <div className="glass-card rounded-xl p-4 border border-accent-blue/20 bg-accent-blue/[0.03] flex items-center gap-4">
+            <div className="glass-card rounded-xl p-4 border border-accent-blue/20 bg-accent-blue/3 flex items-center gap-4">
               <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0">
                 <IconMail className="w-5 h-5 text-red-400" />
               </div>
@@ -270,7 +270,7 @@ export default function DashboardPage() {
       {gmailConnected && (
         <div className="px-4 md:px-6 mb-5">
           <div className="max-w-7xl mx-auto">
-            <div className="glass-card rounded-xl p-4 border border-emerald-500/20 bg-emerald-500/[0.03] flex items-center gap-3">
+            <div className="glass-card rounded-xl p-4 border border-emerald-500/20 bg-emerald-500/3 flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center">
                 <IconCheck className="w-4 h-4 text-emerald-400" />
               </div>
@@ -284,7 +284,7 @@ export default function DashboardPage() {
       <div className="px-4 md:px-6 pb-8">
         <div className="max-w-7xl mx-auto">
           {loading ? (
-            <div className="h-[400px] flex items-center justify-center">
+            <div className="h-100 flex items-center justify-center">
               <div className="flex flex-col items-center gap-3">
                 <IconLoader className="w-6 h-6 text-text-muted animate-spin" />
                 <p className="text-sm text-text-muted">Loading your flights...</p>
@@ -355,7 +355,7 @@ export default function DashboardPage() {
                     positions={positions}
                     selectedFlightId={selectedId}
                     onSelectFlight={setSelectedId}
-                    className="h-[400px] md:h-[520px]"
+                    className="h-100 md:h-130"
                   />
                 </div>
               </div>
@@ -483,7 +483,7 @@ export default function DashboardPage() {
                       );
                     }
                     return (
-                      <div className="space-y-2 max-h-[380px] overflow-y-auto scrollbar-thin pr-1">
+                      <div className="space-y-2 max-h-95 overflow-y-auto scrollbar-thin pr-1">
                         {displayFlights.map((flight) => {
                           const isSelected = flight.id === selectedId;
                           const depTime = flight.actualDeparture ?? flight.estimatedDeparture ?? flight.scheduledDeparture;

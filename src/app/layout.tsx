@@ -27,9 +27,9 @@ export default function RootLayout({
       <body className="min-h-screen flex flex-col bg-bg-primary text-text-primary">
         {/* Global decorative gradient blobs */}
         <div aria-hidden="true" className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-          <div className="absolute -top-40 -left-40 w-[700px] h-[700px] rounded-full bg-[radial-gradient(circle,rgba(15,115,247,0.10)_0%,transparent_70%)] animate-drift" />
-          <div className="absolute top-1/3 -right-32 w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(99,102,241,0.08)_0%,transparent_70%)] animate-drift-reverse" />
-          <div className="absolute -bottom-40 left-1/3 w-[600px] h-[600px] rounded-full bg-[radial-gradient(circle,rgba(15,115,247,0.06)_0%,transparent_70%)] animate-drift" />
+          <div className="absolute -top-40 -left-40 w-175 h-175 rounded-full bg-[radial-gradient(circle,rgba(15,115,247,0.10)_0%,transparent_70%)] animate-drift" />
+          <div className="absolute top-1/3 -right-32 w-125 h-125 rounded-full bg-[radial-gradient(circle,rgba(99,102,241,0.08)_0%,transparent_70%)] animate-drift-reverse" />
+          <div className="absolute -bottom-40 left-1/3 w-150 h-150 rounded-full bg-[radial-gradient(circle,rgba(15,115,247,0.06)_0%,transparent_70%)] animate-drift" />
         </div>
         <AuthProvider>
           <Header />

@@ -605,7 +605,7 @@ export function FlightMap({
   }, [airports, mapLoaded, trackerMode]);
 
   return (
-    <div className={`relative w-full ${className ?? 'h-[500px]'}`}>
+    <div className={`relative w-full ${className ?? 'h-125'}`}>
       <div ref={containerRef} className={`absolute inset-0 overflow-hidden ${trackerMode ? '' : 'rounded-xl'}`} />
       {!mapLoaded && (
         <div className={`absolute inset-0 flex items-center justify-center bg-bg-elevated/50 ${trackerMode ? '' : 'rounded-xl'}`}>

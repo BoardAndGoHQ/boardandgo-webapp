@@ -121,13 +121,13 @@ export default function Home() {
       <section className="relative py-16 md:py-24 overflow-hidden">
         <FlightPath />
         {/* Soft background blobs */}
-        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-accent-blue/[0.06] rounded-full blur-[120px] pointer-events-none animate-drift" />
-        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-blue-300/[0.05] rounded-full blur-[100px] pointer-events-none animate-drift-reverse" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-accent-blue/[0.04] rounded-full blur-[80px] pointer-events-none animate-pulse-slow" />
+        <div className="absolute top-1/4 left-1/4 w-125 h-125 bg-accent-blue/6 rounded-full blur-[120px] pointer-events-none animate-drift" />
+        <div className="absolute bottom-0 right-1/4 w-100 h-100 bg-blue-300/5 rounded-full blur-[100px] pointer-events-none animate-drift-reverse" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-75 h-75 bg-accent-blue/4 rounded-full blur-[80px] pointer-events-none animate-pulse-slow" />
 
         <div className="relative max-w-6xl mx-auto px-4 text-center">
           {/* Overline */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-accent-blue/[0.06] border border-accent-blue/10 rounded-full mb-6 animate-fade-up opacity-0" style={{ animationDelay: '0ms', animationFillMode: 'forwards' }}>
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-accent-blue/6 border border-accent-blue/10 rounded-full mb-6 animate-fade-up opacity-0" style={{ animationDelay: '0ms', animationFillMode: 'forwards' }}>
             <div className="w-1.5 h-1.5 rounded-full bg-accent-blue animate-pulse" />
             <span className="text-xs font-medium text-accent-blue tracking-wide">Flight Intelligence Platform</span>
           </div>
@@ -158,7 +158,7 @@ export default function Home() {
                 {['D', 'P', 'L', 'M'].map((initial, i) => (
                   <div
                     key={initial}
-                    className="w-7 h-7 rounded-full bg-gradient-to-br from-accent-blue/15 to-blue-300/10 border-2 border-bg-primary flex items-center justify-center text-[10px] font-semibold text-accent-blue hover:scale-110 transition-transform"
+                    className="w-7 h-7 rounded-full bg-linear-to-br from-accent-blue/15 to-blue-300/10 border-2 border-bg-primary flex items-center justify-center text-[10px] font-semibold text-accent-blue hover:scale-110 transition-transform"
                     style={{ zIndex: 4 - i }}
                   >
                     {initial}
@@ -179,7 +179,7 @@ export default function Home() {
 
       {/* ---- Features ---- */}
       <section className="py-16 md:py-24 border-t border-border-subtle relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-accent-blue/[0.04] rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute top-0 right-0 w-100 h-100 bg-accent-blue/4 rounded-full blur-[120px] pointer-events-none" />
 
         <div className="relative max-w-6xl mx-auto px-4">
           <div className="text-center mb-12">
@@ -200,7 +200,7 @@ export default function Home() {
                   className="feature-card group p-6 rounded-xl border border-border-subtle bg-white/60 dark:bg-bg-secondary/50 backdrop-blur-sm hover:bg-white/80 dark:hover:bg-bg-card/60 hover:border-accent-blue/15 animate-fade-up opacity-0"
                   style={{ animationDelay: `${i * 80}ms`, animationFillMode: 'forwards' }}
                 >
-                  <div className="w-11 h-11 rounded-xl bg-accent-blue/[0.08] border border-accent-blue/10 flex items-center justify-center mb-4 group-hover:bg-accent-blue/[0.12] group-hover:scale-110 transition-all duration-300">
+                  <div className="w-11 h-11 rounded-xl bg-accent-blue/8 border border-accent-blue/10 flex items-center justify-center mb-4 group-hover:bg-accent-blue/12 group-hover:scale-110 transition-all duration-300">
                     <Icon className="w-5 h-5 text-accent-blue" />
                   </div>
                   <h3 className="text-sm font-semibold text-text-primary mb-2">{f.title}</h3>
@@ -226,7 +226,7 @@ export default function Home() {
                 AI-powered insights on the go.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <a href="#" className="transition-all duration-300 hover:-translate-y-1 w-[180px]">
+                <a href="#" className="transition-all duration-300 hover:-translate-y-1 w-45">
                   <Image
                     src="/icons/download-on-the-app-store.svg"
                     alt="Download on the App Store"
@@ -235,7 +235,7 @@ export default function Home() {
                     className="w-full h-auto"
                   />
                 </a>
-                <a href="#" className="transition-all duration-300 hover:-translate-y-1 w-[180px]">
+                <a href="#" className="transition-all duration-300 hover:-translate-y-1 w-45">
                   <Image
                     src="/icons/download-on-the-google-play-store.svg"
                     alt="Get it on Google Play"
@@ -248,7 +248,7 @@ export default function Home() {
             </div>
 
             <div className="relative flex justify-center items-center gap-6">
-              <div className="absolute inset-0 bg-accent-blue/[0.04] rounded-full blur-3xl pointer-events-none animate-pulse-slow" />
+              <div className="absolute inset-0 bg-accent-blue/4 rounded-full blur-3xl pointer-events-none animate-pulse-slow" />
 
               <div className="animate-float hover:scale-105 transition-transform duration-500">
                 <div className="glass-effect rounded-3xl p-1.5 shadow-xl">
@@ -295,11 +295,11 @@ export default function Home() {
                   style={{ animationDelay: `${i * 100}ms`, animationFillMode: 'forwards' }}
                 >
                   {/* Hover gradient glow */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-accent-blue/[0.08] via-blue-200/[0.04] to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-500" />
+                  <div className="absolute inset-0 bg-linear-to-br from-accent-blue/8 via-blue-200/4 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-500" />
 
                   <div className="relative space-y-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-accent-blue/15 to-blue-300/10 flex items-center justify-center text-xs font-semibold text-accent-blue shrink-0 group-hover:scale-110 transition-transform duration-300">
+                      <div className="w-9 h-9 rounded-full bg-linear-to-br from-accent-blue/15 to-blue-300/10 flex items-center justify-center text-xs font-semibold text-accent-blue shrink-0 group-hover:scale-110 transition-transform duration-300">
                         {t.name.charAt(0)}
                       </div>
                       <div>
@@ -358,9 +358,9 @@ export default function Home() {
       {/* ---- Final CTA ---- */}
       <section className="py-20 md:py-28 border-t border-border-subtle relative overflow-hidden">
         <FlightPath />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-accent-blue/[0.03] to-bg-primary pointer-events-none" />
-        <div className="absolute -left-20 bottom-0 w-80 h-80 bg-accent-blue/[0.06] rounded-full blur-[100px] pointer-events-none animate-drift" />
-        <div className="absolute -right-20 bottom-0 w-80 h-80 bg-blue-300/[0.06] rounded-full blur-[100px] pointer-events-none animate-drift-reverse" />
+        <div className="absolute inset-0 bg-linear-to-b from-transparent via-accent-blue/3 to-bg-primary pointer-events-none" />
+        <div className="absolute -left-20 bottom-0 w-80 h-80 bg-accent-blue/6 rounded-full blur-[100px] pointer-events-none animate-drift" />
+        <div className="absolute -right-20 bottom-0 w-80 h-80 bg-blue-300/6 rounded-full blur-[100px] pointer-events-none animate-drift-reverse" />
 
         <div className="relative max-w-6xl mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-5xl font-bold text-text-primary mb-4">

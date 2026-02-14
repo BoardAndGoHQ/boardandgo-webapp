@@ -115,7 +115,7 @@ export default function CareersPage() {
     <div className="flex flex-col">
       {/* ═══ Hero ═══ */}
       <section className="relative pt-20 md:pt-28 pb-16 overflow-hidden">
-        <div className="absolute top-16 right-1/4 w-[400px] h-[400px] bg-accent-blue/5 rounded-full blur-3xl pointer-events-none animate-drift" />
+        <div className="absolute top-16 right-1/4 w-100 h-100 bg-accent-blue/5 rounded-full blur-3xl pointer-events-none animate-drift" />
 
         <div ref={heroRef} className="scroll-reveal max-w-6xl mx-auto px-5 text-center space-y-6">
           <div className="inline-flex items-center gap-2 glass-card rounded-full px-4 py-1.5 text-xs font-medium text-accent-blue">
@@ -166,7 +166,7 @@ export default function CareersPage() {
 
             <div className="relative rounded-2xl overflow-hidden glass-card">
               <Image src="/images/culture-visual.jpg" alt="BoardAndGo Culture" width={600} height={400} className="w-full h-auto" />
-              <div className="absolute inset-0 bg-gradient-to-tr from-accent-blue/10 via-transparent to-transparent mix-blend-overlay" />
+              <div className="absolute inset-0 bg-linear-to-tr from-accent-blue/10 via-transparent to-transparent mix-blend-overlay" />
             </div>
           </div>
         </div>

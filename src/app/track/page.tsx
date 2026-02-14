@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/auth';
-import { api, type FlightLookupResult, type TrackedFlight, type FlightStatusEvent } from '@/lib/api';
+import { api, type FlightLookupResult, type TrackedFlight, type FlightStatusEvent, type FlightPosition } from '@/lib/api';
 import { FlightStatusCard } from '@/components/flight-tracker';
-import { Search as IconSearch, Loader2 as IconLoader, Plane as IconPlane, Radio as IconSignal, ArrowRight as IconArrowRight, Trash2 as IconTrash } from 'lucide-react';
-import { getTrackedDelayRisk } from '@/lib/insights';
+import { FlightCard } from '@/components/flight-card';
+import { FlightDetailDrawer } from '@/components/flight-detail-drawer';
+import { Search as IconSearch, Loader2 as IconLoader, Plane as IconPlane, Radio as IconSignal, ArrowRight as IconArrowRight } from 'lucide-react';
 import { trackEvent } from '@/lib/events';
 
 export default function TrackFlightPage() {
@@ -38,22 +39,81 @@ export default function TrackFlightPage() {
   // Delete state
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  // Expanded card state
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  // Live position polling
+  const [positions, setPositions] = useState<FlightPosition[]>([]);
+
+  // SSE ref
+  const eventSourceRef = useRef<EventSource | null>(null);
+
+  const refreshFlights = useCallback(async () => {
+    if (!token) return;
+    try {
+      const [active, history] = await Promise.all([
+        api.tracking.myFlights(token, 'active'),
+        api.tracking.myFlights(token, 'history'),
+      ]);
+      setMyFlights(active.flights);
+      setHistoryFlights(history.flights);
+    } catch {}
+  }, [token]);
+
   useEffect(() => {
     if (authLoading) return;
     // Load tracked flights only if logged in (tracking list requires auth)
     if (user && token) {
-      Promise.all([
-        api.tracking.myFlights(token, 'active'),
-        api.tracking.myFlights(token, 'history'),
-      ]).then(([active, history]) => {
-        setMyFlights(active.flights);
-        setHistoryFlights(history.flights);
-      }).catch(() => {}).finally(() => setLoadingMyFlights(false));
+      refreshFlights().finally(() => setLoadingMyFlights(false));
       trackEvent('track_page_viewed', undefined, token);
     } else {
       setLoadingMyFlights(false);
     }
-  }, [user, authLoading, token]);
+  }, [user, authLoading, token, refreshFlights]);
+
+  // Position polling for active flights (every 30s)
+  useEffect(() => {
+    if (!token || myFlights.length === 0) return;
+    const hasActive = myFlights.some((f) => f.flightStatus === 'active');
+    if (!hasActive) return;
+
+    const poll = () => {
+      api.tracking.positions(token).then(({ positions: p }) => setPositions(p)).catch(() => {});
+    };
+    poll();
+    const interval = setInterval(poll, 30_000);
+    return () => clearInterval(interval);
+  }, [token, myFlights]);
+
+  // SSE stream for the expanded flight (live status updates)
+  useEffect(() => {
+    if (!token || !expandedId) {
+      eventSourceRef.current?.close();
+      eventSourceRef.current = null;
+      return;
+    }
+    const flight = myFlights.find((f) => f.id === expandedId);
+    if (!flight || flight.flightStatus === 'landed' || flight.flightStatus === 'cancelled') return;
+
+    const url = api.tracking.streamUrl(flight.id, token);
+    const es = new EventSource(url);
+    eventSourceRef.current = es;
+
+    es.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.status) {
+          setMyFlights((prev) =>
+            prev.map((f) => (f.id === data.flightId ? { ...f, flightStatus: data.status } : f))
+          );
+        }
+        // Refresh full data on any event
+        refreshFlights();
+      } catch {}
+    };
+
+    return () => { es.close(); eventSourceRef.current = null; };
+  }, [token, expandedId, myFlights, refreshFlights]);
 
   // Set default date to today
   useEffect(() => {
@@ -128,20 +188,23 @@ export default function TrackFlightPage() {
     }
   }
 
-  async function handleDelete(flightId: string, e: React.MouseEvent) {
+  function handleDelete(flightId: string, e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
     if (!token) return;
     setDeletingId(flightId);
-    try {
-      await api.tracking.deleteFlight(flightId, token);
-      setMyFlights((prev) => prev.filter((f) => f.id !== flightId));
-      setHistoryFlights((prev) => prev.filter((f) => f.id !== flightId));
-    } catch {
-      // silently fail
-    } finally {
-      setDeletingId(null);
-    }
+    api.tracking.deleteFlight(flightId, token)
+      .then(() => {
+        setMyFlights((prev) => prev.filter((f) => f.id !== flightId));
+        setHistoryFlights((prev) => prev.filter((f) => f.id !== flightId));
+        if (expandedId === flightId) setExpandedId(null);
+      })
+      .catch(() => {})
+      .finally(() => setDeletingId(null));
+  }
+
+  function handleToggleExpand(flightId: string) {
+    setExpandedId((prev) => (prev === flightId ? null : flightId));
   }
 
   if (authLoading) {
@@ -155,7 +218,7 @@ export default function TrackFlightPage() {
   return (
     <div className="max-w-3xl mx-auto px-5 py-10 md:py-14 relative">
       {/* Decorative */}
-      <div className="absolute -top-20 right-0 w-[400px] h-[400px] bg-accent-blue/4 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -top-20 right-0 w-100 h-100 bg-accent-blue/4 rounded-full blur-3xl pointer-events-none" />
 
       {/* Header */}
       <div className="relative text-center mb-10">
@@ -362,68 +425,28 @@ export default function TrackFlightPage() {
             );
           }
           return (
-            <div className="space-y-4">
-              {displayFlights.map((flight) => {
-                const isHistory = ['landed', 'cancelled'].includes(flight.flightStatus);
-                const delayRisk = !isHistory ? getTrackedDelayRisk(flight) : null;
-                return (
-                  <Link
-                    key={flight.id}
-                    href={`/bookings/${flight.bookingId}/track`}
-                    className={`block group ${isHistory ? 'opacity-75 hover:opacity-100' : ''}`}
-                  >
-                    <div className={`glass-card rounded-xl p-4 border transition-all ${
-                      isHistory
-                        ? 'border-border-subtle/50 hover:border-border-subtle'
-                        : 'border-border-subtle hover:border-accent-blue/30'
-                    }`}>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-lg bg-bg-elevated flex items-center justify-center">
-                            <IconPlane className="w-4 h-4 text-text-muted" />
-                          </div>
-                          <div>
-                            <div className="text-sm font-medium text-text-primary">{flight.airlineCode}{flight.flightNumber}</div>
-                            <div className="text-xs text-text-muted">{flight.departureAirport} → {flight.arrivalAirport}</div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                            flight.flightStatus === 'landed' ? 'bg-emerald-500/10 text-emerald-400' :
-                            flight.flightStatus === 'active' ? 'bg-blue-500/10 text-blue-400' :
-                            flight.flightStatus === 'cancelled' ? 'bg-red-500/10 text-red-400' :
-                            'bg-amber-500/10 text-amber-400'
-                          }`}>
-                            {flight.flightStatus}
-                          </span>
-                          {delayRisk && delayRisk.level !== 'low' && (
-                            <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded flex items-center gap-1 ${
-                              delayRisk.level === 'high' ? 'bg-red-400/10 text-red-400' : 'bg-amber-400/10 text-amber-400'
-                            }`}>
-                              <span className={`w-1.5 h-1.5 rounded-full ${delayRisk.level === 'high' ? 'bg-red-400' : 'bg-amber-400'}`} />
-                              {delayRisk.probability}%
-                            </span>
-                          )}
-                          <div className="text-xs text-text-muted">
-                            {new Date(flight.scheduledDeparture).toLocaleDateString([], { month: 'short', day: 'numeric' })}
-                          </div>
-                          <button
-                            onClick={(e) => handleDelete(flight.id, e)}
-                            disabled={deletingId === flight.id}
-                            className="p-1.5 rounded-lg text-text-muted hover:text-red-400 hover:bg-red-400/10 transition-colors disabled:opacity-50"
-                            title="Remove flight"
-                          >
-                            {deletingId === flight.id
-                              ? <IconLoader className="w-3.5 h-3.5 animate-spin" />
-                              : <IconTrash className="w-3.5 h-3.5" />}
-                          </button>
-                          <IconArrowRight className="w-3.5 h-3.5 text-text-muted group-hover:text-accent-blue transition-colors" />
-                        </div>
-                      </div>
+            <div className="space-y-3">
+              {displayFlights.map((flight) => (
+                <div key={flight.id}>
+                  <FlightCard
+                    flight={flight}
+                    isExpanded={expandedId === flight.id}
+                    onToggle={() => handleToggleExpand(flight.id)}
+                    onDelete={handleDelete}
+                    isDeleting={deletingId === flight.id}
+                  />
+                  {/* Expandable detail drawer */}
+                  {expandedId === flight.id && token && (
+                    <div className="glass-card rounded-b-2xl border border-t-0 border-border-subtle -mt-2 pt-2">
+                      <FlightDetailDrawer
+                        flight={flight}
+                        token={token}
+                        positions={positions}
+                      />
                     </div>
-                  </Link>
-                );
-              })}
+                  )}
+                </div>
+              ))}
             </div>
           );
         })()}

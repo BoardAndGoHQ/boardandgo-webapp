@@ -200,7 +200,7 @@ export function AirportAutocomplete({
           aria-expanded={isOpen}
           aria-autocomplete="list"
           role="combobox"
-          className={`${className} ${icon ? '!pl-12' : ''} ${value && !isFocused ? 'uppercase tracking-widest font-semibold text-lg' : ''}`}
+          className={`${className} ${icon ? 'pl-12!' : ''} ${value && !isFocused ? 'uppercase tracking-widest font-semibold text-lg' : ''}`}
         />
       </div>
 

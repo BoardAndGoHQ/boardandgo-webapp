@@ -124,7 +124,7 @@ export function FlightInfoPanel({ flight, position, airports, collapsed, onToggl
   }
 
   return (
-    <div className="bg-[#1a1f2e]/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl w-[380px] max-h-full overflow-y-auto scrollbar-thin flex flex-col">
+    <div className="bg-[#1a1f2e]/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl w-95h-full overflow-y-auto scrollbar-thin flex flex-col">
       {/* ── Header ── */}
       <div className="px-5 pt-4 pb-3 border-b border-white/5">
         <div className="flex items-center justify-between">
@@ -186,7 +186,7 @@ export function FlightInfoPanel({ flight, position, airports, collapsed, onToggl
                 <div className="flex items-center gap-1">
                   <div className="w-1.5 h-1.5 rounded-full bg-accent-blue" />
                   <div className="w-12 h-px bg-text-muted/30 relative">
-                    <IconPlane className="w-3.5 h-3.5 text-text-secondary absolute -top-[7px] left-1/2 -translate-x-1/2 rotate-90" />
+                    <IconPlane className="w-3.5 h-3.5 text-text-secondary absolute -top-1.75 left-1/2 -translate-x-1/2 rotate-90" />
                   </div>
                   <div className={`w-1.5 h-1.5 rounded-full ${flight.flightStatus === 'landed' ? 'bg-accent-blue' : 'bg-text-muted/40'}`} />
                 </div>
@@ -216,7 +216,7 @@ export function FlightInfoPanel({ flight, position, airports, collapsed, onToggl
             <div>
               <div className="flex h-2 rounded-full overflow-hidden bg-white/5">
                 <div
-                  className="bg-gradient-to-r from-green-500 to-green-400 rounded-full transition-all duration-1000"
+                  className="bg-linear-to-r from-green-500 to-green-400 rounded-full transition-all duration-1000"
                   style={{ width: `${Math.round(progress * 100)}%` }}
                 />
               </div>

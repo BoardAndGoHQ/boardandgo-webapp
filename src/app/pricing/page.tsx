@@ -38,7 +38,7 @@ const PricingCard = ({
     >
       {/* Cursor glow */}
       <div
-        className="absolute pointer-events-none bg-accent-blue opacity-0 group-hover:opacity-15 blur-[100px] w-[200px] h-[200px] -translate-x-1/2 -translate-y-1/2 transition-opacity rounded-full"
+        className="absolute pointer-events-none bg-accent-blue opacity-0 group-hover:opacity-15 blur-[100px] w-50 h-50 -translate-x-1/2 -translate-y-1/2 transition-opacity rounded-full"
         style={{ left: pos.x, top: pos.y, transition: hovering ? 'none' : 'opacity 300ms' }}
       />
 
@@ -174,7 +174,7 @@ export default function PricingPage() {
     <div className="flex flex-col">
       {/* ═══ Hero ═══ */}
       <section className="relative pt-20 md:pt-28 pb-16 overflow-hidden">
-        <div className="absolute top-20 left-1/3 w-[400px] h-[400px] rounded-full bg-accent-blue/5 blur-3xl pointer-events-none animate-drift" />
+        <div className="absolute top-20 left-1/3 w-100 h-100 rounded-full bg-accent-blue/5 blur-3xl pointer-events-none animate-drift" />
 
         <div ref={heroRef} className="scroll-reveal max-w-6xl mx-auto px-5 text-center space-y-6">
           <div className="inline-flex items-center gap-2 glass-card rounded-full px-4 py-1.5 text-xs font-medium text-accent-blue">

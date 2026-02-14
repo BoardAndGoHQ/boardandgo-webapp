@@ -49,8 +49,8 @@ function LoginForm() {
   return (
     <div className="min-h-[85vh] flex items-center justify-center px-5 py-16 relative overflow-hidden">
       {/* Decorative blobs */}
-      <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-accent-blue/6 rounded-full blur-3xl pointer-events-none animate-drift" />
-      <div className="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] bg-accent-blue/4 rounded-full blur-3xl pointer-events-none animate-drift-reverse" />
+      <div className="absolute top-1/4 left-1/4 w-100 h-100 bg-accent-blue/6 rounded-full blur-3xl pointer-events-none animate-drift" />
+      <div className="absolute bottom-1/4 right-1/4 w-75 h-75 bg-accent-blue/4 rounded-full blur-3xl pointer-events-none animate-drift-reverse" />
 
       <div className="w-full max-w-md animate-fade-up">
         {/* Glass card */}

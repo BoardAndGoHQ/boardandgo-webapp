@@ -33,8 +33,8 @@ export default function FeaturesPage() {
       {/* ═══ Hero ═══ */}
       <section className="relative pt-20 md:pt-28 pb-16 overflow-hidden">
         {/* decorative blobs */}
-        <div className="absolute top-16 left-1/4 w-[420px] h-[420px] rounded-full bg-accent-blue/5 blur-3xl pointer-events-none animate-drift" />
-        <div className="absolute bottom-0 right-1/4 w-[320px] h-[320px] rounded-full bg-accent-blue/4 blur-3xl pointer-events-none animate-drift-reverse" />
+        <div className="absolute top-16 left-1/4 w-105 h-105 rounded-full bg-accent-blue/5 blur-3xl pointer-events-none animate-drift" />
+        <div className="absolute bottom-0 right-1/4 w-[320px] h-80 rounded-full bg-accent-blue/4 blur-3xl pointer-events-none animate-drift-reverse" />
 
         <div ref={heroRef} className="scroll-reveal max-w-6xl mx-auto px-5 text-center space-y-6">
           <div className="inline-flex items-center gap-2 glass-card rounded-full px-4 py-1.5 text-xs font-medium text-accent-blue">
@@ -122,7 +122,7 @@ export default function FeaturesPage() {
               {/* Progress bar */}
               <div className="relative mb-6">
                 <div className="h-1.5 bg-bg-elevated rounded-full overflow-hidden">
-                  <div className="h-full w-3/4 bg-gradient-to-r from-accent-blue to-blue-400 rounded-full relative">
+                  <div className="h-full w-3/4 bg-linear-to-r from-accent-blue to-blue-400 rounded-full relative">
                     <Plane className="absolute -right-3 -top-2 w-5 h-5 text-accent-blue animate-pulse-slow" />
                   </div>
                 </div>
@@ -194,14 +194,14 @@ export default function FeaturesPage() {
             </div>
 
             {/* Image card */}
-            <div className="relative h-[300px] w-full glass-card rounded-2xl overflow-hidden">
+            <div className="relative h-75 w-full glass-card rounded-2xl overflow-hidden">
               <Image
                 src="/images/terminal-map.jpg"
                 alt="Terminal Navigation"
                 fill
                 className="object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-white/80 via-white/20 to-transparent" />
+              <div className="absolute inset-0 bg-linear-to-t from-white/80 via-white/20 to-transparent" />
               <div className="absolute bottom-4 left-4 right-4 glass rounded-xl px-4 py-3 flex items-center gap-3">
                 <MapPin className="w-5 h-5 text-accent-blue shrink-0" />
                 <div>
