@@ -16,6 +16,7 @@ import Link from 'next/link';
 import { api, type TrackedFlight, type FlightStatusEvent, type JourneyConnectionReport, type JourneyStatus } from '@/lib/api';
 import { generateIntelligenceReport, type FlightIntelligenceReport, type AgentBriefing, type UserIntelligenceProfile } from '@/lib/insights';
 import { useIntelligenceMode } from '@/hooks/use-intelligence-mode';
+import { useAuth } from '@/context/auth';
 import { IconPlane, IconArrowRight, IconLoader } from '@/components/icons';
 import { ArrowRight, Layers, ChevronDown } from 'lucide-react';
 import { JourneyConnections } from '@/components/connection-card';
@@ -130,12 +131,30 @@ function getStatusLineFromReport(
 
 export function SituationRoom({ flight, token, allFlightsCount, onViewAll, allFlights, connectionReport, journeyStatus }: SituationRoomProps) {
   const [intelligenceMode] = useIntelligenceMode();
+  const { user } = useAuth(); // Get user context for personalization
   const [briefing, setBriefing] = useState<AgentBriefing | null>(null);
   const [loading, setLoading] = useState(false);
   const [expanded, setExpanded] = useState(false);
 
   // Generate deterministic report
   const report = generateIntelligenceReport(flight);
+
+  // Extract passenger name from user metadata
+  const passengerName = user?.user_metadata?.full_name || null;
+
+  // Mock location context (in real implementation, this would come from geolocation API)
+  // For demo purposes, we'll simulate different scenarios
+  const passengerLocation = {
+    atAirport: false, // Would be determined by geofencing
+    airportCode: null,
+    estimatedWalkingTimeToGate: null,
+    currentTerminal: null,
+    userAgentLocation: 'At home', // Would come from geolocation
+  };
+
+  // Determine urgency level based on connection risk
+  const urgencyLevel = connectionReport?.worstRiskLevel === 'high' ? 'urgent' : 
+                      connectionReport?.worstRiskLevel === 'medium' ? 'alert' : 'calm';
 
   // Fetch AI briefing on mount (non-blocking)
   useEffect(() => {
@@ -150,13 +169,15 @@ export function SituationRoom({ flight, token, allFlightsCount, onViewAll, allFl
           preferredTone: 'professional',
         };
 
-        // Build journey context for Amberlyn if multi-leg
+        // Build enhanced journey context for Amberlyn with passenger personalization
         const journeyCtx = connectionReport?.isMultiLeg && allFlights && allFlights.length > 1
           ? {
               isMultiLeg: true,
               journeyStatus: journeyStatus ?? 'upcoming',
               totalLegs: allFlights.length,
               currentLegIndex: flight.legIndex ?? 0,
+              passengerName, // Personalization!
+              passengerLocation, // Real-time context!
               connections: connectionReport.connections.map((c) => ({
                 connectionAirport: c.connectionAirport,
                 minutesToNextFlight: c.minutesToNextFlight,
@@ -167,9 +188,14 @@ export function SituationRoom({ flight, token, allFlightsCount, onViewAll, allFl
                 arrivingTerminal: c.arrivingTerminal ?? null,
                 departingTerminal: c.departingTerminal ?? null,
                 minimumConnectionTime: c.minimumConnectionTime,
+                // Enhanced context for agentic behavior
+                boardingClosesInMinutes: c.minutesToNextFlight > 30 ? 20 : Math.max(5, c.minutesToNextFlight - 10),
+                gateWalkingTimeMinutes: c.terminalChange ? 15 : 8,
+                securityWaitTimeMinutes: c.selfTransfer ? 25 : null,
               })),
               worstRiskLevel: connectionReport.worstRiskLevel,
               overallHumanStatus: connectionReport.overallHumanStatus,
+              urgencyLevel, // Dynamic tone adjustment!
             }
           : undefined;
 
@@ -184,7 +210,7 @@ export function SituationRoom({ flight, token, allFlightsCount, onViewAll, allFl
 
     fetchBriefing();
     return () => { cancelled = true; };
-  }, [flight.id, intelligenceMode, token, connectionReport?.worstRiskLevel, journeyStatus]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [flight.id, intelligenceMode, token, connectionReport?.worstRiskLevel, journeyStatus, passengerName]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Use AI briefing if available, otherwise deterministic
   const deterministicStatus = getStatusLineFromReport(report, flight);
