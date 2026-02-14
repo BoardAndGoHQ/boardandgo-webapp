@@ -75,8 +75,8 @@ export default function BookingsPage() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 md:py-12 relative">
       {/* Decorative background */}
-      <div className="fixed top-20 right-1/4 w-[500px] h-[500px] bg-accent-blue/3 rounded-full blur-3xl pointer-events-none" />
-      <div className="fixed bottom-20 left-1/4 w-[400px] h-[400px] bg-accent-blue/2 rounded-full blur-3xl pointer-events-none" />
+      <div className="fixed top-20 right-1/4 w-[500px] h-[500px] bg-accent-blue/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="fixed bottom-20 left-1/4 w-[400px] h-[400px] bg-accent-blue/8 rounded-full blur-3xl pointer-events-none" />
 
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8 animate-fade-up">
         <div>

@@ -186,8 +186,8 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen relative">
       {/* Decorative background */}
-      <div className="fixed top-20 right-1/4 w-[500px] h-[500px] bg-accent-blue/3 rounded-full blur-3xl pointer-events-none" />
-      <div className="fixed bottom-20 left-1/4 w-[400px] h-[400px] bg-accent-blue/2 rounded-full blur-3xl pointer-events-none" />
+      <div className="fixed top-20 right-1/4 w-[500px] h-[500px] bg-accent-blue/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="fixed bottom-20 left-1/4 w-[400px] h-[400px] bg-accent-blue/8 rounded-full blur-3xl pointer-events-none" />
       {/* Header bar */}
       <div className="relative z-10 px-5 md:px-6 py-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between">

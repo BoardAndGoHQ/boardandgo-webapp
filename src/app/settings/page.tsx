@@ -88,7 +88,7 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-5 py-12 relative">
-      <div className="absolute -top-20 left-0 w-[400px] h-[400px] bg-accent-blue/3 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -top-20 left-0 w-[400px] h-[400px] bg-accent-blue/10 rounded-full blur-3xl pointer-events-none" />
 
       <div className="relative">
       <div className="flex items-center gap-3 mb-2">

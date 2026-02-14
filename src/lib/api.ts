@@ -377,6 +377,11 @@ export const api = {
         `/api/flights/${flightId}/status`, { token }
       ),
 
+    deleteFlight: (flightId: string, token: string) =>
+      trackingRequest<{ success: boolean }>(
+        `/api/flights/${flightId}`, { method: 'DELETE', token }
+      ),
+
     getTimeline: (flightId: string, token: string) =>
       trackingRequest<{ events: FlightStatusEvent[] }>(
         `/api/flights/${flightId}/timeline`, { token }

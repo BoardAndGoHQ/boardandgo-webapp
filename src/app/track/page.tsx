@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '@/context/auth';
 import { api, type FlightLookupResult, type TrackedFlight, type FlightStatusEvent } from '@/lib/api';
 import { FlightStatusCard } from '@/components/flight-tracker';
-import { Search as IconSearch, Loader2 as IconLoader, Plane as IconPlane, Radio as IconSignal, ArrowRight as IconArrowRight } from 'lucide-react';
+import { Search as IconSearch, Loader2 as IconLoader, Plane as IconPlane, Radio as IconSignal, ArrowRight as IconArrowRight, Trash2 as IconTrash } from 'lucide-react';
 import { getTrackedDelayRisk } from '@/lib/insights';
 import { trackEvent } from '@/lib/events';
 
@@ -34,6 +34,9 @@ export default function TrackFlightPage() {
   const [historyFlights, setHistoryFlights] = useState<(TrackedFlight & { statusEvents: FlightStatusEvent[] })[]>([]);
   const [loadingMyFlights, setLoadingMyFlights] = useState(true);
   const [trackTab, setTrackTab] = useState<'live' | 'history'>('live');
+
+  // Delete state
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -122,6 +125,22 @@ export default function TrackFlightPage() {
       setSearchError(err.message || 'Failed to start tracking');
     } finally {
       setTracking(false);
+    }
+  }
+
+  async function handleDelete(flightId: string, e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!token) return;
+    setDeletingId(flightId);
+    try {
+      await api.tracking.deleteFlight(flightId, token);
+      setMyFlights((prev) => prev.filter((f) => f.id !== flightId));
+      setHistoryFlights((prev) => prev.filter((f) => f.id !== flightId));
+    } catch {
+      // silently fail
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -368,7 +387,7 @@ export default function TrackFlightPage() {
                             <div className="text-xs text-text-muted">{flight.departureAirport} → {flight.arrivalAirport}</div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2">
                           <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                             flight.flightStatus === 'landed' ? 'bg-emerald-500/10 text-emerald-400' :
                             flight.flightStatus === 'active' ? 'bg-blue-500/10 text-blue-400' :
@@ -388,6 +407,16 @@ export default function TrackFlightPage() {
                           <div className="text-xs text-text-muted">
                             {new Date(flight.scheduledDeparture).toLocaleDateString([], { month: 'short', day: 'numeric' })}
                           </div>
+                          <button
+                            onClick={(e) => handleDelete(flight.id, e)}
+                            disabled={deletingId === flight.id}
+                            className="p-1.5 rounded-lg text-text-muted hover:text-red-400 hover:bg-red-400/10 transition-colors disabled:opacity-50"
+                            title="Remove flight"
+                          >
+                            {deletingId === flight.id
+                              ? <IconLoader className="w-3.5 h-3.5 animate-spin" />
+                              : <IconTrash className="w-3.5 h-3.5" />}
+                          </button>
                           <IconArrowRight className="w-3.5 h-3.5 text-text-muted group-hover:text-accent-blue transition-colors" />
                         </div>
                       </div>
