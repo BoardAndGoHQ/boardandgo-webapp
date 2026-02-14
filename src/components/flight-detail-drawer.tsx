@@ -29,6 +29,9 @@ import {
   ChevronDown,
   Sparkles,
   Car,
+  ExternalLink,
+  BarChart3,
+  Shield,
 } from 'lucide-react';
 
 type FlightWithEvents = TrackedFlight & { statusEvents: FlightStatusEvent[] };
@@ -327,6 +330,34 @@ export function FlightDetailDrawer({ flight, token, positions }: FlightDetailDra
         )}
       </div>
 
+      {/* ── Amadeus Delay Prediction (ML-powered) ── */}
+      {flight.delayPrediction && flight.delayPrediction.buckets && flight.flightStatus !== 'landed' && (
+        <div className="bg-bg-elevated/30 rounded-xl p-4 border border-border-subtle">
+          <div className="flex items-center gap-2 mb-3">
+            <BarChart3 className="w-3.5 h-3.5 text-accent-blue" />
+            <span className="text-xs font-medium text-text-secondary uppercase tracking-wider">Amadeus Delay Prediction</span>
+          </div>
+          <div className="grid grid-cols-4 gap-1.5">
+            {flight.delayPrediction.buckets.map((bucket) => {
+              const pct = Math.round(parseFloat(bucket.probability) * 100);
+              const label = bucket.result === 'LESS_THAN_30_MINUTES' ? '<30m'
+                : bucket.result === 'BETWEEN_30_AND_60_MINUTES' ? '30-60m'
+                : bucket.result === 'BETWEEN_60_AND_120_MINUTES' ? '1-2h'
+                : '>2h/Cancel';
+              const color = bucket.result === 'LESS_THAN_30_MINUTES' ? 'text-emerald-400'
+                : bucket.result === 'BETWEEN_30_AND_60_MINUTES' ? 'text-amber-400'
+                : 'text-red-400';
+              return (
+                <div key={bucket.result} className="text-center bg-bg-elevated/50 rounded-lg py-2 px-1">
+                  <div className={`text-sm font-bold ${color}`}>{pct}%</div>
+                  <div className="text-[9px] text-text-muted leading-tight mt-0.5">{label}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* ── Intelligence grid ── */}
       <div className="grid grid-cols-3 gap-2">
         <div className="bg-bg-elevated/30 rounded-lg p-3 text-center border border-border-subtle">
@@ -345,12 +376,25 @@ export function FlightDetailDrawer({ flight, token, positions }: FlightDetailDra
           </div>
           <div className="text-[10px] text-text-muted">Duration</div>
         </div>
-        <div className="bg-bg-elevated/30 rounded-lg p-3 text-center border border-border-subtle">
-          <div className="text-lg font-bold text-text-primary">
-            {flight.aircraftType ?? '--'}
+        {flight.airportOnTimeScore !== null && flight.airportOnTimeScore !== undefined ? (
+          <div className="bg-bg-elevated/30 rounded-lg p-3 text-center border border-border-subtle">
+            <div className={`text-lg font-bold ${
+              flight.airportOnTimeScore >= 0.8 ? 'text-emerald-400' :
+              flight.airportOnTimeScore >= 0.6 ? 'text-amber-400' :
+              'text-red-400'
+            }`}>
+              {Math.round(flight.airportOnTimeScore * 100)}%
+            </div>
+            <div className="text-[10px] text-text-muted">{flight.departureAirport} On-Time</div>
           </div>
-          <div className="text-[10px] text-text-muted">Aircraft</div>
-        </div>
+        ) : (
+          <div className="bg-bg-elevated/30 rounded-lg p-3 text-center border border-border-subtle">
+            <div className="text-lg font-bold text-text-primary">
+              {flight.aircraftType ?? '--'}
+            </div>
+            <div className="text-[10px] text-text-muted">Aircraft</div>
+          </div>
+        )}
       </div>
 
       {/* ── Status Event Timeline ── */}
@@ -422,6 +466,18 @@ export function FlightDetailDrawer({ flight, token, positions }: FlightDetailDra
 
       {/* ── Action buttons ── */}
       <div className="flex gap-2">
+        {/* Check-In button (when URL available and flight is in check-in window) */}
+        {flight.checkInUrl && !['landed', 'cancelled'].includes(flight.flightStatus) && (
+          <a
+            href={flight.checkInUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-emerald-500 text-white text-sm font-medium rounded-xl hover:brightness-110 transition-all"
+          >
+            <ExternalLink className="w-4 h-4" />
+            Check In
+          </a>
+        )}
         <Link
           href={`/bookings/${flight.bookingId}/track`}
           className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-accent-blue text-white text-sm font-medium rounded-xl hover:brightness-110 transition-all"

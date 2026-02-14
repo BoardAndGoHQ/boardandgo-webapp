@@ -12,6 +12,7 @@ import {
   AlertTriangle,
   MapPin,
   Radio,
+  ExternalLink,
 } from 'lucide-react';
 
 type FlightWithEvents = TrackedFlight & { statusEvents: FlightStatusEvent[] };
@@ -276,6 +277,14 @@ export function FlightCard({
                   delayRisk.level === 'high' ? 'bg-red-400' : 'bg-amber-400'
                 }`} />
                 {delayRisk.probability}% risk
+              </span>
+            )}
+
+            {/* Check-in available badge */}
+            {flight.checkInUrl && !isHistory && (
+              <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded bg-emerald-400/10 text-emerald-400">
+                <ExternalLink className="w-2.5 h-2.5" />
+                Check-in open
               </span>
             )}
 

@@ -43,6 +43,11 @@ export interface FlightIntelligenceReport {
   // Time context
   hoursUntilDeparture: number;
   minutesUntilRecommendedArrival: number;
+
+  // Amadeus enrichment (null when not available)
+  amadeusDelayPrediction: { result: string; probability: string }[] | null;
+  airportOnTimeScore: number | null;  // 0.0–1.0
+  checkInUrl: string | null;
 }
 
 /** Minimal flight data needed to generate report */
@@ -59,6 +64,10 @@ interface FlightForReport {
   // Optional connection data
   connectionRiskScore?: number | null;
   connectionRiskLevel?: 'low' | 'medium' | 'high' | 'critical' | null;
+  // Optional Amadeus enrichment
+  delayPrediction?: { buckets: Array<{ result: string; probability: string }> } | null;
+  airportOnTimeScore?: number | null;
+  checkInUrl?: string | null;
 }
 
 /**
@@ -114,6 +123,20 @@ export function generateIntelligenceReport(flight: FlightForReport): FlightIntel
   // Aggregated reasoning factors
   const reasoningFactors = [...delayPred.factors.map(f => f.label)];
   
+  // Incorporate Amadeus delay prediction if available
+  if (flight.delayPrediction?.buckets) {
+    const onTimeBucket = flight.delayPrediction.buckets.find(b => b.result === 'LESS_THAN_30_MINUTES');
+    if (onTimeBucket) {
+      const onTimePct = Math.round(parseFloat(onTimeBucket.probability) * 100);
+      reasoningFactors.push(`Amadeus ML: ${onTimePct}% chance of on-time arrival`);
+    }
+  }
+
+  if (flight.airportOnTimeScore !== null && flight.airportOnTimeScore !== undefined) {
+    const otpPct = Math.round(flight.airportOnTimeScore * 100);
+    reasoningFactors.push(`${flight.departureAirport} airport on-time rate: ${otpPct}%`);
+  }
+  
   if (flight.connectionRiskLevel === 'high' || flight.connectionRiskLevel === 'critical') {
     reasoningFactors.push(`Connection risk is ${flight.connectionRiskLevel}`);
   }
@@ -163,6 +186,9 @@ export function generateIntelligenceReport(flight: FlightForReport): FlightIntel
     currentDelayMinutes: flight.departureDelayMinutes,
     hoursUntilDeparture: Math.round(hoursUntilDeparture * 10) / 10,
     minutesUntilRecommendedArrival,
+    amadeusDelayPrediction: flight.delayPrediction?.buckets ?? null,
+    airportOnTimeScore: flight.airportOnTimeScore ?? null,
+    checkInUrl: flight.checkInUrl ?? null,
   };
 }
 

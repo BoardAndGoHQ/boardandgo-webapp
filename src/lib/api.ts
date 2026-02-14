@@ -203,6 +203,20 @@ export interface TrackedFlight {
   arrivalTerminal: string | null;
   aircraftType: string | null;
   durationMinutes: number | null;
+  checkInUrl: string | null;
+  delayPrediction: DelayPredictionData | null;
+  airportOnTimeScore: number | null;
+}
+
+/** Amadeus ML delay prediction data stored on TrackedFlight */
+export interface DelayPredictionData {
+  id: string;
+  probability: string;
+  result: string;
+  subType: string;
+  type: string;
+  buckets: Array<{ result: string; probability: string }>;
+  fetchedAt: string;
 }
 
 export interface FlightStatusEvent {
