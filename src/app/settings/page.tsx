@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth';
-import { Mail as IconMail, Loader2 as IconLoader, Check as IconCheck, Settings, Layers, AlertTriangle } from 'lucide-react';
+import { api, type GmailStatus } from '@/lib/api';
+import { Mail as IconMail, Loader2 as IconLoader, Check as IconCheck, Settings, Layers, AlertTriangle, RefreshCw, Unlink } from 'lucide-react';
 
 type IntelligenceMode = 'minimal' | 'balanced' | 'deep';
 
@@ -22,14 +23,34 @@ export default function SettingsPage() {
   const router = useRouter();
   const { user, token, loading: authLoading } = useAuth();
   const [gmailConnecting, setGmailConnecting] = useState(false);
-  const [gmailConnected, setGmailConnected] = useState(false);
+  const [gmailStatus, setGmailStatus] = useState<GmailStatus | null>(null);
+  const [gmailLoading, setGmailLoading] = useState(true);
+  const [scanning, setScanning] = useState(false);
+  const [disconnecting, setDisconnecting] = useState(false);
   const [error, setError] = useState('');
+  const [scanMessage, setScanMessage] = useState('');
   const [intelligenceMode, setIntelligenceMode] = useState<IntelligenceMode>('balanced');
 
   // Load stored mode on mount
   useEffect(() => {
     setIntelligenceMode(getStoredMode());
   }, []);
+
+  const fetchGmailStatus = useCallback(async () => {
+    if (!token) return;
+    try {
+      const status = await api.gmail.getStatus(token);
+      setGmailStatus(status);
+    } catch {
+      // Not critical — just means we can't determine status
+    } finally {
+      setGmailLoading(false);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    if (token) fetchGmailStatus();
+  }, [token, fetchGmailStatus]);
 
   const handleModeChange = (mode: IntelligenceMode) => {
     setIntelligenceMode(mode);
@@ -49,17 +70,7 @@ export default function SettingsPage() {
     setError('');
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/gmail/authorize`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to get Gmail authorization URL');
-      }
-
-      const data = await response.json();
+      const data = await api.gmail.getAuthUrl(token);
       
       // Open Gmail OAuth in a popup
       const popup = window.open(data.authUrl, 'gmail-auth', 'width=600,height=700,popup=yes');
@@ -69,12 +80,42 @@ export default function SettingsPage() {
         if (popup?.closed) {
           clearInterval(checkClosed);
           setGmailConnecting(false);
-          setGmailConnected(true);
+          // Refresh status from backend
+          fetchGmailStatus();
         }
       }, 1000);
     } catch {
       setError('Failed to connect Gmail. Please try again.');
       setGmailConnecting(false);
+    }
+  };
+
+  const handleDisconnect = async () => {
+    if (!token) return;
+    setDisconnecting(true);
+    setError('');
+    try {
+      await api.gmail.disconnect(token);
+      setGmailStatus({ connected: false, email: null, watchExpiration: null });
+    } catch {
+      setError('Failed to disconnect Gmail.');
+    } finally {
+      setDisconnecting(false);
+    }
+  };
+
+  const handleScan = async () => {
+    if (!token) return;
+    setScanning(true);
+    setScanMessage('');
+    setError('');
+    try {
+      const result = await api.gmail.scan(token);
+      setScanMessage(result.message || 'Scan started! Bookings will appear shortly.');
+    } catch {
+      setError('Failed to trigger email scan.');
+    } finally {
+      setScanning(false);
     }
   };
 
@@ -142,10 +183,49 @@ export default function SettingsPage() {
                 </div>
               )}
 
-              {gmailConnected ? (
-                <div className="flex items-center gap-2 text-green-400">
-                  <IconCheck className="w-5 h-5" />
-                  <span className="text-sm">Gmail connected successfully!</span>
+              {scanMessage && (
+                <div className="mb-4 px-4 py-3 text-sm text-green-400 bg-green-400/10 border border-green-400/20 rounded-lg">
+                  {scanMessage}
+                </div>
+              )}
+
+              {gmailLoading ? (
+                <div className="flex items-center gap-2 text-text-muted">
+                  <IconLoader className="w-4 h-4 animate-spin" />
+                  <span className="text-sm">Checking connection...</span>
+                </div>
+              ) : gmailStatus?.connected ? (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-green-400">
+                    <IconCheck className="w-5 h-5" />
+                    <span className="text-sm">Gmail connected ({gmailStatus.email})</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleScan}
+                      disabled={scanning}
+                      className="px-4 py-2 bg-accent-blue/10 border border-accent-blue/20 text-accent-blue text-sm rounded-lg hover:bg-accent-blue/20 transition-colors disabled:opacity-50 flex items-center gap-2"
+                    >
+                      {scanning ? (
+                        <IconLoader className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <RefreshCw className="w-4 h-4" />
+                      )}
+                      {scanning ? 'Scanning...' : 'Scan Emails Now'}
+                    </button>
+                    <button
+                      onClick={handleDisconnect}
+                      disabled={disconnecting}
+                      className="px-4 py-2 bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-lg hover:bg-red-500/20 transition-colors disabled:opacity-50 flex items-center gap-2"
+                    >
+                      {disconnecting ? (
+                        <IconLoader className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Unlink className="w-4 h-4" />
+                      )}
+                      Disconnect
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <button

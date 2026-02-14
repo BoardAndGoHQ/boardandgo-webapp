@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth';
-import { api, type Booking } from '@/lib/api';
+import { api, type Booking, type GmailStatus } from '@/lib/api';
 import { IconPlane, IconPlus, IconMail, IconLoader, IconArrowRight, IconClock, IconSignal } from '@/components/icons';
 
 function formatDate(dateStr: string) {
@@ -30,6 +30,8 @@ export default function BookingsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [connectingGmail, setConnectingGmail] = useState(false);
+  const [gmailStatus, setGmailStatus] = useState<GmailStatus | null>(null);
+  const [scanning, setScanning] = useState(false);
 
   const fetchBookings = useCallback(async () => {
     if (!token) return;
@@ -43,6 +45,14 @@ export default function BookingsPage() {
     }
   }, [token]);
 
+  const fetchGmailStatus = useCallback(async () => {
+    if (!token) return;
+    try {
+      const status = await api.gmail.getStatus(token);
+      setGmailStatus(status);
+    } catch { /* ignore */ }
+  }, [token]);
+
   useEffect(() => {
     if (authLoading) return;
     if (!user) {
@@ -50,17 +60,41 @@ export default function BookingsPage() {
       return;
     }
     fetchBookings();
-  }, [user, authLoading, router, fetchBookings]);
+    fetchGmailStatus();
+  }, [user, authLoading, router, fetchBookings, fetchGmailStatus]);
 
   const handleConnectGmail = async () => {
     if (!token) return;
     setConnectingGmail(true);
     try {
-      const { url } = await api.gmail.getAuthUrl(token);
-      window.location.href = url;
+      const data = await api.gmail.getAuthUrl(token);
+      const popup = window.open(data.authUrl, 'gmail-auth', 'width=600,height=700,popup=yes');
+      const checkClosed = setInterval(() => {
+        if (popup?.closed) {
+          clearInterval(checkClosed);
+          setConnectingGmail(false);
+          fetchGmailStatus();
+          // Re-fetch bookings after a short delay (scan may create new ones)
+          setTimeout(() => fetchBookings(), 3000);
+        }
+      }, 1000);
     } catch {
       setError('Failed to connect Gmail');
       setConnectingGmail(false);
+    }
+  };
+
+  const handleScanEmails = async () => {
+    if (!token) return;
+    setScanning(true);
+    try {
+      await api.gmail.scan(token);
+      // Re-fetch bookings after a delay for the scan to process
+      setTimeout(() => fetchBookings(), 5000);
+    } catch {
+      setError('Failed to scan emails');
+    } finally {
+      setScanning(false);
     }
   };
 
@@ -85,16 +119,16 @@ export default function BookingsPage() {
         </div>
         <div className="flex items-center gap-3">
           <button
-            onClick={handleConnectGmail}
-            disabled={connectingGmail}
+            onClick={gmailStatus?.connected ? handleScanEmails : handleConnectGmail}
+            disabled={connectingGmail || scanning}
             className="flex items-center gap-2 px-4 py-2.5 text-sm text-text-secondary glass-card rounded-xl hover:bg-white/60 dark:hover:bg-white/10 transition-colors disabled:opacity-50"
           >
-            {connectingGmail ? (
+            {connectingGmail || scanning ? (
               <IconLoader className="w-4 h-4 animate-spin" />
             ) : (
               <IconMail className="w-4 h-4" />
             )}
-            Sync Gmail
+            {gmailStatus?.connected ? (scanning ? 'Scanning...' : 'Scan Emails') : 'Connect Gmail'}
           </button>
           <Link
             href="/bookings/new"

@@ -87,6 +87,12 @@ export interface FlightSearchParams {
   cabin?: CabinClass;
 }
 
+export interface GmailStatus {
+  connected: boolean;
+  email: string | null;
+  watchExpiration: string | null;
+}
+
 export interface Booking {
   id: string;
   source: 'gmail' | 'manual';
@@ -348,7 +354,16 @@ export const api = {
 
   gmail: {
     getAuthUrl: (token: string) =>
-      request<{ url: string }>('/api/gmail/authorize', { token }),
+      request<{ authUrl: string }>('/api/gmail/authorize', { token }),
+
+    getStatus: (token: string) =>
+      request<GmailStatus>('/api/gmail/status', { token }),
+
+    disconnect: (token: string) =>
+      request<{ success: boolean }>('/api/gmail/disconnect', { method: 'POST', token }),
+
+    scan: (token: string) =>
+      request<{ success: boolean; message: string }>('/api/gmail/scan', { method: 'POST', token }),
   },
 
   agent: {
