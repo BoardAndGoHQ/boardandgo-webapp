@@ -35,6 +35,7 @@ export default function SettingsPage() {
   const [telegramConnecting, setTelegramConnecting] = useState(false);
   const [telegramConnected, setTelegramConnected] = useState(false);
   const [telegramLoading, setTelegramLoading] = useState(true);
+  const [authCode, setAuthCode] = useState<{code: string, instructions: string} | null>(null);
 
   // Load stored mode on mount
   useEffect(() => {
@@ -184,6 +185,23 @@ export default function SettingsPage() {
       
     } catch (err) {
       setError('Failed to connect Telegram. Please try again.');
+      setTelegramConnecting(false);
+    }
+  };
+
+  const handleGenerateAuthCode = async () => {
+    if (!token) return;
+    
+    setTelegramConnecting(true);
+    setError('');
+    
+    try {
+      const response = await api.notifications.generateAuthCode(token);
+      setAuthCode(response);
+      setScanMessage('Auth code generated! Copy it and send to @boardandgo_bot');
+    } catch (err) {
+      setError('Failed to generate auth code. Please try again.');
+    } finally {
       setTelegramConnecting(false);
     }
   };
@@ -359,27 +377,63 @@ export default function SettingsPage() {
                   <span className="text-sm">Telegram connected</span>
                 </div>
               ) : (
-                <div className="space-y-3">
-                  <button
-                    onClick={handleConnectTelegram}
-                    disabled={telegramConnecting}
-                    className="px-4 py-2 bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm rounded-lg hover:bg-blue-500/20 transition-colors disabled:opacity-50 flex items-center gap-2"
-                  >
-                    {telegramConnecting ? (
-                      <>
-                        <IconLoader className="w-4 h-4 animate-spin" />
-                        Connecting...
-                      </>
-                    ) : (
-                      <>
-                        <MessageCircle className="w-4 h-4" />
-                        Connect Telegram
-                      </>
-                    )}
-                  </button>
-                  <p className="text-xs text-text-muted mt-2">
-                    This will open Telegram with an encoded link. <strong>Click the START button</strong> in Telegram (don't type /start manually). The link contains your secure user ID.
-                  </p>
+                <div className="space-y-4">
+                  <div className="space-y-3">
+                    <button
+                      onClick={handleConnectTelegram}
+                      disabled={telegramConnecting}
+                      className="px-4 py-2 bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm rounded-lg hover:bg-blue-500/20 transition-colors disabled:opacity-50 flex items-center gap-2 w-full"
+                    >
+                      {telegramConnecting ? (
+                        <>
+                          <IconLoader className="w-4 h-4 animate-spin" />
+                          Opening Telegram...
+                        </>
+                      ) : (
+                        <>
+                          <MessageCircle className="w-4 h-4" />
+                          Connect via Deep Link
+                        </>
+                      )}
+                    </button>
+                    <p className="text-xs text-text-muted">
+                      This opens Telegram with an encoded link. <strong>Click START</strong> in Telegram.
+                    </p>
+                  </div>
+                  
+                  <div className="border-t border-border-subtle pt-4">
+                    <button
+                      onClick={handleGenerateAuthCode}
+                      disabled={telegramConnecting}
+                      className="px-4 py-2 bg-purple-500/10 border border-purple-500/20 text-purple-400 text-sm rounded-lg hover:bg-purple-500/20 transition-colors disabled:opacity-50 flex items-center gap-2 w-full"
+                    >
+                      <Key className="w-4 h-4" />
+                      Generate Auth Code
+                    </button>
+                    <p className="text-xs text-text-muted mt-2">
+                      Get a code to manually send to @boardandgo_bot
+                    </p>
+                  </div>
+                  
+                  {authCode && (
+                    <div className="mt-4 p-4 bg-purple-500/10 border border-purple-500/20 rounded-lg">
+                      <p className="text-sm font-medium text-purple-400 mb-2">Your Auth Code:</p>
+                      <div className="flex items-center gap-2">
+                        <code className="px-3 py-2 bg-bg-elevated rounded text-sm font-mono">
+                          {authCode.code}
+                        </code>
+                        <button
+                          onClick={() => navigator.clipboard.writeText(authCode.code)}
+                          className="p-2 text-text-muted hover:text-text-primary"
+                        >
+                          <Copy className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <p className="text-xs text-text-muted mt-2">
+                        Send to @boardandgo_bot: <code className="bg-bg-elevated px-1 rounded">{authCode.instructions}</code>
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

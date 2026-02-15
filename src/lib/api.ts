@@ -375,6 +375,9 @@ export const api = {
     
     getTelegramLink: (botUsername: string, token: string) =>
       trackingRequest<{ link: string }>('/api/preferences/telegram/connect-link?botUsername=' + encodeURIComponent(botUsername), { token }),
+    
+    generateAuthCode: (token: string) =>
+      trackingRequest<{ code: string, instructions: string }>('/api/preferences/telegram/generate-code', { method: 'POST', token }),
   },
 
   agent: {
