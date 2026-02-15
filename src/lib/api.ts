@@ -366,6 +366,17 @@ export const api = {
       request<{ success: boolean; message: string }>('/api/gmail/scan', { method: 'POST', token }),
   },
 
+  notifications: {
+    getPreferences: (token: string) =>
+      trackingRequest<{ preferences: Record<string, unknown> }>('/api/notifications', { token }),
+    
+    updatePreferences: (prefs: Record<string, unknown>, token: string) =>
+      trackingRequest<{ preferences: Record<string, unknown> }>('/api/notifications', { method: 'PUT', body: prefs, token }),
+    
+    getTelegramLink: (botUsername: string, token: string) =>
+      trackingRequest<{ link: string }>('/api/notifications/telegram/connect-link?botUsername=' + encodeURIComponent(botUsername), { token }),
+  },
+
   agent: {
     chat: (messages: AgentChatMessage[], token: string) =>
       request<AgentResponse>('/api/agent/chat', {
