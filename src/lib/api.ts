@@ -368,13 +368,13 @@ export const api = {
 
   notifications: {
     getPreferences: (token: string) =>
-      trackingRequest<{ preferences: Record<string, unknown> }>('/api/notifications', { token }),
+      trackingRequest<{ preferences: Record<string, unknown> }>('/api/preferences', { token }),
     
     updatePreferences: (prefs: Record<string, unknown>, token: string) =>
-      trackingRequest<{ preferences: Record<string, unknown> }>('/api/notifications', { method: 'PUT', body: prefs, token }),
+      trackingRequest<{ preferences: Record<string, unknown> }>('/api/preferences', { method: 'PUT', body: prefs, token }),
     
     getTelegramLink: (botUsername: string, token: string) =>
-      trackingRequest<{ link: string }>('/api/notifications/telegram/connect-link?botUsername=' + encodeURIComponent(botUsername), { token }),
+      trackingRequest<{ link: string }>('/api/preferences/telegram/connect-link?botUsername=' + encodeURIComponent(botUsername), { token }),
   },
 
   agent: {

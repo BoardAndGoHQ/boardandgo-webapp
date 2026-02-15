@@ -155,7 +155,7 @@ export default function SettingsPage() {
       window.open(response.link, '_blank');
       
       // Show instruction message
-      setScanMessage('Opened Telegram! Please start the bot and return here to refresh.');
+      setScanMessage('Opened Telegram! Please CLICK the START button (don\'t type it) and return here to refresh.');
       
       // Poll for connection status
       const checkInterval = setInterval(async () => {
@@ -359,23 +359,28 @@ export default function SettingsPage() {
                   <span className="text-sm">Telegram connected</span>
                 </div>
               ) : (
-                <button
-                  onClick={handleConnectTelegram}
-                  disabled={telegramConnecting}
-                  className="px-4 py-2 bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm rounded-lg hover:bg-blue-500/20 transition-colors disabled:opacity-50 flex items-center gap-2"
-                >
-                  {telegramConnecting ? (
-                    <>
-                      <IconLoader className="w-4 h-4 animate-spin" />
-                      Connecting...
-                    </>
-                  ) : (
-                    <>
-                      <MessageCircle className="w-4 h-4" />
-                      Connect Telegram
-                    </>
-                  )}
-                </button>
+                <div className="space-y-3">
+                  <button
+                    onClick={handleConnectTelegram}
+                    disabled={telegramConnecting}
+                    className="px-4 py-2 bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm rounded-lg hover:bg-blue-500/20 transition-colors disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {telegramConnecting ? (
+                      <>
+                        <IconLoader className="w-4 h-4 animate-spin" />
+                        Connecting...
+                      </>
+                    ) : (
+                      <>
+                        <MessageCircle className="w-4 h-4" />
+                        Connect Telegram
+                      </>
+                    )}
+                  </button>
+                  <p className="text-xs text-text-muted mt-2">
+                    This will open Telegram with a special link. Make sure to click "START" in Telegram (don't type it manually).
+                  </p>
+                </div>
               )}
             </div>
           </div>
