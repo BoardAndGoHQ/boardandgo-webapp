@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth';
 import { api, type GmailStatus } from '@/lib/api';
-import { Mail as IconMail, Loader2 as IconLoader, Check as IconCheck, Settings, Layers, AlertTriangle, RefreshCw, Unlink, MessageCircle } from 'lucide-react';
+import { Mail as IconMail, Loader2 as IconLoader, Check as IconCheck, Settings, Layers, AlertTriangle, RefreshCw, Unlink, MessageCircle, Key, Copy } from 'lucide-react';
 
 type IntelligenceMode = 'minimal' | 'balanced' | 'deep';
 
