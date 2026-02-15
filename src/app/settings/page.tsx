@@ -155,7 +155,7 @@ export default function SettingsPage() {
       window.open(response.link, '_blank');
       
       // Show instruction message
-      setScanMessage('Opened Telegram! Please CLICK the START button (don\'t type it) and return here to refresh.');
+      setScanMessage('Opened Telegram! Please CLICK the START button (don\'t type it manually) and return here to refresh. The link contains your encoded user ID.');
       
       // Poll for connection status
       const checkInterval = setInterval(async () => {
@@ -378,7 +378,7 @@ export default function SettingsPage() {
                     )}
                   </button>
                   <p className="text-xs text-text-muted mt-2">
-                    This will open Telegram with a special link. Make sure to click "START" in Telegram (don't type it manually).
+                    This will open Telegram with an encoded link. <strong>Click the START button</strong> in Telegram (don't type /start manually). The link contains your secure user ID.
                   </p>
                 </div>
               )}
