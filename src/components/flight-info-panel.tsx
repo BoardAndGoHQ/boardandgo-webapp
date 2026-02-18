@@ -139,10 +139,12 @@ export function FlightInfoPanel({ flight, position, airports, collapsed, onToggl
               onError={(e) => {
                 // Fallback to icon if logo fails
                 (e.target as HTMLImageElement).style.display = 'none';
-                (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                const fallback = (e.target as HTMLImageElement).nextElementSibling as HTMLElement | null;
+                fallback?.classList.remove('hidden');
+                fallback?.classList.add('flex');
               }}
             />
-            <div className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center hidden">
+            <div className="w-9 h-9 rounded-lg bg-white/10 hidden items-center justify-center">
               <IconPlane className="w-5 h-5 text-accent-blue" />
             </div>
             <div>

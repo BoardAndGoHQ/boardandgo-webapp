@@ -373,11 +373,8 @@ export const api = {
     updatePreferences: (prefs: Record<string, unknown>, token: string) =>
       trackingRequest<{ preferences: Record<string, unknown> }>('/api/preferences', { method: 'PUT', body: prefs, token }),
     
-    getTelegramLink: (botUsername: string, token: string) =>
-      trackingRequest<{ link: string }>('/api/preferences/telegram/connect-link?botUsername=' + encodeURIComponent(botUsername), { token }),
-    
-    generateAuthCode: (token: string) =>
-      trackingRequest<{ code: string, instructions: string }>('/api/preferences/telegram/generate-code', { method: 'POST', token }),
+    getTelegramLink: (token: string) =>
+      trackingRequest<{ link: string }>('/api/preferences/telegram/connect-link', { token }),
   },
 
   agent: {
