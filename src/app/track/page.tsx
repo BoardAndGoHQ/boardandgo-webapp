@@ -152,8 +152,9 @@ export default function TrackFlightPage() {
     try {
       const { flight } = await api.tracking.lookup(parsed.carrier, parsed.number, date, token);
       setLookupResult(flight);
-    } catch (err: any) {
-      setSearchError(err.message || 'Flight not found. Check the airline code, flight number, and date.');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Flight not found. Check the airline code, flight number, and date.';
+      setSearchError(message);
     } finally {
       setSearching(false);
     }
@@ -181,8 +182,9 @@ export default function TrackFlightPage() {
       // Refresh my flights list
       const { flights } = await api.tracking.myFlights(token, 'active');
       setMyFlights(flights);
-    } catch (err: any) {
-      setSearchError(err.message || 'Failed to start tracking');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to start tracking';
+      setSearchError(message);
     } finally {
       setTracking(false);
     }

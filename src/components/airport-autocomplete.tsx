@@ -47,13 +47,7 @@ export function AirportAutocomplete({
 
   // Resolve the display text from the IATA code
   const selectedAirport = value ? getAirport(value) : undefined;
-
-  // When the value changes externally (e.g. swap), update the display
-  useEffect(() => {
-    if (!isFocused) {
-      setQuery(value || '');
-    }
-  }, [value, isFocused]);
+  const displayQuery = isFocused ? query : (value || query);
 
   // Search when query changes
   const handleInputChange = useCallback((text: string) => {
@@ -158,7 +152,7 @@ export function AirportAutocomplete({
   const handleFocus = () => {
     setIsFocused(true);
     // Select all text on focus for easy replacement
-    if (query) {
+    if (displayQuery) {
       setQuery('');
       const matches = searchAirports('', 0);
       setResults(matches);
@@ -188,7 +182,7 @@ export function AirportAutocomplete({
           type="text"
           id={id}
           name={name}
-          value={query}
+          value={displayQuery}
           onChange={(e) => handleInputChange(e.target.value)}
           onKeyDown={handleKeyDown}
           onFocus={handleFocus}

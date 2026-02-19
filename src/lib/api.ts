@@ -292,6 +292,137 @@ export interface JourneyData {
   connectionReport: JourneyConnectionReport;
 }
 
+export type NotificationChannel =
+  | 'email'
+  | 'telegram'
+  | 'sms'
+  | 'whatsapp'
+  | 'in_app'
+  | 'web_push';
+
+export interface NotificationChannelSetup {
+  emailReady: boolean;
+  telegramReady: boolean;
+  smsReady: boolean;
+  whatsappReady: boolean;
+  inAppReady: boolean;
+  webPushReady: boolean;
+}
+
+export interface NotificationPreferences {
+  id: string;
+  userId: string;
+  enabledChannels: NotificationChannel[];
+  smsNumber: string | null;
+  whatsappNumber: string | null;
+  telegramChatId: string | null;
+  webPushEnabled: boolean;
+  intelligenceMode: 'minimal' | 'balanced' | 'deep';
+  preferredTone: 'professional' | 'friendly' | 'casual';
+  delayThresholdMinutes: number;
+  notifyOnDelays: boolean;
+  notifyOnCancellations: boolean;
+  notifyOnGateChanges: boolean;
+  notifyOnBoarding: boolean;
+  notifyOnDepartures: boolean;
+  notifyOnArrivals: boolean;
+  quietHours: Record<string, unknown> | null;
+  smsOptedOutAt?: string | null;
+  whatsappOptedOutAt?: string | null;
+  channelSetup: NotificationChannelSetup;
+}
+
+export interface NotificationPreferencesUpdate {
+  enabledChannels?: NotificationChannel[];
+  smsNumber?: string | null;
+  whatsappNumber?: string | null;
+  webPushEnabled?: boolean;
+  intelligenceMode?: 'minimal' | 'balanced' | 'deep';
+  preferredTone?: 'professional' | 'friendly' | 'casual';
+  delayThresholdMinutes?: number;
+  notifyOnDelays?: boolean;
+  notifyOnCancellations?: boolean;
+  notifyOnGateChanges?: boolean;
+  notifyOnBoarding?: boolean;
+  notifyOnDepartures?: boolean;
+  notifyOnArrivals?: boolean;
+  quietHours?: Record<string, unknown> | null;
+}
+
+export interface NotificationDeliverySummary {
+  channel: NotificationChannel | string;
+  deliveryStatus: 'pending' | 'sent' | 'delivered' | 'failed' | string;
+  provider: string | null;
+  providerStatus: string | null;
+  attemptCount: number;
+  lastAttemptAt: string | null;
+  lastWebhookAt: string | null;
+  isTerminal: boolean;
+  errorCode: string | null;
+  errorMessage: string | null;
+}
+
+export interface NotificationItem {
+  id: string;
+  bookingId: string;
+  flightId: string | null;
+  notificationType: string;
+  subject: string | null;
+  messageText: string;
+  messageHtml: string | null;
+  status: string;
+  channels: NotificationChannel[];
+  readAt: string | null;
+  sentAt: string | null;
+  deliveredAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  deliveries: NotificationDeliverySummary[];
+}
+
+export interface NotificationListResponse {
+  items: NotificationItem[];
+  nextCursor: string | null;
+  unreadCount: number;
+}
+
+export interface WebPushPublicKeyResponse {
+  publicKey: string;
+}
+
+export interface WebPushSubscriptionInput {
+  endpoint: string;
+  keys: {
+    p256dh: string;
+    auth: string;
+  };
+}
+
+export interface ConciergeChatSession {
+  id: string;
+  userId: string;
+  title: string | null;
+  context: Record<string, unknown> | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ConciergeChatMessage {
+  id: string;
+  sessionId: string;
+  role: 'user' | 'assistant' | string;
+  content: string;
+  metadata: Record<string, unknown> | null;
+  createdAt: string;
+}
+
+export interface ConciergeActionProposal {
+  id: string;
+  type: string;
+  summary: string;
+  payload: Record<string, unknown>;
+}
+
 async function trackingRequest<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
   const { method = 'GET', body, token, cache } = options;
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
@@ -422,13 +553,70 @@ export const api = {
 
   notifications: {
     getPreferences: (token: string) =>
-      trackingRequest<{ preferences: Record<string, unknown> }>('/api/preferences', { token, cache: 'no-store' }),
-    
-    updatePreferences: (prefs: Record<string, unknown>, token: string) =>
-      trackingRequest<{ preferences: Record<string, unknown> }>('/api/preferences', { method: 'PUT', body: prefs, token }),
-    
+      trackingRequest<{ preferences: NotificationPreferences }>('/api/preferences', { token, cache: 'no-store' }),
+
+    updatePreferences: (prefs: NotificationPreferencesUpdate, token: string) =>
+      trackingRequest<{ preferences: NotificationPreferences }>('/api/preferences', {
+        method: 'PUT',
+        body: prefs,
+        token,
+      }),
+
     getTelegramLink: (token: string) =>
       trackingRequest<{ link: string }>('/api/preferences/telegram/connect-link', { token, cache: 'no-store' }),
+
+    list: (
+      token: string,
+      options?: {
+        limit?: number;
+        cursor?: string;
+        unreadOnly?: boolean;
+      }
+    ) => {
+      const query = new URLSearchParams();
+      if (options?.limit) query.set('limit', String(options.limit));
+      if (options?.cursor) query.set('cursor', options.cursor);
+      if (options?.unreadOnly !== undefined) query.set('unreadOnly', String(options.unreadOnly));
+      const suffix = query.toString().length > 0 ? `?${query.toString()}` : '';
+      return trackingRequest<NotificationListResponse>(`/api/notifications${suffix}`, {
+        token,
+        cache: 'no-store',
+      });
+    },
+
+    markRead: (notificationId: string, token: string) =>
+      trackingRequest<{ success: boolean }>(`/api/notifications/${notificationId}/read`, {
+        method: 'POST',
+        token,
+      }),
+
+    markAllRead: (token: string) =>
+      trackingRequest<{ updated: number }>('/api/notifications/read-all', {
+        method: 'POST',
+        token,
+      }),
+
+    streamUrl: (token: string) =>
+      `${POST_BOOKING_API}/api/notifications/stream?token=${encodeURIComponent(token)}`,
+
+    getWebPushPublicKey: (token: string) =>
+      trackingRequest<WebPushPublicKeyResponse>('/api/preferences/web-push/public-key', {
+        token,
+        cache: 'no-store',
+      }),
+
+    subscribeWebPush: (subscription: WebPushSubscriptionInput, token: string) =>
+      trackingRequest<{ subscription: { id: string; endpoint: string; isActive: boolean } }>(
+        '/api/preferences/web-push/subscriptions',
+        { method: 'POST', body: subscription, token }
+      ),
+
+    unsubscribeWebPush: (token: string, endpoint?: string) =>
+      trackingRequest<{ removed: number }>('/api/preferences/web-push/subscriptions', {
+        method: 'DELETE',
+        body: endpoint ? { endpoint } : {},
+        token,
+      }),
   },
 
   agent: {
@@ -436,6 +624,49 @@ export const api = {
       request<AgentResponse>('/api/agent/chat', {
         method: 'POST',
         body: { messages },
+        token,
+      }),
+  },
+
+  concierge: {
+    createSession: (token: string, payload?: { title?: string; context?: Record<string, unknown> }) =>
+      trackingRequest<{ session: ConciergeChatSession }>('/api/concierge/chat/sessions', {
+        method: 'POST',
+        body: payload ?? {},
+        token,
+      }),
+
+    listSessions: (token: string, limit = 20) =>
+      trackingRequest<{ sessions: ConciergeChatSession[] }>(
+        `/api/concierge/chat/sessions?limit=${encodeURIComponent(String(limit))}`,
+        { token, cache: 'no-store' }
+      ),
+
+    listMessages: (sessionId: string, token: string, limit = 100) =>
+      trackingRequest<{ messages: ConciergeChatMessage[] }>(
+        `/api/concierge/chat/sessions/${encodeURIComponent(sessionId)}/messages?limit=${encodeURIComponent(String(limit))}`,
+        { token, cache: 'no-store' }
+      ),
+
+    sendMessage: (sessionId: string, content: string, token: string) =>
+      trackingRequest<{
+        message: ConciergeChatMessage;
+        action: ConciergeActionProposal | null;
+      }>(`/api/concierge/chat/sessions/${encodeURIComponent(sessionId)}/messages`, {
+        method: 'POST',
+        body: { content },
+        token,
+      }),
+
+    confirmAction: (actionId: string, token: string) =>
+      trackingRequest<{
+        actionId: string;
+        status: string;
+        result: Record<string, unknown> | null;
+        followUp: ConciergeChatMessage | null;
+      }>(`/api/concierge/chat/actions/${encodeURIComponent(actionId)}/confirm`, {
+        method: 'POST',
+        body: { confirm: true },
         token,
       }),
   },

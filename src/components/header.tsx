@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/auth';
 import { IconUser, IconLogout, IconMenu, IconX } from './icons';
+import { NotificationCenter } from './notification-center';
 
 /* Links swap depending on auth state */
 const publicLinks = [
@@ -86,6 +87,7 @@ export function Header() {
             <div className="w-20 h-8 bg-black/4 dark:bg-bg-elevated/50 rounded-full animate-shimmer" />
           ) : user ? (
             <div className="flex items-center gap-2">
+              <NotificationCenter />
               <div className="flex items-center gap-2 px-3 py-1.5 bg-white/60 dark:bg-bg-elevated/40 border border-black/4 dark:border-border-subtle rounded-full backdrop-blur-sm">
                 <div className="w-6 h-6 rounded-full bg-accent-blue/10 flex items-center justify-center">
                   <span className="text-[10px] font-semibold text-accent-blue">

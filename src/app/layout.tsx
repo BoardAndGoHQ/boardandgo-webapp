@@ -5,6 +5,7 @@ import { Header } from '@/components/header';
 import { ConditionalFooter } from '@/components/conditional-footer';
 import { ScrollToTop } from '@/components/scroll-to-top';
 import { AuthProvider } from '@/context/auth';
+import { ConciergeWidget } from '@/components/concierge-widget';
 
 const inter = Inter({
   variable: '--font-inter',
@@ -36,6 +37,7 @@ export default function RootLayout({
           <main className="flex-1 relative z-10">{children}</main>
           <ConditionalFooter />
           <ScrollToTop />
+          <ConciergeWidget />
         </AuthProvider>
       </body>
     </html>

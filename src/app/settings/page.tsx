@@ -1,148 +1,206 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth';
-import { api, type GmailStatus } from '@/lib/api';
-import { Mail as IconMail, Loader2 as IconLoader, Check as IconCheck, Settings, Layers, AlertTriangle, RefreshCw, Unlink, MessageCircle } from 'lucide-react';
+import {
+  api,
+  type GmailStatus,
+  type NotificationChannel,
+  type NotificationPreferences,
+} from '@/lib/api';
+import {
+  Mail as IconMail,
+  Loader2 as IconLoader,
+  Check as IconCheck,
+  Settings,
+  RefreshCw,
+  Unlink,
+  MessageCircle,
+  Bell,
+  Smartphone,
+  Save,
+} from 'lucide-react';
 
-type IntelligenceMode = 'minimal' | 'balanced' | 'deep';
-type NotificationPreferences = {
-  telegramChatId?: string | null;
-};
+type PushPermissionState = 'unsupported' | 'default' | 'granted' | 'denied';
 
-const INTELLIGENCE_MODE_KEY = 'boardandgo_intelligence_mode';
+const CHANNELS: Array<{ id: NotificationChannel; label: string }> = [
+  { id: 'email', label: 'Email' },
+  { id: 'telegram', label: 'Telegram' },
+  { id: 'sms', label: 'SMS' },
+  { id: 'whatsapp', label: 'WhatsApp' },
+  { id: 'in_app', label: 'In-App' },
+  { id: 'web_push', label: 'Browser Push' },
+];
 
-function getStoredMode(): IntelligenceMode {
-  if (typeof window === 'undefined') return 'balanced';
-  return (localStorage.getItem(INTELLIGENCE_MODE_KEY) as IntelligenceMode) || 'balanced';
+function toPushPermissionState(): PushPermissionState {
+  if (typeof window === 'undefined' || !('Notification' in window)) return 'unsupported';
+  return Notification.permission;
 }
 
-function setStoredMode(mode: IntelligenceMode) {
-  localStorage.setItem(INTELLIGENCE_MODE_KEY, mode);
-}
-
-function hasLinkedTelegram(preferences: Record<string, unknown> | undefined): boolean {
-  const telegramChatId = (preferences as NotificationPreferences | undefined)?.telegramChatId;
-  return typeof telegramChatId === 'string' && telegramChatId.length > 0;
+function urlBase64ToArrayBuffer(base64String: string): ArrayBuffer {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const raw = window.atob(base64);
+  const output = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i += 1) output[i] = raw.charCodeAt(i);
+  return output.buffer;
 }
 
 export default function SettingsPage() {
   const router = useRouter();
   const { user, token, loading: authLoading } = useAuth();
-  const [gmailConnecting, setGmailConnecting] = useState(false);
+
   const [gmailStatus, setGmailStatus] = useState<GmailStatus | null>(null);
   const [gmailLoading, setGmailLoading] = useState(true);
+  const [gmailConnecting, setGmailConnecting] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
-  const [error, setError] = useState('');
-  const [scanMessage, setScanMessage] = useState('');
-  const [intelligenceMode, setIntelligenceMode] = useState<IntelligenceMode>('balanced');
-  
-  // Telegram states
+
+  const [preferences, setPreferences] = useState<NotificationPreferences | null>(null);
+  const [prefsLoading, setPrefsLoading] = useState(true);
+  const [savingPrefs, setSavingPrefs] = useState(false);
+
   const [telegramConnecting, setTelegramConnecting] = useState(false);
-  const [telegramConnected, setTelegramConnected] = useState(false);
-  const [telegramLoading, setTelegramLoading] = useState(true);
-  const telegramPollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const telegramPollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const telegramSuccessTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [pushPermission, setPushPermission] = useState<PushPermissionState>(() => toPushPermissionState());
+  const [pushBusy, setPushBusy] = useState(false);
 
-  const clearTelegramPolling = useCallback(() => {
-    if (telegramPollIntervalRef.current) {
-      clearInterval(telegramPollIntervalRef.current);
-      telegramPollIntervalRef.current = null;
-    }
-    if (telegramPollTimeoutRef.current) {
-      clearTimeout(telegramPollTimeoutRef.current);
-      telegramPollTimeoutRef.current = null;
-    }
-    if (telegramSuccessTimeoutRef.current) {
-      clearTimeout(telegramSuccessTimeoutRef.current);
-      telegramSuccessTimeoutRef.current = null;
-    }
+  const [error, setError] = useState('');
+  const [info, setInfo] = useState('');
+
+  const telegramPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const telegramTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const stopTelegramPolling = useCallback(() => {
+    if (telegramPollRef.current) clearInterval(telegramPollRef.current);
+    if (telegramTimeoutRef.current) clearTimeout(telegramTimeoutRef.current);
+    telegramPollRef.current = null;
+    telegramTimeoutRef.current = null;
   }, []);
 
-  // Load stored mode on mount
-  useEffect(() => {
-    setIntelligenceMode(getStoredMode());
-  }, []);
-
-  const fetchGmailStatus = useCallback(async () => {
+  const loadPreferences = useCallback(async () => {
     if (!token) return;
+    setPrefsLoading(true);
+    try {
+      const response = await api.notifications.getPreferences(token);
+      setPreferences(response.preferences);
+    } catch {
+      setError('Failed to load notification preferences.');
+    } finally {
+      setPrefsLoading(false);
+    }
+  }, [token]);
+
+  const loadGmail = useCallback(async () => {
+    if (!token) return;
+    setGmailLoading(true);
     try {
       const status = await api.gmail.getStatus(token);
       setGmailStatus(status);
     } catch {
-      // Not critical — just means we can't determine status
+      setGmailStatus(null);
     } finally {
       setGmailLoading(false);
     }
   }, [token]);
 
-  const fetchTelegramStatus = useCallback(async () => {
-    if (!token) return;
-    try {
-      const prefs = await api.notifications.getPreferences(token);
-      // Check if telegramChatId exists in preferences
-      const hasTelegram = hasLinkedTelegram(prefs.preferences);
-      setTelegramConnected(hasTelegram);
-    } catch {
-      // Not critical
-    } finally {
-      setTelegramLoading(false);
-    }
-  }, [token]);
-
   useEffect(() => {
-    if (token) {
-      fetchGmailStatus();
-      fetchTelegramStatus();
-    }
-  }, [token, fetchGmailStatus, fetchTelegramStatus]);
+    if (!token) return;
+    loadGmail();
+    loadPreferences();
+  }, [token, loadGmail, loadPreferences]);
 
-  useEffect(() => () => {
-    clearTelegramPolling();
-  }, [clearTelegramPolling]);
+  useEffect(() => () => stopTelegramPolling(), [stopTelegramPolling]);
 
-  const handleModeChange = (mode: IntelligenceMode) => {
-    setIntelligenceMode(mode);
-    setStoredMode(mode);
-  };
-
-  // Redirect if not authenticated
   if (!authLoading && !user) {
     router.push('/login');
     return null;
   }
 
-  const handleConnectGmail = async () => {
-    if (!token) return;
-    
-    setGmailConnecting(true);
+  const hasTelegram = Boolean(preferences?.telegramChatId);
+
+  const savePreferences = async (partial: Partial<NotificationPreferences>) => {
+    if (!token || !preferences) return;
+    setSavingPrefs(true);
     setError('');
+    try {
+      const response = await api.notifications.updatePreferences(partial, token);
+      setPreferences(response.preferences);
+      setInfo('Preferences saved.');
+      setTimeout(() => setInfo(''), 1800);
+    } catch {
+      setError('Failed to save preferences.');
+    } finally {
+      setSavingPrefs(false);
+    }
+  };
+
+  const toggleChannel = (channel: NotificationChannel) => {
+    if (!preferences) return;
+    const enabled = new Set(preferences.enabledChannels);
+    if (enabled.has(channel)) enabled.delete(channel);
+    else enabled.add(channel);
+    const next = Array.from(enabled) as NotificationChannel[];
+    if (next.length === 0) next.push('in_app');
+    void savePreferences({ enabledChannels: next });
+  };
+
+  const connectTelegram = async () => {
+    if (!token) return;
+    setTelegramConnecting(true);
+    setError('');
+    stopTelegramPolling();
 
     try {
+      const response = await api.notifications.getTelegramLink(token);
+      window.open(response.link, '_blank');
+      setInfo('Telegram opened. Press START in the bot and return here.');
+
+      telegramPollRef.current = setInterval(async () => {
+        try {
+          const data = await api.notifications.getPreferences(token);
+          if (data.preferences.telegramChatId) {
+            setPreferences(data.preferences);
+            setTelegramConnecting(false);
+            stopTelegramPolling();
+            setInfo('Telegram connected.');
+          }
+        } catch {
+          // noop
+        }
+      }, 2000);
+
+      telegramTimeoutRef.current = setTimeout(() => {
+        setTelegramConnecting(false);
+        stopTelegramPolling();
+      }, 120000);
+    } catch {
+      setTelegramConnecting(false);
+      setError('Failed to open Telegram connect flow.');
+    }
+  };
+
+  const connectGmail = async () => {
+    if (!token) return;
+    setGmailConnecting(true);
+    setError('');
+    try {
       const data = await api.gmail.getAuthUrl(token);
-      
-      // Open Gmail OAuth in a popup
       const popup = window.open(data.authUrl, 'gmail-auth', 'width=600,height=700,popup=yes');
-      
-      // Poll for popup close
-      const checkClosed = setInterval(() => {
+      const interval = setInterval(() => {
         if (popup?.closed) {
-          clearInterval(checkClosed);
+          clearInterval(interval);
           setGmailConnecting(false);
-          // Refresh status from backend
-          fetchGmailStatus();
+          void loadGmail();
         }
       }, 1000);
     } catch {
-      setError('Failed to connect Gmail. Please try again.');
+      setError('Failed to start Gmail connect.');
       setGmailConnecting(false);
     }
   };
 
-  const handleDisconnect = async () => {
+  const disconnectGmail = async () => {
     if (!token) return;
     setDisconnecting(true);
     setError('');
@@ -156,74 +214,84 @@ export default function SettingsPage() {
     }
   };
 
-  const handleScan = async () => {
+  const scanGmail = async () => {
     if (!token) return;
     setScanning(true);
-    setScanMessage('');
     setError('');
     try {
       const result = await api.gmail.scan(token);
-      setScanMessage(result.message || 'Scan started! Bookings will appear shortly.');
+      setInfo(result.message || 'Scan started.');
+      setTimeout(() => setInfo(''), 2200);
     } catch {
-      setError('Failed to trigger email scan.');
+      setError('Failed to trigger Gmail scan.');
     } finally {
       setScanning(false);
     }
   };
 
-  const handleConnectTelegram = async () => {
-    if (!token) return;
+  const handlePushToggle = async (enabled: boolean) => {
+    if (!token || !preferences) return;
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+      setError('Browser push is not supported in this browser.');
+      return;
+    }
 
-    clearTelegramPolling();
-    setTelegramConnecting(true);
+    setPushBusy(true);
     setError('');
-    
     try {
-      // Get the deep link from the API
-      const response = await api.notifications.getTelegramLink(token);
-      
-      // Open the Telegram deep link
-      window.open(response.link, '_blank');
-      
-      // Show instruction message
-      setScanMessage('Telegram opened. Click START in @boardandgo_bot, then return here while we complete linking.');
-      
-      // Poll for connection status
-      let isLinked = false;
-      telegramPollIntervalRef.current = setInterval(async () => {
-        try {
-          const prefs = await api.notifications.getPreferences(token);
-          const hasTelegram = hasLinkedTelegram(prefs.preferences);
-          if (hasTelegram) {
-            isLinked = true;
-            setTelegramConnected(true);
-            setTelegramConnecting(false);
-            setScanMessage('Telegram connected successfully!');
-            clearTelegramPolling();
-            telegramSuccessTimeoutRef.current = setTimeout(() => setScanMessage(''), 5000);
+      if (enabled) {
+        if (toPushPermissionState() === 'default') {
+          const permission = await Notification.requestPermission();
+          setPushPermission(permission);
+          if (permission !== 'granted') {
+            throw new Error('Notification permission denied');
           }
-        } catch {
-          // Continue polling
         }
-      }, 2000);
-      
-      // Stop polling after 2 minutes
-      telegramPollTimeoutRef.current = setTimeout(() => {
-        clearTelegramPolling();
-        if (!isLinked) {
-          setTelegramConnecting(false);
-          setError('Telegram connection timed out. Please try again.');
+        const key = await api.notifications.getWebPushPublicKey(token);
+        const registration = await navigator.serviceWorker.register('/sw.js');
+        const subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToArrayBuffer(key.publicKey),
+        });
+        const json = subscription.toJSON();
+        if (!json.endpoint || !json.keys?.p256dh || !json.keys?.auth) {
+          throw new Error('Invalid push subscription');
         }
-      }, 120000);
-      
+        await api.notifications.subscribeWebPush(
+          {
+            endpoint: json.endpoint,
+            keys: {
+              p256dh: json.keys.p256dh,
+              auth: json.keys.auth,
+            },
+          },
+          token
+        );
+        await savePreferences({
+          webPushEnabled: true,
+          enabledChannels: Array.from(new Set([...preferences.enabledChannels, 'web_push'])) as NotificationChannel[],
+        });
+      } else {
+        const registration = await navigator.serviceWorker.getRegistration();
+        const subscription = await registration?.pushManager.getSubscription();
+        await api.notifications.unsubscribeWebPush(token, subscription?.endpoint);
+        if (subscription) await subscription.unsubscribe();
+
+        const nextChannels = preferences.enabledChannels.filter(channel => channel !== 'web_push');
+        await savePreferences({
+          webPushEnabled: false,
+          enabledChannels: (nextChannels.length > 0 ? nextChannels : ['in_app']) as NotificationChannel[],
+        });
+      }
     } catch {
-      clearTelegramPolling();
-      setError('Failed to connect Telegram. Please try again.');
-      setTelegramConnecting(false);
+      setError('Failed to update browser push settings.');
+    } finally {
+      setPushBusy(false);
+      setPushPermission(toPushPermissionState());
     }
   };
 
-  if (authLoading) {
+  if (authLoading || prefsLoading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <IconLoader className="w-6 h-6 text-accent-blue animate-spin" />
@@ -232,286 +300,163 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-5 py-12 relative">
-      <div className="absolute -top-20 left-0 w-100 h-100 bg-accent-blue/10 rounded-full blur-3xl pointer-events-none" />
-
-      <div className="relative">
+    <div className="max-w-3xl mx-auto px-5 py-10">
       <div className="flex items-center gap-3 mb-2">
         <div className="w-10 h-10 rounded-2xl bg-accent-blue/10 flex items-center justify-center">
           <Settings className="w-5 h-5 text-accent-blue" />
         </div>
         <h1 className="text-2xl font-bold text-text-primary">Settings</h1>
       </div>
-      <p className="text-text-muted ml-13 mb-8">Manage your account and integrations</p>
+      <p className="text-text-muted mb-8">Concierge channels, intelligence profile, and integrations</p>
 
-      {/* Account Section */}
-      <section className="mb-8">
-        <h2 className="text-lg font-medium text-text-primary mb-4">Account</h2>
-        <div className="glass-card rounded-2xl p-6">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-accent-blue/10 rounded-full flex items-center justify-center">
-              <span className="text-accent-blue text-xl font-semibold">
-                {user?.email?.charAt(0).toUpperCase()}
-              </span>
-            </div>
-            <div>
-              <p className="text-text-primary font-medium">
-                {user?.user_metadata?.full_name || 'User'}
-              </p>
-              <p className="text-text-muted text-sm">{user?.email}</p>
-            </div>
-          </div>
+      {error && <div className="mb-4 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-sm text-red-400">{error}</div>}
+      {info && <div className="mb-4 px-4 py-3 rounded-xl bg-green-500/10 border border-green-500/20 text-sm text-green-400">{info}</div>}
+
+      <section className="glass-card rounded-2xl p-6 mb-6">
+        <h2 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
+          <Bell className="w-4 h-4 text-accent-blue" />
+          Notification Channels
+        </h2>
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          {CHANNELS.map(channel => (
+            <label key={channel.id} className="flex items-center gap-2 text-sm text-text-primary">
+              <input
+                type="checkbox"
+                checked={preferences?.enabledChannels.includes(channel.id)}
+                onChange={() => toggleChannel(channel.id)}
+                disabled={savingPrefs}
+                className="accent-accent-blue"
+              />
+              {channel.label}
+            </label>
+          ))}
+        </div>
+        <div className="grid sm:grid-cols-2 gap-3">
+          <input
+            value={preferences?.smsNumber ?? ''}
+            onChange={event => setPreferences(prev => (prev ? { ...prev, smsNumber: event.target.value } : prev))}
+            onBlur={() => void savePreferences({ smsNumber: preferences?.smsNumber ?? null })}
+            placeholder="SMS number (+15551234567)"
+            className="glass-input rounded-xl px-3 py-2 text-sm"
+          />
+          <input
+            value={preferences?.whatsappNumber ?? ''}
+            onChange={event => setPreferences(prev => (prev ? { ...prev, whatsappNumber: event.target.value } : prev))}
+            onBlur={() => void savePreferences({ whatsappNumber: preferences?.whatsappNumber ?? null })}
+            placeholder="WhatsApp number (+15551234567)"
+            className="glass-input rounded-xl px-3 py-2 text-sm"
+          />
+        </div>
+        <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
+          <button
+            onClick={connectTelegram}
+            disabled={telegramConnecting || hasTelegram}
+            className="px-3 py-2 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 disabled:opacity-50 inline-flex items-center gap-2"
+          >
+            {telegramConnecting ? <IconLoader className="w-4 h-4 animate-spin" /> : <MessageCircle className="w-4 h-4" />}
+            {hasTelegram ? 'Telegram Linked' : 'Link Telegram'}
+          </button>
+          <button
+            onClick={() => void handlePushToggle(!(preferences?.webPushEnabled ?? false))}
+            disabled={pushBusy}
+            className="px-3 py-2 rounded-xl bg-accent-blue/10 border border-accent-blue/20 text-accent-blue disabled:opacity-50 inline-flex items-center gap-2"
+          >
+            {pushBusy ? <IconLoader className="w-4 h-4 animate-spin" /> : <Smartphone className="w-4 h-4" />}
+            {preferences?.webPushEnabled ? 'Disable Browser Push' : 'Enable Browser Push'}
+          </button>
+          <span className="text-xs text-text-muted">Browser permission: {pushPermission}</span>
         </div>
       </section>
 
-      {/* Gmail Integration Section */}
-      <section className="mb-8">
-        <h2 className="text-lg font-medium text-text-primary mb-4">Gmail Integration</h2>
-        <div className="glass-card rounded-2xl p-6">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center shrink-0">
-              <IconMail className="w-6 h-6 text-red-400" />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-text-primary font-medium mb-1">
-                Automatic Booking Detection
-              </h3>
-              <p className="text-text-muted text-sm mb-4">
-                Connect your Gmail to automatically import flight booking confirmations.
-                We&apos;ll scan for booking emails and add them to your travel history.
-              </p>
-              
-              {error && (
-                <div className="mb-4 px-4 py-3 text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg">
-                  {error}
-                </div>
-              )}
-
-              {scanMessage && (
-                <div className="mb-4 px-4 py-3 text-sm text-green-400 bg-green-400/10 border border-green-400/20 rounded-lg">
-                  {scanMessage}
-                </div>
-              )}
-
-              {gmailLoading ? (
-                <div className="flex items-center gap-2 text-text-muted">
-                  <IconLoader className="w-4 h-4 animate-spin" />
-                  <span className="text-sm">Checking connection...</span>
-                </div>
-              ) : gmailStatus?.connected ? (
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-green-400">
-                    <IconCheck className="w-5 h-5" />
-                    <span className="text-sm">Gmail connected ({gmailStatus.email})</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={handleScan}
-                      disabled={scanning}
-                      className="px-4 py-2 bg-accent-blue/10 border border-accent-blue/20 text-accent-blue text-sm rounded-lg hover:bg-accent-blue/20 transition-colors disabled:opacity-50 flex items-center gap-2"
-                    >
-                      {scanning ? (
-                        <IconLoader className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <RefreshCw className="w-4 h-4" />
-                      )}
-                      {scanning ? 'Scanning...' : 'Scan Emails Now'}
-                    </button>
-                    <button
-                      onClick={handleDisconnect}
-                      disabled={disconnecting}
-                      className="px-4 py-2 bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-lg hover:bg-red-500/20 transition-colors disabled:opacity-50 flex items-center gap-2"
-                    >
-                      {disconnecting ? (
-                        <IconLoader className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <Unlink className="w-4 h-4" />
-                      )}
-                      Disconnect
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <button
-                  onClick={handleConnectGmail}
-                  disabled={gmailConnecting}
-                  className="px-4 py-2 bg-bg-elevated border border-border-subtle text-text-primary text-sm rounded-lg hover:bg-bg-primary transition-colors disabled:opacity-50 flex items-center gap-2"
-                >
-                  {gmailConnecting ? (
-                    <>
-                      <IconLoader className="w-4 h-4 animate-spin" />
-                      Connecting...
-                    </>
-                  ) : (
-                    <>
-                      <IconMail className="w-4 h-4" />
-                      Connect Gmail
-                    </>
-                  )}
-                </button>
-              )}
-            </div>
-          </div>
+      <section className="glass-card rounded-2xl p-6 mb-6">
+        <h2 className="text-lg font-semibold text-text-primary mb-4">Intelligence Profile</h2>
+        <div className="space-y-2">
+          {(['minimal', 'balanced', 'deep'] as const).map(mode => (
+            <label key={mode} className="flex items-center gap-2 text-sm text-text-primary">
+              <input
+                type="radio"
+                name="intelligenceMode"
+                checked={preferences?.intelligenceMode === mode}
+                onChange={() => void savePreferences({ intelligenceMode: mode })}
+                className="accent-accent-blue"
+              />
+              <span className="capitalize">{mode}</span>
+            </label>
+          ))}
+        </div>
+        <div className="mt-4">
+          <label className="text-sm text-text-muted">Delay alert threshold (minutes)</label>
+          <input
+            type="number"
+            min={0}
+            max={300}
+            value={preferences?.delayThresholdMinutes ?? 30}
+            onChange={event =>
+              setPreferences(prev =>
+                prev ? { ...prev, delayThresholdMinutes: Number(event.target.value || 0) } : prev
+              )
+            }
+            onBlur={() =>
+              void savePreferences({
+                delayThresholdMinutes: Math.max(0, Math.min(300, preferences?.delayThresholdMinutes ?? 30)),
+              })
+            }
+            className="mt-1 w-32 glass-input rounded-xl px-3 py-2 text-sm"
+          />
         </div>
       </section>
 
-      {/* Telegram Integration Section */}
-      <section className="mb-8">
-        <h2 className="text-lg font-medium text-text-primary mb-4">Telegram Notifications</h2>
-        <div className="glass-card rounded-2xl p-6">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 bg-blue-500/10 rounded-full flex items-center justify-center shrink-0">
-              <MessageCircle className="w-6 h-6 text-blue-400" />
+      <section className="glass-card rounded-2xl p-6 mb-6">
+        <h2 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
+          <IconMail className="w-4 h-4 text-red-400" />
+          Gmail Integration
+        </h2>
+        {gmailLoading ? (
+          <div className="text-text-muted text-sm inline-flex items-center gap-2">
+            <IconLoader className="w-4 h-4 animate-spin" />
+            Checking Gmail connection...
+          </div>
+        ) : gmailStatus?.connected ? (
+          <div className="space-y-3">
+            <div className="text-sm text-green-400 inline-flex items-center gap-2">
+              <IconCheck className="w-4 h-4" />
+              Connected ({gmailStatus.email})
             </div>
-            <div className="flex-1">
-              <h3 className="text-text-primary font-medium mb-1">
-                Instant Flight Updates
-              </h3>
-              <p className="text-text-muted text-sm mb-4">
-                Get real-time flight notifications directly in Telegram. No app installation needed.
-              </p>
-              
-              {error && (
-                <div className="mb-4 px-4 py-3 text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg">
-                  {error}
-                </div>
-              )}
-
-              {scanMessage && (
-                <div className="mb-4 px-4 py-3 text-sm text-green-400 bg-green-400/10 border border-green-400/20 rounded-lg">
-                  {scanMessage}
-                </div>
-              )}
-
-              {telegramLoading ? (
-                <div className="flex items-center gap-2 text-text-muted">
-                  <IconLoader className="w-4 h-4 animate-spin" />
-                  <span className="text-sm">Checking connection...</span>
-                </div>
-              ) : telegramConnected ? (
-                <div className="flex items-center gap-2 text-green-400">
-                  <IconCheck className="w-5 h-5" />
-                  <span className="text-sm">Telegram connected</span>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  <button
-                    onClick={handleConnectTelegram}
-                    disabled={telegramConnecting}
-                    className="px-4 py-2 bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm rounded-lg hover:bg-blue-500/20 transition-colors disabled:opacity-50 flex items-center gap-2 w-full"
-                  >
-                    {telegramConnecting ? (
-                      <>
-                        <IconLoader className="w-4 h-4 animate-spin" />
-                        Opening Telegram...
-                      </>
-                    ) : (
-                      <>
-                        <MessageCircle className="w-4 h-4" />
-                        Connect Telegram
-                      </>
-                    )}
-                  </button>
-                  <p className="text-xs text-text-muted">
-                    We open Telegram for you. Click <strong>START</strong> in @boardandgo_bot to complete linking.
-                  </p>
-                </div>
-              )}
+            <div className="flex gap-2">
+              <button
+                onClick={scanGmail}
+                disabled={scanning}
+                className="px-3 py-2 rounded-xl bg-accent-blue/10 border border-accent-blue/20 text-accent-blue text-sm inline-flex items-center gap-2"
+              >
+                {scanning ? <IconLoader className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                Scan Now
+              </button>
+              <button
+                onClick={disconnectGmail}
+                disabled={disconnecting}
+                className="px-3 py-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm inline-flex items-center gap-2"
+              >
+                {disconnecting ? <IconLoader className="w-4 h-4 animate-spin" /> : <Unlink className="w-4 h-4" />}
+                Disconnect
+              </button>
             </div>
           </div>
-        </div>
+        ) : (
+          <button
+            onClick={connectGmail}
+            disabled={gmailConnecting}
+            className="px-3 py-2 rounded-xl bg-bg-elevated border border-border-subtle text-text-primary text-sm inline-flex items-center gap-2"
+          >
+            {gmailConnecting ? <IconLoader className="w-4 h-4 animate-spin" /> : <IconMail className="w-4 h-4" />}
+            Connect Gmail
+          </button>
+        )}
       </section>
 
-      {/* Flight Intelligence Mode */}
-      <section className="mb-8">
-        <h2 className="text-lg font-medium text-text-primary mb-4">Flight Intelligence</h2>
-        <div className="glass-card rounded-2xl p-6">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 bg-accent-blue/10 rounded-full flex items-center justify-center shrink-0">
-              <Layers className="w-6 h-6 text-accent-blue" />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-text-primary font-medium mb-1">
-                Intelligence Briefing Mode
-              </h3>
-              <p className="text-text-muted text-sm mb-4">
-                Control how much detail Amberlyn provides in your briefings.
-              </p>
-              
-              <div className="space-y-2">
-                <label className="flex items-start gap-3 p-3 rounded-xl glass cursor-pointer hover:shadow-md transition-all">
-                  <input
-                    type="radio"
-                    name="intelligenceMode"
-                    checked={intelligenceMode === 'minimal'}
-                    onChange={() => handleModeChange('minimal')}
-                    className="mt-0.5 accent-accent-blue"
-                  />
-                  <div>
-                    <div className="text-sm font-medium text-text-primary">Minimal</div>
-                    <div className="text-xs text-text-muted">Only critical alerts: time to leave, gate changes, cancellations. No noise.</div>
-                  </div>
-                </label>
-                
-                <label className="flex items-start gap-3 p-3 rounded-xl glass cursor-pointer hover:shadow-md transition-all">
-                  <input
-                    type="radio"
-                    name="intelligenceMode"
-                    checked={intelligenceMode === 'balanced'}
-                    onChange={() => handleModeChange('balanced')}
-                    className="mt-0.5 accent-accent-blue"
-                  />
-                  <div>
-                    <div className="text-sm font-medium text-text-primary">Balanced <span className="text-xs text-accent-blue">(Recommended)</span></div>
-                    <div className="text-xs text-text-muted">Risk assessment, delay predictions, smart suggestions. Brief but informative.</div>
-                  </div>
-                </label>
-                
-                <label className="flex items-start gap-3 p-3 rounded-xl glass cursor-pointer hover:shadow-md transition-all">
-                  <input
-                    type="radio"
-                    name="intelligenceMode"
-                    checked={intelligenceMode === 'deep'}
-                    onChange={() => handleModeChange('deep')}
-                    className="mt-0.5 accent-accent-blue"
-                  />
-                  <div>
-                    <div className="text-sm font-medium text-text-primary">Deep Ops</div>
-                    <div className="text-xs text-text-muted">Full analysis: historical performance, congestion patterns, all contributing factors explained.</div>
-                  </div>
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Danger Zone */}
-      <section>
-        <h2 className="text-lg font-medium text-text-primary mb-4">Danger Zone</h2>
-        <div className="glass-card rounded-2xl p-6 border border-red-500/20">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center">
-                <AlertTriangle className="w-5 h-5 text-red-400" />
-              </div>
-              <div>
-                <h3 className="text-text-primary font-medium mb-1">Delete Account</h3>
-                <p className="text-text-muted text-sm">
-                  Permanently delete your account and all associated data.
-                </p>
-              </div>
-            </div>
-            <button
-              className="px-4 py-2 bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-lg hover:bg-red-500/20 transition-colors"
-            >
-              Delete Account
-            </button>
-          </div>
-        </div>
-      </section>
+      <div className="text-xs text-text-muted inline-flex items-center gap-2">
+        <Save className="w-3.5 h-3.5" />
+        Changes are saved immediately.
       </div>
     </div>
   );
 }
-

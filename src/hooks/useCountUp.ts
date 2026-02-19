@@ -34,9 +34,11 @@ export function useCountUp(
     // Respect prefers-reduced-motion
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReduced) {
-      setValue(`${prefix}${target.toFixed(decimals)}${suffix}`);
+      const rafId = requestAnimationFrame(() => {
+        setValue(`${prefix}${target.toFixed(decimals)}${suffix}`);
+      });
       hasAnimated.current = true;
-      return;
+      return () => cancelAnimationFrame(rafId);
     }
 
     const observer = new IntersectionObserver(
