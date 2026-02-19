@@ -5,6 +5,7 @@ interface RequestOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
   body?: unknown;
   token?: string;
+  cache?: RequestCache;
 }
 
 class ApiError extends Error {
@@ -17,7 +18,7 @@ class ApiError extends Error {
 }
 
 async function request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
-  const { method = 'GET', body, token } = options;
+  const { method = 'GET', body, token, cache } = options;
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -31,15 +32,16 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
     method,
     headers,
     body: body ? JSON.stringify(body) : undefined,
+    cache,
   });
 
-  const data = await res.json();
+  const data = await parseJsonResponse(res);
 
   if (!res.ok) {
-    throw new ApiError(res.status, data.error || 'Request failed');
+    throw new ApiError(res.status, getErrorMessage(data, res.status));
   }
 
-  return data;
+  return (data ?? ({} as T)) as T;
 }
 
 export interface User {
@@ -291,7 +293,7 @@ export interface JourneyData {
 }
 
 async function trackingRequest<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
-  const { method = 'GET', body, token } = options;
+  const { method = 'GET', body, token, cache } = options;
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
@@ -299,11 +301,63 @@ async function trackingRequest<T>(endpoint: string, options: RequestOptions = {}
     method,
     headers,
     body: body ? JSON.stringify(body) : undefined,
+    cache,
   });
 
-  const data = await res.json();
-  if (!res.ok) throw new ApiError(res.status, data.error?.message || 'Request failed');
-  return data;
+  const data = await parseJsonResponse(res);
+  if (!res.ok) throw new ApiError(res.status, getErrorMessage(data, res.status));
+  return (data ?? ({} as T)) as T;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+async function parseJsonResponse(res: Response): Promise<unknown | null> {
+  if (res.status === 204 || res.status === 205 || res.status === 304) {
+    return null;
+  }
+
+  const contentLength = res.headers.get('content-length');
+  if (contentLength === '0') {
+    return null;
+  }
+
+  const contentType = (res.headers.get('content-type') || '').toLowerCase();
+  if (!contentType.includes('application/json')) {
+    return null;
+  }
+
+  const text = await res.text();
+  if (!text) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(text) as unknown;
+  } catch {
+    return null;
+  }
+}
+
+function getErrorMessage(payload: unknown, status: number): string {
+  if (isRecord(payload)) {
+    const directError = payload.error;
+    if (typeof directError === 'string' && directError.length > 0) {
+      return directError;
+    }
+
+    if (isRecord(directError) && typeof directError.message === 'string' && directError.message.length > 0) {
+      return directError.message;
+    }
+
+    const directMessage = payload.message;
+    if (typeof directMessage === 'string' && directMessage.length > 0) {
+      return directMessage;
+    }
+  }
+
+  return `Request failed (${status})`;
 }
 
 export const api = {
@@ -368,13 +422,13 @@ export const api = {
 
   notifications: {
     getPreferences: (token: string) =>
-      trackingRequest<{ preferences: Record<string, unknown> }>('/api/preferences', { token }),
+      trackingRequest<{ preferences: Record<string, unknown> }>('/api/preferences', { token, cache: 'no-store' }),
     
     updatePreferences: (prefs: Record<string, unknown>, token: string) =>
       trackingRequest<{ preferences: Record<string, unknown> }>('/api/preferences', { method: 'PUT', body: prefs, token }),
     
     getTelegramLink: (token: string) =>
-      trackingRequest<{ link: string }>('/api/preferences/telegram/connect-link', { token }),
+      trackingRequest<{ link: string }>('/api/preferences/telegram/connect-link', { token, cache: 'no-store' }),
   },
 
   agent: {
@@ -438,7 +492,7 @@ export const api = {
       ),
 
     getPreferences: (token: string) =>
-      trackingRequest<{ preferences: Record<string, unknown> }>('/api/preferences', { token }),
+      trackingRequest<{ preferences: Record<string, unknown> }>('/api/preferences', { token, cache: 'no-store' }),
 
     updatePreferences: (prefs: Record<string, unknown>, token: string) =>
       trackingRequest<{ preferences: Record<string, unknown> }>(

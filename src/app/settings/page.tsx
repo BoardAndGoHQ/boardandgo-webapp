@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth';
 import { api, type GmailStatus } from '@/lib/api';
@@ -43,6 +43,24 @@ export default function SettingsPage() {
   const [telegramConnecting, setTelegramConnecting] = useState(false);
   const [telegramConnected, setTelegramConnected] = useState(false);
   const [telegramLoading, setTelegramLoading] = useState(true);
+  const telegramPollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const telegramPollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const telegramSuccessTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearTelegramPolling = useCallback(() => {
+    if (telegramPollIntervalRef.current) {
+      clearInterval(telegramPollIntervalRef.current);
+      telegramPollIntervalRef.current = null;
+    }
+    if (telegramPollTimeoutRef.current) {
+      clearTimeout(telegramPollTimeoutRef.current);
+      telegramPollTimeoutRef.current = null;
+    }
+    if (telegramSuccessTimeoutRef.current) {
+      clearTimeout(telegramSuccessTimeoutRef.current);
+      telegramSuccessTimeoutRef.current = null;
+    }
+  }, []);
 
   // Load stored mode on mount
   useEffect(() => {
@@ -81,6 +99,10 @@ export default function SettingsPage() {
       fetchTelegramStatus();
     }
   }, [token, fetchGmailStatus, fetchTelegramStatus]);
+
+  useEffect(() => () => {
+    clearTelegramPolling();
+  }, [clearTelegramPolling]);
 
   const handleModeChange = (mode: IntelligenceMode) => {
     setIntelligenceMode(mode);
@@ -151,7 +173,8 @@ export default function SettingsPage() {
 
   const handleConnectTelegram = async () => {
     if (!token) return;
-    
+
+    clearTelegramPolling();
     setTelegramConnecting(true);
     setError('');
     
@@ -167,7 +190,7 @@ export default function SettingsPage() {
       
       // Poll for connection status
       let isLinked = false;
-      const checkInterval = setInterval(async () => {
+      telegramPollIntervalRef.current = setInterval(async () => {
         try {
           const prefs = await api.notifications.getPreferences(token);
           const hasTelegram = hasLinkedTelegram(prefs.preferences);
@@ -175,9 +198,9 @@ export default function SettingsPage() {
             isLinked = true;
             setTelegramConnected(true);
             setTelegramConnecting(false);
-            setScanMessage('✅ Telegram connected successfully!');
-            clearInterval(checkInterval);
-            setTimeout(() => setScanMessage(''), 5000);
+            setScanMessage('Telegram connected successfully!');
+            clearTelegramPolling();
+            telegramSuccessTimeoutRef.current = setTimeout(() => setScanMessage(''), 5000);
           }
         } catch {
           // Continue polling
@@ -185,8 +208,8 @@ export default function SettingsPage() {
       }, 2000);
       
       // Stop polling after 2 minutes
-      setTimeout(() => {
-        clearInterval(checkInterval);
+      telegramPollTimeoutRef.current = setTimeout(() => {
+        clearTelegramPolling();
         if (!isLinked) {
           setTelegramConnecting(false);
           setError('Telegram connection timed out. Please try again.');
@@ -194,6 +217,7 @@ export default function SettingsPage() {
       }, 120000);
       
     } catch {
+      clearTelegramPolling();
       setError('Failed to connect Telegram. Please try again.');
       setTelegramConnecting(false);
     }
@@ -490,3 +514,4 @@ export default function SettingsPage() {
     </div>
   );
 }
+
