@@ -14,6 +14,7 @@ import {
   Loader2 as IconLoader,
   Check as IconCheck,
   Settings,
+  Layers,
   RefreshCw,
   Unlink,
   MessageCircle,
@@ -32,6 +33,43 @@ const CHANNELS: Array<{ id: NotificationChannel; label: string }> = [
   { id: 'in_app', label: 'In-App' },
   { id: 'web_push', label: 'Browser Push' },
 ];
+
+const INTELLIGENCE_PROFILES: Array<{
+  id: NotificationPreferences['intelligenceMode'];
+  title: string;
+  description: string;
+  recommended?: boolean;
+}> = [
+  {
+    id: 'minimal',
+    title: 'Minimal',
+    description: 'Only critical disruptions and action items. Quiet and direct.',
+  },
+  {
+    id: 'balanced',
+    title: 'Balanced',
+    description: 'Smart guidance with concise context for most travelers.',
+    recommended: true,
+  },
+  {
+    id: 'deep',
+    title: 'Deep',
+    description: 'Full operational detail and richer explanations for power users.',
+  },
+];
+
+type PhoneField = 'sms' | 'whatsapp';
+
+function normalizePhoneDraft(value: string): string | null {
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+function isLikelyPhoneDraft(value: string): boolean {
+  const trimmed = value.trim();
+  if (trimmed.length === 0) return true;
+  return /^[+\d()\-\s]{8,24}$/.test(trimmed);
+}
 
 function toPushPermissionState(): PushPermissionState {
   if (typeof window === 'undefined' || !('Notification' in window)) return 'unsupported';
@@ -64,6 +102,9 @@ export default function SettingsPage() {
   const [telegramConnecting, setTelegramConnecting] = useState(false);
   const [pushPermission, setPushPermission] = useState<PushPermissionState>(() => toPushPermissionState());
   const [pushBusy, setPushBusy] = useState(false);
+  const [smsDraft, setSmsDraft] = useState('');
+  const [whatsappDraft, setWhatsappDraft] = useState('');
+  const [savingPhoneField, setSavingPhoneField] = useState<PhoneField | null>(null);
 
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
@@ -112,6 +153,15 @@ export default function SettingsPage() {
 
   useEffect(() => () => stopTelegramPolling(), [stopTelegramPolling]);
 
+  useEffect(() => {
+    setPushPermission(toPushPermissionState());
+  }, []);
+
+  useEffect(() => {
+    setSmsDraft(preferences?.smsNumber ?? '');
+    setWhatsappDraft(preferences?.whatsappNumber ?? '');
+  }, [preferences?.smsNumber, preferences?.whatsappNumber]);
+
   if (!authLoading && !user) {
     router.push('/login');
     return null;
@@ -128,8 +178,8 @@ export default function SettingsPage() {
       setPreferences(response.preferences);
       setInfo('Preferences saved.');
       setTimeout(() => setInfo(''), 1800);
-    } catch {
-      setError('Failed to save preferences.');
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to save preferences.');
     } finally {
       setSavingPrefs(false);
     }
@@ -137,12 +187,39 @@ export default function SettingsPage() {
 
   const toggleChannel = (channel: NotificationChannel) => {
     if (!preferences) return;
+    if (channel === 'web_push') {
+      void handlePushToggle(!preferences.webPushEnabled);
+      return;
+    }
     const enabled = new Set(preferences.enabledChannels);
     if (enabled.has(channel)) enabled.delete(channel);
     else enabled.add(channel);
     const next = Array.from(enabled) as NotificationChannel[];
     if (next.length === 0) next.push('in_app');
     void savePreferences({ enabledChannels: next });
+  };
+
+  const persistPhoneField = async (field: PhoneField) => {
+    if (!preferences) return;
+
+    const draft = field === 'sms' ? smsDraft : whatsappDraft;
+    const previous = field === 'sms' ? (preferences.smsNumber ?? '') : (preferences.whatsappNumber ?? '');
+    const normalized = normalizePhoneDraft(draft);
+    const normalizedPrevious = normalizePhoneDraft(previous);
+
+    if (normalized === normalizedPrevious) return;
+    if (!isLikelyPhoneDraft(draft)) {
+      setError('Enter a valid phone number, for example +15551234567.');
+      return;
+    }
+
+    setSavingPhoneField(field);
+    await savePreferences(
+      field === 'sms'
+        ? { smsNumber: normalized }
+        : { whatsappNumber: normalized }
+    );
+    setSavingPhoneField(null);
   };
 
   const connectTelegram = async () => {
@@ -153,7 +230,10 @@ export default function SettingsPage() {
 
     try {
       const response = await api.notifications.getTelegramLink(token);
-      window.open(response.link, '_blank');
+      const popup = window.open(response.link, '_blank', 'noopener,noreferrer');
+      if (!popup) {
+        window.location.href = response.link;
+      }
       setInfo('Telegram opened. Press START in the bot and return here.');
 
       telegramPollRef.current = setInterval(async () => {
@@ -231,7 +311,11 @@ export default function SettingsPage() {
 
   const handlePushToggle = async (enabled: boolean) => {
     if (!token || !preferences) return;
-    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    if (typeof window === 'undefined' || !window.isSecureContext) {
+      setError('Browser push requires HTTPS (or localhost).');
+      return;
+    }
+    if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
       setError('Browser push is not supported in this browser.');
       return;
     }
@@ -240,19 +324,34 @@ export default function SettingsPage() {
     setError('');
     try {
       if (enabled) {
-        if (toPushPermissionState() === 'default') {
-          const permission = await Notification.requestPermission();
-          setPushPermission(permission);
-          if (permission !== 'granted') {
-            throw new Error('Notification permission denied');
-          }
+        let permission = toPushPermissionState();
+        if (permission === 'denied') {
+          setError('Browser notifications are blocked. Allow them in site settings and retry.');
+          return;
         }
+        if (permission === 'default') {
+          permission = await Notification.requestPermission();
+        }
+        setPushPermission(permission);
+        if (permission !== 'granted') {
+          setError('Browser notification permission was not granted.');
+          return;
+        }
+
         const key = await api.notifications.getWebPushPublicKey(token);
-        const registration = await navigator.serviceWorker.register('/sw.js');
-        const subscription = await registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToArrayBuffer(key.publicKey),
-        });
+        let registration = await navigator.serviceWorker.getRegistration();
+        if (!registration) {
+          registration = await navigator.serviceWorker.register('/sw.js');
+        }
+        await navigator.serviceWorker.ready;
+
+        let subscription = await registration.pushManager.getSubscription();
+        if (!subscription) {
+          subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToArrayBuffer(key.publicKey),
+          });
+        }
         const json = subscription.toJSON();
         if (!json.endpoint || !json.keys?.p256dh || !json.keys?.auth) {
           throw new Error('Invalid push subscription');
@@ -283,8 +382,8 @@ export default function SettingsPage() {
           enabledChannels: (nextChannels.length > 0 ? nextChannels : ['in_app']) as NotificationChannel[],
         });
       }
-    } catch {
-      setError('Failed to update browser push settings.');
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to update browser push settings.');
     } finally {
       setPushBusy(false);
       setPushPermission(toPushPermissionState());
@@ -322,9 +421,13 @@ export default function SettingsPage() {
             <label key={channel.id} className="flex items-center gap-2 text-sm text-text-primary">
               <input
                 type="checkbox"
-                checked={preferences?.enabledChannels.includes(channel.id)}
+                checked={
+                  channel.id === 'web_push'
+                    ? Boolean(preferences?.webPushEnabled)
+                    : Boolean(preferences?.enabledChannels.includes(channel.id))
+                }
                 onChange={() => toggleChannel(channel.id)}
-                disabled={savingPrefs}
+                disabled={savingPrefs || pushBusy}
                 className="accent-accent-blue"
               />
               {channel.label}
@@ -333,20 +436,31 @@ export default function SettingsPage() {
         </div>
         <div className="grid sm:grid-cols-2 gap-3">
           <input
-            value={preferences?.smsNumber ?? ''}
-            onChange={event => setPreferences(prev => (prev ? { ...prev, smsNumber: event.target.value } : prev))}
-            onBlur={() => void savePreferences({ smsNumber: preferences?.smsNumber ?? null })}
+            type="tel"
+            inputMode="tel"
+            autoComplete="tel"
+            value={smsDraft}
+            onChange={event => setSmsDraft(event.target.value)}
+            onBlur={() => void persistPhoneField('sms')}
             placeholder="SMS number (+15551234567)"
             className="glass-input rounded-xl px-3 py-2 text-sm"
           />
           <input
-            value={preferences?.whatsappNumber ?? ''}
-            onChange={event => setPreferences(prev => (prev ? { ...prev, whatsappNumber: event.target.value } : prev))}
-            onBlur={() => void savePreferences({ whatsappNumber: preferences?.whatsappNumber ?? null })}
+            type="tel"
+            inputMode="tel"
+            autoComplete="tel"
+            value={whatsappDraft}
+            onChange={event => setWhatsappDraft(event.target.value)}
+            onBlur={() => void persistPhoneField('whatsapp')}
             placeholder="WhatsApp number (+15551234567)"
             className="glass-input rounded-xl px-3 py-2 text-sm"
           />
         </div>
+        {savingPhoneField && (
+          <div className="mt-2 text-xs text-text-muted">
+            Saving {savingPhoneField === 'sms' ? 'SMS' : 'WhatsApp'} number...
+          </div>
+        )}
         <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
           <button
             onClick={connectTelegram}
@@ -369,40 +483,37 @@ export default function SettingsPage() {
       </section>
 
       <section className="glass-card rounded-2xl p-6 mb-6">
-        <h2 className="text-lg font-semibold text-text-primary mb-4">Intelligence Profile</h2>
-        <div className="space-y-2">
-          {(['minimal', 'balanced', 'deep'] as const).map(mode => (
-            <label key={mode} className="flex items-center gap-2 text-sm text-text-primary">
-              <input
-                type="radio"
-                name="intelligenceMode"
-                checked={preferences?.intelligenceMode === mode}
-                onChange={() => void savePreferences({ intelligenceMode: mode })}
-                className="accent-accent-blue"
-              />
-              <span className="capitalize">{mode}</span>
-            </label>
-          ))}
-        </div>
-        <div className="mt-4">
-          <label className="text-sm text-text-muted">Delay alert threshold (minutes)</label>
-          <input
-            type="number"
-            min={0}
-            max={300}
-            value={preferences?.delayThresholdMinutes ?? 30}
-            onChange={event =>
-              setPreferences(prev =>
-                prev ? { ...prev, delayThresholdMinutes: Number(event.target.value || 0) } : prev
-              )
-            }
-            onBlur={() =>
-              void savePreferences({
-                delayThresholdMinutes: Math.max(0, Math.min(300, preferences?.delayThresholdMinutes ?? 30)),
-              })
-            }
-            className="mt-1 w-32 glass-input rounded-xl px-3 py-2 text-sm"
-          />
+        <h2 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
+          <Layers className="w-4 h-4 text-accent-blue" />
+          Intelligence Profile
+        </h2>
+        <div className="grid gap-3 md:grid-cols-3">
+          {INTELLIGENCE_PROFILES.map(profile => {
+            const active = preferences?.intelligenceMode === profile.id;
+            return (
+              <button
+                key={profile.id}
+                type="button"
+                onClick={() => void savePreferences({ intelligenceMode: profile.id })}
+                className={[
+                  'rounded-2xl border p-4 text-left transition-all',
+                  active
+                    ? 'border-accent-blue bg-accent-blue/10 shadow-sm'
+                    : 'border-border-subtle bg-bg-elevated/40 hover:border-accent-blue/40',
+                ].join(' ')}
+              >
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="text-sm font-semibold text-text-primary">{profile.title}</span>
+                  {profile.recommended ? (
+                    <span className="text-[10px] font-semibold uppercase tracking-wide text-accent-blue">
+                      Recommended
+                    </span>
+                  ) : null}
+                </div>
+                <p className="text-xs leading-relaxed text-text-muted">{profile.description}</p>
+              </button>
+            );
+          })}
         </div>
       </section>
 
