@@ -73,8 +73,8 @@ export function Footer() {
           {/* Logo & contact */}
           <div className="col-span-2">
             <Link href="/" className="flex items-center gap-2.5 text-text-primary font-black text-lg mb-5 group">
-              <div className="w-8 h-8 rounded-xl bg-accent-copper/10 border border-accent-copper/20 flex items-center justify-center group-hover:scale-110 group-hover:shadow-[0_0_15px_rgba(160,67,10,0.3)] transition-all duration-300">
-                <Image src="/logo.svg" alt="BoardAndGo" width={20} height={28} className="w-5 h-auto" />
+              <div className="w-10 h-10 rounded-xl bg-accent-copper/10 border border-accent-copper/20 flex items-center justify-center group-hover:scale-110 group-hover:shadow-[0_0_15px_rgba(160,67,10,0.3)] transition-all duration-300">
+                <Image src="/logo.png" alt="BoardAndGo" width={70} height={70} className="w-16 h-auto" />
               </div>
               <span className="tracking-tight">BoardAndGo</span>
             </Link>
