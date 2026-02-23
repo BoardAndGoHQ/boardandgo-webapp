@@ -55,18 +55,18 @@ const testimonials = [
 function RadarWidget() {
   return (
     <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden opacity-30 md:opacity-50">
-      {/* Concentric Radar Rings */}
-      <div className="absolute w-[800px] h-[800px] rounded-full border border-accent-copper/20" />
-      <div className="absolute w-[600px] h-[600px] rounded-full border border-accent-copper/15" />
-      <div className="absolute w-[400px] h-[400px] rounded-full border border-accent-copper/20 border-dashed" />
-      <div className="absolute w-[200px] h-[200px] rounded-full border border-accent-copper/30" />
+      {/* Concentric Radar Rings — scale down on mobile */}
+      <div className="absolute w-[300px] h-[300px] md:w-[600px] md:h-[600px] lg:w-[800px] lg:h-[800px] rounded-full border border-accent-copper/20" />
+      <div className="absolute w-[220px] h-[220px] md:w-[450px] md:h-[450px] lg:w-[600px] lg:h-[600px] rounded-full border border-accent-copper/15" />
+      <div className="absolute w-[150px] h-[150px] md:w-[300px] md:h-[300px] lg:w-[400px] lg:h-[400px] rounded-full border border-accent-copper/20 border-dashed" />
+      <div className="absolute w-[75px] h-[75px] md:w-[150px] md:h-[150px] lg:w-[200px] lg:h-[200px] rounded-full border border-accent-copper/30" />
 
       {/* Crosshairs */}
       <div className="absolute w-full h-[1px] bg-accent-copper/10" />
       <div className="absolute w-[1px] h-full bg-accent-copper/10" />
 
       {/* Sweeping Radar Beam */}
-      <div className="absolute w-[800px] h-[800px] rounded-full animate-radar-sweep opacity-60">
+      <div className="absolute w-[300px] h-[300px] md:w-[600px] md:h-[600px] lg:w-[800px] lg:h-[800px] rounded-full animate-radar-sweep opacity-60">
         <div style={{
           background: 'conic-gradient(from 0deg, transparent 70%, rgba(160, 67, 10, 0.15) 95%, rgba(160, 67, 10, 0.5) 100%)',
           width: '50%',
@@ -77,9 +77,9 @@ function RadarWidget() {
       </div>
 
       {/* Glowing Blips (Simulated Aircraft) */}
-      <div className="absolute w-2 h-2 rounded-full bg-accent-copper shadow-[0_0_10px_3px_rgba(160,67,10,0.8)] animate-pulse-ring top-1/4 left-1/3" />
-      <div className="absolute w-1.5 h-1.5 rounded-full bg-accent-copper shadow-[0_0_8px_2px_rgba(160,67,10,0.8)] animate-pulse-ring bottom-1/3 right-1/4" style={{ animationDelay: '1s' }} />
-      <div className="absolute w-2 h-2 rounded-full bg-accent-copper shadow-[0_0_10px_3px_rgba(160,67,10,0.8)] animate-pulse-ring top-1/2 right-1/3" style={{ animationDelay: '2s' }} />
+      <div className="absolute w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-accent-copper shadow-[0_0_10px_3px_rgba(160,67,10,0.8)] animate-pulse-ring top-1/4 left-1/3" />
+      <div className="absolute w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-accent-copper shadow-[0_0_8px_2px_rgba(160,67,10,0.8)] animate-pulse-ring bottom-1/3 right-1/4" style={{ animationDelay: '1s' }} />
+      <div className="absolute w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-accent-copper shadow-[0_0_10px_3px_rgba(160,67,10,0.8)] animate-pulse-ring top-1/2 right-1/3" style={{ animationDelay: '2s' }} />
     </div>
   );
 }

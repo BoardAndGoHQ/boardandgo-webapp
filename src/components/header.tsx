@@ -10,6 +10,7 @@ import { NotificationCenter } from './notification-center';
 
 /* Links swap depending on auth state */
 const publicLinks = [
+  { href: '/', label: 'Home' },
   { href: '/features', label: 'Features' },
   { href: '/pricing', label: 'Pricing' },
   { href: '/about', label: 'About' },
@@ -32,7 +33,9 @@ export function Header() {
   const navLinks = user ? appLinks : publicLinks;
 
   const isActive = (href: string) =>
-    pathname === href || pathname.startsWith(href + '/') || (href === '/search' && pathname.startsWith('/search'));
+    href === '/'
+      ? pathname === '/'
+      : pathname === href || pathname.startsWith(href + '/') || (href === '/search' && pathname.startsWith('/search'));
 
   // Scroll-aware header: increase glass effect on scroll
   useEffect(() => {
@@ -43,11 +46,10 @@ export function Header() {
 
   return (
     <header
-      className={`sticky top-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? 'glass-nav shadow-sm'
-          : 'bg-transparent'
-      }`}
+      className={`sticky top-0 z-50 transition-all duration-300 ${scrolled
+        ? 'glass-nav shadow-sm'
+        : 'bg-transparent'
+        }`}
     >
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo */}
@@ -70,11 +72,10 @@ export function Header() {
             <Link
               key={link.href}
               href={link.href}
-              className={`relative px-4 py-1.5 text-[13px] font-medium rounded-full transition-all duration-200 ${
-                isActive(link.href)
-                  ? 'text-white bg-accent-copper shadow-sm shadow-accent-copper/25'
-                  : 'text-text-secondary hover:text-text-primary'
-              }`}
+              className={`relative px-4 py-1.5 text-[13px] font-medium rounded-full transition-all duration-200 ${isActive(link.href)
+                ? 'text-white bg-accent-copper shadow-sm shadow-accent-copper/25'
+                : 'text-text-secondary hover:text-text-primary'
+                }`}
             >
               {link.label}
             </Link>
@@ -143,11 +144,10 @@ export function Header() {
                 key={link.href}
                 href={link.href}
                 onClick={() => setMobileOpen(false)}
-                className={`px-4 py-3 text-sm rounded-xl transition-all animate-fade-up opacity-0 ${
-                  isActive(link.href)
-                    ? 'text-white bg-accent-copper font-medium'
-                    : 'text-text-secondary hover:text-text-primary hover:bg-black/3 dark:hover:bg-bg-elevated/50'
-                }`}
+                className={`px-4 py-3 text-sm rounded-xl transition-all animate-fade-up opacity-0 ${isActive(link.href)
+                  ? 'text-white bg-accent-copper font-medium'
+                  : 'text-text-secondary hover:text-text-primary hover:bg-black/3 dark:hover:bg-bg-elevated/50'
+                  }`}
                 style={{ animationDelay: `${i * 50}ms`, animationFillMode: 'forwards' }}
               >
                 {link.label}
