@@ -18,7 +18,7 @@ function formatTime(dateStr: string) {
 }
 
 const statusColors: Record<string, string> = {
-  upcoming: 'bg-accent-blue/10 text-accent-blue',
+  upcoming: 'bg-accent-copper/10 text-accent-copper',
   completed: 'bg-text-muted/10 text-text-muted',
   cancelled: 'bg-red-400/10 text-red-400',
 };
@@ -109,8 +109,8 @@ export default function BookingsPage() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 md:py-12 relative">
       {/* Decorative background */}
-      <div className="fixed top-20 right-1/4 w-125 h-125 bg-accent-blue/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="fixed bottom-20 left-1/4 w-100 h-100 bg-accent-blue/8 rounded-full blur-3xl pointer-events-none" />
+      <div className="fixed top-20 right-1/4 w-125 h-125 bg-accent-copper/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="fixed bottom-20 left-1/4 w-100 h-100 bg-accent-copper/8 rounded-full blur-3xl pointer-events-none" />
 
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8 animate-fade-up">
         <div>
@@ -132,7 +132,7 @@ export default function BookingsPage() {
           </button>
           <Link
             href="/bookings/new"
-            className="flex items-center gap-2 px-4 py-2.5 text-sm text-white bg-accent-blue rounded-xl hover:bg-accent-blue/90 transition-colors shadow-lg shadow-accent-blue/20"
+            className="flex items-center gap-2 px-4 py-2.5 text-sm text-white bg-accent-copper rounded-xl hover:bg-accent-copper/90 transition-colors shadow-lg shadow-accent-copper/20"
           >
             <IconPlus className="w-4 h-4" />
             Add Booking
@@ -152,7 +152,7 @@ export default function BookingsPage() {
         </div>
       ) : bookings.length === 0 ? (
         <div className="text-center py-20 animate-fade-up">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-accent-blue/10 text-accent-blue mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-accent-copper/10 text-accent-copper mb-4">
             <IconPlane className="w-8 h-8" />
           </div>
           <h3 className="text-lg font-medium text-text-secondary mb-2">No bookings yet</h3>
@@ -162,7 +162,7 @@ export default function BookingsPage() {
           <div className="flex items-center justify-center gap-3">
             <Link
               href="/"
-              className="px-4 py-2.5 text-sm text-white bg-accent-blue rounded-xl hover:bg-accent-blue/90 transition-colors shadow-lg shadow-accent-blue/20"
+              className="px-4 py-2.5 text-sm text-white bg-accent-copper rounded-xl hover:bg-accent-copper/90 transition-colors shadow-lg shadow-accent-copper/20"
             >
               Search Flights
             </Link>
@@ -217,7 +217,7 @@ export default function BookingsPage() {
                   <Link
                     href={`/bookings/${booking.id}/track`}
                     onClick={(e) => e.stopPropagation()}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-accent-blue bg-accent-blue/10 rounded-lg hover:bg-accent-blue/20 transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-accent-copper bg-accent-copper/10 rounded-lg hover:bg-accent-copper/20 transition-colors"
                   >
                     <IconSignal className="w-3.5 h-3.5" />
                     Track

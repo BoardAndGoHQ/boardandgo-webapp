@@ -81,7 +81,7 @@ function timeUntil(iso: string): string {
 }
 
 const statusConfig: Record<string, { label: string; color: string; bg: string; dot: string }> = {
-  scheduled: { label: 'Scheduled', color: 'text-accent-blue', bg: 'bg-accent-blue/10', dot: 'bg-accent-blue' },
+  scheduled: { label: 'Scheduled', color: 'text-accent-copper', bg: 'bg-accent-copper/10', dot: 'bg-accent-copper' },
   active: { label: 'In Flight', color: 'text-emerald-400', bg: 'bg-emerald-400/10', dot: 'bg-emerald-400' },
   landed: { label: 'Landed', color: 'text-text-muted', bg: 'bg-text-muted/10', dot: 'bg-text-muted' },
   cancelled: { label: 'Cancelled', color: 'text-red-400', bg: 'bg-red-400/10', dot: 'bg-red-400' },
@@ -144,7 +144,7 @@ export function FlightCard({
           ? 'border-border-subtle/50 opacity-80 hover:opacity-100'
           : isActive
           ? 'border-emerald-500/30 shadow-lg shadow-emerald-500/5'
-          : 'border-border-subtle hover:border-accent-blue/30'
+          : 'border-border-subtle hover:border-accent-copper/30'
       }`}
     >
       {/* ── Main card (always visible) ── */}
@@ -217,7 +217,7 @@ export function FlightCard({
             <div className="text-lg font-bold text-text-primary">{flight.departureAirport}</div>
             <div className="text-xs text-text-muted">{formatTime(bestDep)}</div>
             {flight.departureGate && (
-              <div className="text-[10px] text-accent-blue">Gate {flight.departureGate}</div>
+              <div className="text-[10px] text-accent-copper">Gate {flight.departureGate}</div>
             )}
           </div>
 
@@ -226,7 +226,7 @@ export function FlightCard({
             <div className="relative h-1 bg-border-subtle rounded-full overflow-visible">
               <div
                 className={`absolute inset-y-0 left-0 rounded-full transition-all duration-1000 ${
-                  isActive ? 'bg-emerald-400' : flight.flightStatus === 'landed' ? 'bg-accent-blue' : 'bg-accent-blue/30'
+                  isActive ? 'bg-emerald-400' : flight.flightStatus === 'landed' ? 'bg-accent-copper' : 'bg-accent-copper/30'
                 }`}
                 style={{ width: `${Math.round(progress * 100)}%` }}
               />
@@ -250,7 +250,7 @@ export function FlightCard({
             <div className="text-lg font-bold text-text-primary">{flight.arrivalAirport}</div>
             <div className="text-xs text-text-muted">{formatTime(bestArr)}</div>
             {flight.arrivalGate && (
-              <div className="text-[10px] text-accent-blue">Gate {flight.arrivalGate}</div>
+              <div className="text-[10px] text-accent-copper">Gate {flight.arrivalGate}</div>
             )}
           </div>
         </div>

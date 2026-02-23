@@ -67,7 +67,7 @@ export default function StatusPage() {
                   {/* Progress bar */}
                   <div className="h-2 bg-bg-elevated rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-linear-to-r from-accent-blue to-emerald-400 rounded-full transition-all duration-700"
+                      className="h-full bg-linear-to-r from-accent-copper to-emerald-400 rounded-full transition-all duration-700"
                       style={{ width: `${s.uptime}%` }}
                     />
                   </div>
@@ -86,7 +86,7 @@ export default function StatusPage() {
       <section className="py-16 md:py-24 bg-bg-secondary/50">
         <div ref={historyRef} className="scroll-reveal max-w-6xl mx-auto px-5">
           <div className="flex items-center gap-3 mb-6">
-            <Clock className="w-5 h-5 text-accent-blue" />
+            <Clock className="w-5 h-5 text-accent-copper" />
             <h2 className="text-2xl font-bold text-text-primary">Past Incidents</h2>
           </div>
           <div className="glass-card rounded-2xl p-8">

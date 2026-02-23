@@ -119,7 +119,7 @@ export function NotificationCenter() {
       >
         <Bell className="w-4 h-4" />
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 rounded-full bg-accent-blue text-white text-[10px] leading-4 text-center">
+          <span className="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 rounded-full bg-accent-copper text-white text-[10px] leading-4 text-center">
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
@@ -131,7 +131,7 @@ export function NotificationCenter() {
             <div className="text-sm font-semibold text-text-primary">Notifications</div>
             <button
               onClick={markAllRead}
-              className="text-xs text-accent-blue hover:opacity-80 transition-opacity flex items-center gap-1"
+              className="text-xs text-accent-copper hover:opacity-80 transition-opacity flex items-center gap-1"
             >
               <CheckCheck className="w-3.5 h-3.5" />
               Mark all read
@@ -152,14 +152,14 @@ export function NotificationCenter() {
                     key={item.id}
                     onClick={() => markRead(item.id)}
                     className={`w-full text-left px-4 py-3 hover:bg-black/3 dark:hover:bg-bg-elevated/40 transition-colors ${
-                      item.readAt === null ? 'bg-accent-blue/5' : ''
+                      item.readAt === null ? 'bg-accent-copper/5' : ''
                     }`}
                   >
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-medium text-accent-blue">
+                      <span className="text-xs font-medium text-accent-copper">
                         {humanizeType(item.notificationType)}
                       </span>
-                      {item.readAt === null && <span className="w-1.5 h-1.5 rounded-full bg-accent-blue" />}
+                      {item.readAt === null && <span className="w-1.5 h-1.5 rounded-full bg-accent-copper" />}
                     </div>
                     <div className="text-sm text-text-primary mt-1">
                       {item.subject || item.messageText}

@@ -50,7 +50,7 @@ export function Footer() {
             <div className="space-y-2">
               <a
                 href="mailto:contact@boardandgo.com"
-                className="flex items-center gap-2 text-sm text-text-muted hover:text-accent-blue transition-colors"
+                className="flex items-center gap-2 text-sm text-text-muted hover:text-accent-copper transition-colors"
               >
                 <Mail className="w-4 h-4" />
                 contact@boardandgo.com
@@ -59,7 +59,7 @@ export function Footer() {
                 href="https://www.linkedin.com/company/boardandgo"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 text-sm text-text-muted hover:text-accent-blue transition-colors"
+                className="flex items-center gap-2 text-sm text-text-muted hover:text-accent-copper transition-colors"
               >
                 <Linkedin className="w-4 h-4" />
                 Follow us on LinkedIn
@@ -78,7 +78,7 @@ export function Footer() {
                   <li key={link.name}>
                     <Link
                       href={link.href}
-                      className="text-sm text-text-muted hover:text-accent-blue transition-colors"
+                      className="text-sm text-text-muted hover:text-accent-copper transition-colors"
                     >
                       {link.name}
                     </Link>

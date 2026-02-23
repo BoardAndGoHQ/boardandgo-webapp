@@ -9,7 +9,7 @@ function QuickHelp({ title, description, icon: Icon }: { title: string; descript
   return (
     <div className="glass-card rounded-2xl p-6 hover:shadow-lg hover:scale-[1.02] transition-all duration-300 group">
       <div className="flex items-start gap-4">
-        <div className="w-12 h-12 rounded-2xl bg-accent-blue/10 flex items-center justify-center text-accent-blue group-hover:bg-accent-blue group-hover:text-white transition-colors shrink-0">
+        <div className="w-12 h-12 rounded-2xl bg-accent-copper/10 flex items-center justify-center text-accent-copper group-hover:bg-accent-copper group-hover:text-white transition-colors shrink-0">
           <Icon className="w-6 h-6" />
         </div>
         <div>
@@ -30,7 +30,7 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
     <div className="glass-card rounded-xl overflow-hidden">
       <button
         onClick={toggle}
-        className="w-full flex items-center justify-between p-5 text-left hover:bg-accent-blue/3 transition-colors"
+        className="w-full flex items-center justify-between p-5 text-left hover:bg-accent-copper/3 transition-colors"
       >
         <span className="font-semibold text-text-primary text-sm pr-4">{question}</span>
         <ChevronDown className={`w-4 h-4 text-text-muted shrink-0 transition-transform duration-300 ${open ? 'rotate-180' : ''}`} />
@@ -63,10 +63,10 @@ export default function SupportPage() {
     <div className="flex flex-col">
       {/* ═══ Hero ═══ */}
       <section className="relative pt-20 md:pt-28 pb-16 overflow-hidden">
-        <div className="absolute top-16 left-1/3 w-95 h-95 bg-accent-blue/5 rounded-full blur-3xl pointer-events-none animate-drift" />
+        <div className="absolute top-16 left-1/3 w-95 h-95 bg-accent-copper/5 rounded-full blur-3xl pointer-events-none animate-drift" />
 
         <div ref={heroRef} className="scroll-reveal max-w-6xl mx-auto px-5 text-center space-y-6">
-          <div className="inline-flex items-center gap-2 glass-card rounded-full px-4 py-1.5 text-xs font-medium text-accent-blue">
+          <div className="inline-flex items-center gap-2 glass-card rounded-full px-4 py-1.5 text-xs font-medium text-accent-copper">
             <LifeBuoy className="w-3.5 h-3.5" />
             24/7 Support
           </div>
@@ -107,7 +107,7 @@ export default function SupportPage() {
       <section className="py-16 md:py-24 bg-bg-secondary/50">
         <div ref={faqRef} className="scroll-reveal max-w-3xl mx-auto px-5">
           <div className="text-center mb-10">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-accent-blue/10 text-accent-blue mb-4">
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-accent-copper/10 text-accent-copper mb-4">
               <HelpCircle className="w-6 h-6" />
             </div>
             <h2 className="text-2xl md:text-3xl font-bold text-text-primary">

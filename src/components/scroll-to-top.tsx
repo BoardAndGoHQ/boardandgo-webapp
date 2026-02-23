@@ -27,9 +27,9 @@ export function ScrollToTop() {
       >
         <div className="relative p-3 rounded-full glass shadow-lg group hover:scale-110 hover:shadow-xl transition-all duration-300">
           {/* Hover glow */}
-          <div className="absolute inset-0 bg-linear-to-br from-accent-blue/15 to-accent-blue/5 opacity-0 group-hover:opacity-100 rounded-full transition-opacity duration-300" />
+          <div className="absolute inset-0 bg-linear-to-br from-accent-copper/15 to-accent-copper/5 opacity-0 group-hover:opacity-100 rounded-full transition-opacity duration-300" />
 
-          <div className="relative text-accent-blue">
+          <div className="relative text-accent-copper">
             <ChevronUp className="w-5 h-5" />
           </div>
         </div>

@@ -224,11 +224,11 @@ export function AirportAutocomplete({
               onMouseEnter={() => setHighlightIndex(i)}
               className={`flex items-center gap-3 px-3 py-2.5 cursor-pointer transition-colors ${
                 i === highlightIndex
-                  ? 'bg-accent-blue/10 text-text-primary'
-                  : 'text-text-secondary hover:bg-accent-blue/5'
+                  ? 'bg-accent-copper/10 text-text-primary'
+                  : 'text-text-secondary hover:bg-accent-copper/5'
               }`}
             >
-              <span className="font-mono font-bold text-accent-blue text-sm w-10 shrink-0">
+              <span className="font-mono font-bold text-accent-copper text-sm w-10 shrink-0">
                 {airport.iata}
               </span>
               <span className="flex-1 min-w-0 truncate text-sm">

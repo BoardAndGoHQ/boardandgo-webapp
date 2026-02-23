@@ -71,12 +71,12 @@ export default function PrivacyPage() {
 
   return (
     <div className="relative pt-16 md:pt-24 pb-20">
-      <div className="absolute top-16 left-1/4 w-100 h-100 bg-accent-blue/5 rounded-full blur-3xl pointer-events-none animate-drift" />
+      <div className="absolute top-16 left-1/4 w-100 h-100 bg-accent-copper/5 rounded-full blur-3xl pointer-events-none animate-drift" />
 
       <div className="max-w-4xl mx-auto px-5">
         {/* Header */}
         <div ref={heroRef} className="scroll-reveal text-center mb-14">
-          <div className="inline-flex items-center gap-2 glass-card rounded-full px-4 py-1.5 text-xs font-medium text-accent-blue mb-6">
+          <div className="inline-flex items-center gap-2 glass-card rounded-full px-4 py-1.5 text-xs font-medium text-accent-copper mb-6">
             <Lock className="w-3.5 h-3.5" />
             Privacy
           </div>
@@ -94,7 +94,7 @@ export default function PrivacyPage() {
                 style={{ animationDelay: `${i * 60}ms` }}
               >
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-9 h-9 rounded-xl bg-accent-blue/10 flex items-center justify-center text-accent-blue shrink-0">
+                  <div className="w-9 h-9 rounded-xl bg-accent-copper/10 flex items-center justify-center text-accent-copper shrink-0">
                     <Icon className="w-4 h-4" />
                   </div>
                   <h2 className="text-lg font-bold text-text-primary">{s.title}</h2>
@@ -109,7 +109,7 @@ export default function PrivacyPage() {
                         <ul className="space-y-2 pl-1">
                           {sub.items.map((item) => (
                             <li key={item} className="flex items-start gap-2.5 text-sm text-text-secondary">
-                              <div className="w-1.5 h-1.5 rounded-full bg-accent-blue mt-2 shrink-0" />
+                              <div className="w-1.5 h-1.5 rounded-full bg-accent-copper mt-2 shrink-0" />
                               {item}
                             </li>
                           ))}
@@ -126,7 +126,7 @@ export default function PrivacyPage() {
                       <ul className="space-y-2 pl-1">
                         {s.items!.map((item) => (
                           <li key={item} className="flex items-start gap-2.5 text-sm text-text-secondary">
-                            <div className="w-1.5 h-1.5 rounded-full bg-accent-blue mt-2 shrink-0" />
+                            <div className="w-1.5 h-1.5 rounded-full bg-accent-copper mt-2 shrink-0" />
                             {item}
                           </li>
                         ))}
@@ -152,7 +152,7 @@ export default function PrivacyPage() {
                 const CIcon = c.icon;
                 return (
                   <div key={c.label} className="glass rounded-xl p-4 flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-accent-blue/10 flex items-center justify-center text-accent-blue shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-accent-copper/10 flex items-center justify-center text-accent-copper shrink-0">
                       <CIcon className="w-5 h-5" />
                     </div>
                     <div>

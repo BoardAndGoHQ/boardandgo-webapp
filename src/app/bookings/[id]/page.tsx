@@ -21,7 +21,7 @@ function formatTime(dateStr: string) {
 }
 
 const statusColors: Record<string, string> = {
-  upcoming: 'bg-accent-blue/10 text-accent-blue border-accent-blue/20',
+  upcoming: 'bg-accent-copper/10 text-accent-copper border-accent-copper/20',
   completed: 'bg-text-muted/10 text-text-muted border-text-muted/20',
   cancelled: 'bg-red-400/10 text-red-400 border-red-400/20',
 };
@@ -66,11 +66,11 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
   if (error || !booking) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-12 text-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-accent-blue/10 text-accent-blue mb-4">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-accent-copper/10 text-accent-copper mb-4">
           <IconPlane className="w-8 h-8" />
         </div>
         <h3 className="text-lg font-medium text-text-secondary mb-2">{error || 'Booking not found'}</h3>
-        <Link href="/bookings" className="text-accent-blue hover:underline">
+        <Link href="/bookings" className="text-accent-copper hover:underline">
           Back to Bookings
         </Link>
       </div>
@@ -80,11 +80,11 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 md:py-12 relative">
       {/* Decorative background */}
-      <div className="fixed top-20 right-1/4 w-125 h-125 bg-accent-blue/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="fixed bottom-20 left-1/4 w-100 h-100 bg-accent-blue/8 rounded-full blur-3xl pointer-events-none" />
+      <div className="fixed top-20 right-1/4 w-125 h-125 bg-accent-copper/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="fixed bottom-20 left-1/4 w-100 h-100 bg-accent-copper/8 rounded-full blur-3xl pointer-events-none" />
 
       <div className="mb-8 animate-fade-up">
-        <Link href="/bookings" className="inline-flex items-center gap-1.5 text-sm text-text-muted hover:text-accent-blue transition-colors">
+        <Link href="/bookings" className="inline-flex items-center gap-1.5 text-sm text-text-muted hover:text-accent-copper transition-colors">
           <IconArrowRight className="w-3.5 h-3.5 rotate-180" />
           Back to Bookings
         </Link>
@@ -108,7 +108,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
               <div className="text-sm text-text-muted mt-1">{formatTime(booking.departureTime)}</div>
             </div>
             <div className="flex flex-col items-center gap-2">
-              <IconPlane className="w-6 h-6 text-accent-blue rotate-90" />
+              <IconPlane className="w-6 h-6 text-accent-copper rotate-90" />
               <div className="w-24 h-px bg-border-subtle" />
             </div>
             <div className="text-center">
@@ -171,7 +171,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
               <div className="bg-white/5 rounded-lg p-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Car className="w-4 h-4 text-accent-blue" />
+                    <Car className="w-4 h-4 text-accent-copper" />
                     <span className="text-xs text-text-secondary">Leave for Airport</span>
                   </div>
                   <span className="text-xs font-medium text-text-primary">
@@ -187,7 +187,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
       <div className="mt-4 flex justify-center">
         <Link
           href={`/bookings/${id}/track`}
-          className="flex items-center gap-2 px-5 py-3 text-sm font-medium text-white bg-accent-blue rounded-xl hover:bg-accent-blue/90 transition-colors shadow-lg shadow-accent-blue/20"
+          className="flex items-center gap-2 px-5 py-3 text-sm font-medium text-white bg-accent-copper rounded-xl hover:bg-accent-copper/90 transition-colors shadow-lg shadow-accent-copper/20"
         >
           <IconSignal className="w-4 h-4" />
           Track Flight

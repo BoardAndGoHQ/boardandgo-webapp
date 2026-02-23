@@ -12,7 +12,7 @@ function Stat({ value, suffix, label }: { value: number; suffix: string; label: 
   const { ref, value: countValue } = useCountUp(value, { duration: 2000 });
   return (
     <div ref={ref as RefObject<HTMLDivElement>} className="text-center">
-      <div className="text-3xl md:text-4xl font-bold text-accent-blue">
+      <div className="text-3xl md:text-4xl font-bold text-accent-copper">
         {countValue}{suffix}
       </div>
       <div className="text-sm text-text-muted mt-1">{label}</div>
@@ -33,11 +33,11 @@ export default function FeaturesPage() {
       {/* ═══ Hero ═══ */}
       <section className="relative pt-20 md:pt-28 pb-16 overflow-hidden">
         {/* decorative blobs */}
-        <div className="absolute top-16 left-1/4 w-105 h-105 rounded-full bg-accent-blue/5 blur-3xl pointer-events-none animate-drift" />
-        <div className="absolute bottom-0 right-1/4 w-[320px] h-80 rounded-full bg-accent-blue/4 blur-3xl pointer-events-none animate-drift-reverse" />
+        <div className="absolute top-16 left-1/4 w-105 h-105 rounded-full bg-accent-copper/5 blur-3xl pointer-events-none animate-drift" />
+        <div className="absolute bottom-0 right-1/4 w-[320px] h-80 rounded-full bg-accent-copper/4 blur-3xl pointer-events-none animate-drift-reverse" />
 
         <div ref={heroRef} className="scroll-reveal max-w-6xl mx-auto px-5 text-center space-y-6">
-          <div className="inline-flex items-center gap-2 glass-card rounded-full px-4 py-1.5 text-xs font-medium text-accent-blue">
+          <div className="inline-flex items-center gap-2 glass-card rounded-full px-4 py-1.5 text-xs font-medium text-accent-copper">
             <Radio className="w-3.5 h-3.5" />
             AI-Powered Features
           </div>
@@ -57,7 +57,7 @@ export default function FeaturesPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Text */}
             <div className="space-y-5">
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-accent-blue/10 text-accent-blue">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-accent-copper/10 text-accent-copper">
                 <Mic className="w-6 h-6" />
               </div>
               <h2 className="text-2xl md:text-4xl font-bold text-text-primary">
@@ -78,7 +78,7 @@ export default function FeaturesPage() {
             <div className="glass-card rounded-2xl p-6 space-y-5">
               {/* AI message */}
               <div className="flex items-start gap-3 animate-fade-up">
-                <div className="w-9 h-9 rounded-full bg-accent-blue flex items-center justify-center text-white text-xs font-bold shrink-0">AI</div>
+                <div className="w-9 h-9 rounded-full bg-accent-copper flex items-center justify-center text-white text-xs font-bold shrink-0">AI</div>
                 <div className="flex-1 glass rounded-2xl rounded-tl-md p-4">
                   <p className="text-xs text-text-muted mb-1">Amy from BoardAndGo</p>
                   <p className="text-sm text-text-primary">Your flight to Paris has arrived at Gate B15, which is about 12 minutes walk from your current location. Boarding begins in 45 minutes.</p>
@@ -87,14 +87,14 @@ export default function FeaturesPage() {
               {/* User message */}
               <div className="flex items-start gap-3 animate-fade-up stagger-2">
                 <div className="w-9 h-9 rounded-full bg-bg-elevated border border-border-subtle flex items-center justify-center text-text-muted text-xs font-bold shrink-0">S</div>
-                <div className="flex-1 bg-accent-blue/5 rounded-2xl rounded-tl-md p-4">
+                <div className="flex-1 bg-accent-copper/5 rounded-2xl rounded-tl-md p-4">
                   <p className="text-xs text-text-muted mb-1">Sarah</p>
                   <p className="text-sm text-text-primary">Perfect, thanks! Will I make my connection?</p>
                 </div>
               </div>
               {/* AI reply */}
               <div className="flex items-start gap-3 animate-fade-up stagger-4">
-                <div className="w-9 h-9 rounded-full bg-accent-blue flex items-center justify-center text-white text-xs font-bold shrink-0">AI</div>
+                <div className="w-9 h-9 rounded-full bg-accent-copper flex items-center justify-center text-white text-xs font-bold shrink-0">AI</div>
                 <div className="flex-1 glass rounded-2xl rounded-tl-md p-4">
                   <p className="text-xs text-text-muted mb-1">Amy from BoardAndGo</p>
                   <p className="text-sm text-text-primary">Yes, we&apos;re expecting an early arrival at 7:45 AM. I&apos;ve already updated your pre-arranged taxi with the new time.</p>
@@ -122,8 +122,8 @@ export default function FeaturesPage() {
               {/* Progress bar */}
               <div className="relative mb-6">
                 <div className="h-1.5 bg-bg-elevated rounded-full overflow-hidden">
-                  <div className="h-full w-3/4 bg-linear-to-r from-accent-blue to-blue-400 rounded-full relative">
-                    <Plane className="absolute -right-3 -top-2 w-5 h-5 text-accent-blue animate-pulse-slow" />
+                  <div className="h-full w-3/4 bg-linear-to-r from-accent-copper to-blue-400 rounded-full relative">
+                    <Plane className="absolute -right-3 -top-2 w-5 h-5 text-accent-copper animate-pulse-slow" />
                   </div>
                 </div>
                 <div className="flex justify-between text-sm text-text-muted mt-3">
@@ -140,7 +140,7 @@ export default function FeaturesPage() {
                   { icon: <CloudSun className="w-4 h-4" />, label: 'Weather', value: '16°C' },
                 ].map((item) => (
                   <div key={item.label} className="glass rounded-xl p-3 text-center">
-                    <div className="flex justify-center text-accent-blue mb-1">{item.icon}</div>
+                    <div className="flex justify-center text-accent-copper mb-1">{item.icon}</div>
                     <p className="text-[10px] text-text-muted uppercase tracking-wide">{item.label}</p>
                     <p className={`text-sm font-bold ${item.highlight ? 'text-emerald-600' : 'text-text-primary'}`}>{item.value}</p>
                   </div>
@@ -150,7 +150,7 @@ export default function FeaturesPage() {
 
             {/* Text */}
             <div className="space-y-5 order-1 lg:order-2">
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-accent-blue/10 text-accent-blue">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-accent-copper/10 text-accent-copper">
                 <Plane className="w-6 h-6" />
               </div>
               <h2 className="text-2xl md:text-4xl font-bold text-text-primary">
@@ -176,7 +176,7 @@ export default function FeaturesPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Text */}
             <div className="space-y-5">
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-accent-blue/10 text-accent-blue">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-accent-copper/10 text-accent-copper">
                 <Shield className="w-6 h-6" />
               </div>
               <h2 className="text-2xl md:text-4xl font-bold text-text-primary">
@@ -203,7 +203,7 @@ export default function FeaturesPage() {
               />
               <div className="absolute inset-0 bg-linear-to-t from-white/80 via-white/20 to-transparent" />
               <div className="absolute bottom-4 left-4 right-4 glass rounded-xl px-4 py-3 flex items-center gap-3">
-                <MapPin className="w-5 h-5 text-accent-blue shrink-0" />
+                <MapPin className="w-5 h-5 text-accent-copper shrink-0" />
                 <div>
                   <p className="text-xs text-text-muted">Walking to Gate B15</p>
                   <p className="text-sm font-bold text-text-primary">12 min &middot; 850m</p>
@@ -239,7 +239,7 @@ export default function FeaturesPage() {
           </p>
           <Link
             href="/register"
-            className="inline-flex items-center gap-2 bg-accent-blue text-white px-8 py-3.5 rounded-full font-semibold text-sm hover:bg-accent-blue/90 transition-all glow-primary hover:scale-105"
+            className="inline-flex items-center gap-2 bg-accent-copper text-white px-8 py-3.5 rounded-full font-semibold text-sm hover:bg-accent-copper/90 transition-all glow-primary hover:scale-105"
           >
             Get Started Free
             <ArrowRight className="w-4 h-4" />

@@ -5,7 +5,7 @@ import { IconPlane, IconClock, IconSignal } from '@/components/icons';
 import { AlertTriangle, Map, Radio, Plane } from 'lucide-react';
 
 const statusConfig: Record<string, { label: string; color: string; bg: string }> = {
-  scheduled: { label: 'Scheduled', color: 'text-accent-blue', bg: 'bg-accent-blue/10' },
+  scheduled: { label: 'Scheduled', color: 'text-accent-copper', bg: 'bg-accent-copper/10' },
   active: { label: 'In Flight', color: 'text-green-400', bg: 'bg-green-400/10' },
   landed: { label: 'Landed', color: 'text-text-muted', bg: 'bg-text-muted/10' },
   cancelled: { label: 'Cancelled', color: 'text-red-400', bg: 'bg-red-400/10' },
@@ -48,7 +48,7 @@ function relativeTime(iso: string): string {
 function eventIcon(type: string) {
   switch (type) {
     case 'gate_change':
-      return <Map className="w-3 h-3 text-accent-blue" />;
+      return <Map className="w-3 h-3 text-accent-copper" />;
     case 'delay':
       return <AlertTriangle className="w-3 h-3 text-amber-400" />;
     case 'cancellation':
@@ -80,19 +80,19 @@ export function FlightProgress({ status }: { status: string }) {
   return (
     <div className="relative w-full">
       <div className="flex items-center gap-2">
-        <div className="w-3 h-3 rounded-full bg-accent-blue" />
+        <div className="w-3 h-3 rounded-full bg-accent-copper" />
         <div className="flex-1 h-0.5 bg-border-subtle relative overflow-hidden">
           <div
-            className="absolute inset-y-0 left-0 bg-accent-blue transition-all duration-1000"
+            className="absolute inset-y-0 left-0 bg-accent-copper transition-all duration-1000"
             style={{ width: `${pct}%` }}
           />
           {status === 'active' && (
-            <svg className="absolute w-4 h-4 text-accent-blue -top-1.5 rotate-90 transition-all duration-1000" style={{ left: `calc(${pct}% - 8px)` }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <svg className="absolute w-4 h-4 text-accent-copper -top-1.5 rotate-90 transition-all duration-1000" style={{ left: `calc(${pct}% - 8px)` }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5Z" />
             </svg>
           )}
         </div>
-        <div className={`w-3 h-3 rounded-full ${status === 'landed' ? 'bg-accent-blue' : 'bg-border-subtle'}`} />
+        <div className={`w-3 h-3 rounded-full ${status === 'landed' ? 'bg-accent-copper' : 'bg-border-subtle'}`} />
       </div>
     </div>
   );
@@ -106,7 +106,7 @@ export function FlightStatusCard({ flight }: { flight: TrackedFlight }) {
     <div className="glass-card rounded-2xl p-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <IconSignal className="w-5 h-5 text-accent-blue" />
+          <IconSignal className="w-5 h-5 text-accent-copper" />
           <span className="text-sm font-medium text-text-secondary">{flight.flightNumber}</span>
           {flight.airlineName && <span className="text-xs text-text-muted">{flight.airlineName}</span>}
         </div>
@@ -118,7 +118,7 @@ export function FlightStatusCard({ flight }: { flight: TrackedFlight }) {
           <div className="text-3xl font-bold text-text-primary">{flight.departureAirport}</div>
           <div className="text-sm text-text-muted mt-1">{formatTime(bestDep)}</div>
           {flight.departureGate && (
-            <div className="text-xs text-accent-blue mt-1">Gate {flight.departureGate}</div>
+            <div className="text-xs text-accent-copper mt-1">Gate {flight.departureGate}</div>
           )}
           {flight.departureTerminal && (
             <div className="text-xs text-text-muted">T{flight.departureTerminal}</div>
@@ -139,7 +139,7 @@ export function FlightStatusCard({ flight }: { flight: TrackedFlight }) {
           <div className="text-3xl font-bold text-text-primary">{flight.arrivalAirport}</div>
           <div className="text-sm text-text-muted mt-1">{formatTime(bestArr)}</div>
           {flight.arrivalGate && (
-            <div className="text-xs text-accent-blue mt-1">Gate {flight.arrivalGate}</div>
+            <div className="text-xs text-accent-copper mt-1">Gate {flight.arrivalGate}</div>
           )}
           {flight.arrivalTerminal && (
             <div className="text-xs text-text-muted">T{flight.arrivalTerminal}</div>
@@ -190,12 +190,12 @@ export function FlightTimeline({ events, isActive = false }: { events: FlightSta
         <div key={event.id} className="flex gap-3">
           <div className="flex flex-col items-center">
             <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-              i === 0 ? 'bg-accent-blue/10' : 'bg-bg-elevated/50'
+              i === 0 ? 'bg-accent-copper/10' : 'bg-bg-elevated/50'
             }`}>
               {i === 0 && isActive ? (
                 <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full rounded-full bg-accent-blue opacity-75 animate-ping" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-accent-blue" />
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-accent-copper opacity-75 animate-ping" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-accent-copper" />
                 </span>
               ) : (
                 eventIcon(event.eventType)
