@@ -38,7 +38,7 @@ function JobCard({
         </div>
         <Link
           href="#"
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-accent-blue text-white text-sm font-semibold rounded-full hover:bg-accent-blue/90 transition-all hover:scale-105 shrink-0"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-accent-copper text-white text-sm font-semibold rounded-full hover:bg-accent-copper/90 transition-all hover:scale-105 shrink-0"
         >
           Apply Now
           <ArrowRight className="w-3.5 h-3.5" />
@@ -48,7 +48,7 @@ function JobCard({
       <p className="text-sm text-text-secondary mb-4 leading-relaxed">{description}</p>
 
       <button onClick={() => setExpanded(!expanded)} className="group text-left">
-        <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent-blue group-hover:text-accent-blue/80 transition-colors">
+        <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent-copper group-hover:text-accent-copper/80 transition-colors">
           Requirements
           <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${expanded ? 'rotate-180' : ''}`} />
         </span>
@@ -62,7 +62,7 @@ function JobCard({
           <ul className="space-y-2 mt-4">
             {requirements.map((r) => (
               <li key={r} className="flex items-start gap-2.5 text-sm text-text-secondary">
-                <div className="w-1.5 h-1.5 rounded-full bg-accent-blue mt-2 shrink-0" />
+                <div className="w-1.5 h-1.5 rounded-full bg-accent-copper mt-2 shrink-0" />
                 {r}
               </li>
             ))}
@@ -115,10 +115,10 @@ export default function CareersPage() {
     <div className="flex flex-col">
       {/* ═══ Hero ═══ */}
       <section className="relative pt-20 md:pt-28 pb-16 overflow-hidden">
-        <div className="absolute top-16 right-1/4 w-100 h-100 bg-accent-blue/5 rounded-full blur-3xl pointer-events-none animate-drift" />
+        <div className="absolute top-16 right-1/4 w-100 h-100 bg-accent-copper/5 rounded-full blur-3xl pointer-events-none animate-drift" />
 
         <div ref={heroRef} className="scroll-reveal max-w-6xl mx-auto px-5 text-center space-y-6">
-          <div className="inline-flex items-center gap-2 glass-card rounded-full px-4 py-1.5 text-xs font-medium text-accent-blue">
+          <div className="inline-flex items-center gap-2 glass-card rounded-full px-4 py-1.5 text-xs font-medium text-accent-copper">
             <Zap className="w-3.5 h-3.5" />
             We&apos;re Hiring
           </div>
@@ -155,7 +155,7 @@ export default function CareersPage() {
                     className="glass rounded-xl p-3 flex items-center gap-3 animate-fade-up"
                     style={{ animationDelay: `${i * 60}ms` }}
                   >
-                    <div className="w-8 h-8 rounded-lg bg-accent-blue/10 flex items-center justify-center text-accent-blue shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-accent-copper/10 flex items-center justify-center text-accent-copper shrink-0">
                       <p.icon className="w-4 h-4" />
                     </div>
                     <span className="text-sm text-text-secondary font-medium">{p.label}</span>
@@ -166,7 +166,7 @@ export default function CareersPage() {
 
             <div className="relative rounded-2xl overflow-hidden glass-card">
               <Image src="/images/culture-visual.jpg" alt="BoardAndGo Culture" width={600} height={400} className="w-full h-auto" />
-              <div className="absolute inset-0 bg-linear-to-tr from-accent-blue/10 via-transparent to-transparent mix-blend-overlay" />
+              <div className="absolute inset-0 bg-linear-to-tr from-accent-copper/10 via-transparent to-transparent mix-blend-overlay" />
             </div>
           </div>
         </div>
@@ -176,7 +176,7 @@ export default function CareersPage() {
       <section className="py-16 md:py-24">
         <div ref={positionsRef} className="scroll-reveal max-w-6xl mx-auto px-5">
           <div className="text-center mb-12">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-accent-blue/10 text-accent-blue mb-4">
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-accent-copper/10 text-accent-copper mb-4">
               <Coffee className="w-6 h-6" />
             </div>
             <h2 className="text-2xl md:text-3xl font-bold text-text-primary">

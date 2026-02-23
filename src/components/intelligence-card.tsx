@@ -26,7 +26,7 @@ export function DelayPredictionCard({ prediction }: { prediction: DelayPredictio
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Timer className="w-4 h-4 text-accent-blue" />
+          <Timer className="w-4 h-4 text-accent-copper" />
           <span className="text-xs text-text-secondary">Delay Probability</span>
         </div>
         <div className="flex items-center gap-2">
@@ -74,7 +74,7 @@ export function ConnectionRiskCard({ risk }: { risk: ConnectionRiskResult }) {
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Link2 className="w-4 h-4 text-accent-blue" />
+          <Link2 className="w-4 h-4 text-accent-copper" />
           <span className="text-xs text-text-secondary">Connection Risk</span>
         </div>
         <div className="flex items-center gap-2">
@@ -138,7 +138,7 @@ export function IntelligenceSection({
         <span className="text-[10px] font-medium text-text-muted uppercase tracking-wider">
           Flight Intelligence
         </span>
-        <span className="px-1.5 py-0.5 text-[9px] font-semibold bg-accent-blue/10 text-accent-blue rounded">
+        <span className="px-1.5 py-0.5 text-[9px] font-semibold bg-accent-copper/10 text-accent-copper rounded">
           Beta
         </span>
       </div>

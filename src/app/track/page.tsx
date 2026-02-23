@@ -220,12 +220,12 @@ export default function TrackFlightPage() {
   return (
     <div className="max-w-3xl mx-auto px-5 py-10 md:py-14 relative">
       {/* Decorative */}
-      <div className="absolute -top-20 right-0 w-100 h-100 bg-accent-blue/4 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -top-20 right-0 w-100 h-100 bg-accent-copper/4 rounded-full blur-3xl pointer-events-none" />
 
       {/* Header */}
       <div className="relative text-center mb-10">
-        <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-accent-blue/10 mb-4">
-          <IconSignal className="w-7 h-7 text-accent-blue" />
+        <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-accent-copper/10 mb-4">
+          <IconSignal className="w-7 h-7 text-accent-copper" />
         </div>
         <h1 className="text-2xl md:text-3xl font-bold text-text-primary mb-2">Track My Flight</h1>
         <p className="text-text-muted text-sm max-w-md mx-auto">
@@ -256,7 +256,7 @@ export default function TrackFlightPage() {
           <button
             type="submit"
             disabled={searching || !flightInput.trim()}
-            className="flex items-center justify-center gap-2 px-6 py-3 bg-accent-blue text-white font-semibold text-sm rounded-xl hover:bg-accent-blue/90 transition-all hover:scale-105 glow-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-accent-copper text-white font-semibold text-sm rounded-xl hover:bg-accent-copper/90 transition-all hover:scale-105 glow-primary disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {searching ? <IconLoader className="w-4 h-4 animate-spin" /> : <IconSearch className="w-4 h-4" />}
             {searching ? 'Searching...' : 'Look Up'}
@@ -274,8 +274,8 @@ export default function TrackFlightPage() {
             {/* Flight header */}
             <div className="flex items-center justify-between mb-5">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-accent-blue/10 flex items-center justify-center">
-                  <IconPlane className="w-5 h-5 text-accent-blue" />
+                <div className="w-10 h-10 rounded-lg bg-accent-copper/10 flex items-center justify-center">
+                  <IconPlane className="w-5 h-5 text-accent-copper" />
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-text-primary">{parsedCarrier}{parsedNumber}</h3>
@@ -298,7 +298,7 @@ export default function TrackFlightPage() {
               <button
                 onClick={handleTrack}
                 disabled={tracking}
-                className="flex items-center gap-2 px-5 py-2.5 bg-accent-blue text-white font-medium text-sm rounded-xl hover:brightness-110 transition-all disabled:opacity-50"
+                className="flex items-center gap-2 px-5 py-2.5 bg-accent-copper text-white font-medium text-sm rounded-xl hover:brightness-110 transition-all disabled:opacity-50"
               >
                 {tracking ? <IconLoader className="w-4 h-4 animate-spin" /> : <IconSignal className="w-4 h-4" />}
                 {tracking ? 'Starting...' : 'Track This Flight'}
@@ -310,7 +310,7 @@ export default function TrackFlightPage() {
               <div className="text-center">
                 <div className="text-2xl font-bold text-text-primary">{lookupResult.departureAirport}</div>
                 {lookupResult.departureTerminal && <div className="text-xs text-text-muted">T{lookupResult.departureTerminal}</div>}
-                {lookupResult.departureGate && <div className="text-xs text-accent-blue">Gate {lookupResult.departureGate}</div>}
+                {lookupResult.departureGate && <div className="text-xs text-accent-copper">Gate {lookupResult.departureGate}</div>}
               </div>
               <div className="flex-1 flex items-center gap-2">
                 <div className="flex-1 h-px bg-border-subtle" />
@@ -320,7 +320,7 @@ export default function TrackFlightPage() {
               <div className="text-center">
                 <div className="text-2xl font-bold text-text-primary">{lookupResult.arrivalAirport}</div>
                 {lookupResult.arrivalTerminal && <div className="text-xs text-text-muted">T{lookupResult.arrivalTerminal}</div>}
-                {lookupResult.arrivalGate && <div className="text-xs text-accent-blue">Gate {lookupResult.arrivalGate}</div>}
+                {lookupResult.arrivalGate && <div className="text-xs text-accent-copper">Gate {lookupResult.arrivalGate}</div>}
               </div>
             </div>
 
@@ -379,7 +379,7 @@ export default function TrackFlightPage() {
       {/* My Tracked Flights */}
       <div className="mt-10">
         <h2 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
-          <IconSignal className="w-5 h-5 text-accent-blue" />
+          <IconSignal className="w-5 h-5 text-accent-copper" />
           My Tracked Flights
         </h2>
 
@@ -389,7 +389,7 @@ export default function TrackFlightPage() {
             onClick={() => setTrackTab('live')}
             className={`flex-1 text-sm font-medium py-2 rounded-lg transition-colors ${
               trackTab === 'live'
-                ? 'bg-accent-blue/10 text-accent-blue'
+                ? 'bg-accent-copper/10 text-accent-copper'
                 : 'text-text-muted hover:text-text-secondary'
             }`}
           >
@@ -399,7 +399,7 @@ export default function TrackFlightPage() {
             onClick={() => setTrackTab('history')}
             className={`flex-1 text-sm font-medium py-2 rounded-lg transition-colors ${
               trackTab === 'history'
-                ? 'bg-accent-blue/10 text-accent-blue'
+                ? 'bg-accent-copper/10 text-accent-copper'
                 : 'text-text-muted hover:text-text-secondary'
             }`}
           >

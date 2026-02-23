@@ -186,15 +186,15 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen relative">
       {/* Decorative background */}
-      <div className="fixed top-20 right-1/4 w-125 h-125 bg-accent-blue/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="fixed bottom-20 left-1/4 w-100 h-100 bg-accent-blue/8 rounded-full blur-3xl pointer-events-none" />
+      <div className="fixed top-20 right-1/4 w-125 h-125 bg-accent-copper/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="fixed bottom-20 left-1/4 w-100 h-100 bg-accent-copper/8 rounded-full blur-3xl pointer-events-none" />
       {/* Header bar */}
       <div className="relative z-10 px-5 md:px-6 py-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div>
             <h1 className="text-xl md:text-2xl font-bold text-text-primary flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-accent-blue/10 flex items-center justify-center">
-                <IconSignal className="w-5 h-5 text-accent-blue" />
+              <div className="w-10 h-10 rounded-2xl bg-accent-copper/10 flex items-center justify-center">
+                <IconSignal className="w-5 h-5 text-accent-copper" />
               </div>
               Flight Dashboard
             </h1>
@@ -204,7 +204,7 @@ export default function DashboardPage() {
           </div>
           <Link
             href="/track"
-            className="flex items-center gap-2 px-5 py-2.5 bg-accent-blue text-white text-sm font-semibold rounded-xl hover:bg-accent-blue/90 transition-all hover:scale-105 glow-primary"
+            className="flex items-center gap-2 px-5 py-2.5 bg-accent-copper text-white text-sm font-semibold rounded-xl hover:bg-accent-copper/90 transition-all hover:scale-105 glow-primary"
           >
             <IconPlane className="w-4 h-4" />
             Track Flight
@@ -217,7 +217,7 @@ export default function DashboardPage() {
         <div className="max-w-7xl mx-auto grid grid-cols-3 gap-3 md:gap-4">
           <div className="glass-card rounded-xl p-4 border border-border-subtle">
             <div className="text-xs text-text-muted uppercase tracking-wider mb-1">Active</div>
-            <div className="text-2xl font-bold text-accent-blue">{activeCount}</div>
+            <div className="text-2xl font-bold text-accent-copper">{activeCount}</div>
           </div>
           <div className="glass-card rounded-xl p-4 border border-border-subtle">
             <div className="text-xs text-text-muted uppercase tracking-wider mb-1">Scheduled</div>
@@ -234,7 +234,7 @@ export default function DashboardPage() {
       {!gmailDismissed && !gmailConnected && (
         <div className="px-4 md:px-6 mb-5">
           <div className="max-w-7xl mx-auto">
-            <div className="glass-card rounded-xl p-4 border border-accent-blue/20 bg-accent-blue/3 flex items-center gap-4">
+            <div className="glass-card rounded-xl p-4 border border-accent-copper/20 bg-accent-copper/3 flex items-center gap-4">
               <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0">
                 <IconMail className="w-5 h-5 text-red-400" />
               </div>
@@ -246,7 +246,7 @@ export default function DashboardPage() {
                 <button
                   onClick={handleConnectGmail}
                   disabled={gmailConnecting}
-                  className="flex items-center gap-2 px-4 py-2 bg-accent-blue text-white text-xs font-medium rounded-lg hover:brightness-110 transition-all disabled:opacity-50"
+                  className="flex items-center gap-2 px-4 py-2 bg-accent-copper text-white text-xs font-medium rounded-lg hover:brightness-110 transition-all disabled:opacity-50"
                 >
                   {gmailConnecting ? (
                     <><IconLoader className="w-3.5 h-3.5 animate-spin" /> Connecting...</>
@@ -309,7 +309,7 @@ export default function DashboardPage() {
               {flights.length > 1 && (
                 <button
                   onClick={() => setShowFullDashboard(true)}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 glass-card rounded-xl border border-border-subtle text-sm text-text-muted hover:text-text-secondary hover:border-accent-blue/20 transition-all"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 glass-card rounded-xl border border-border-subtle text-sm text-text-muted hover:text-text-secondary hover:border-accent-copper/20 transition-all"
                 >
                   <IconSignal className="w-4 h-4" />
                   <span>View all {flights.length} flights on map</span>
@@ -364,10 +364,10 @@ export default function DashboardPage() {
               <div className="lg:w-80 xl:w-96 flex flex-col gap-3">
                 {/* Selected flight detail */}
                 {selectedFlight && (
-                  <div className="glass-card rounded-xl p-5 border border-accent-blue/20 animate-in fade-in slide-in-from-right-2 duration-200">
+                  <div className="glass-card rounded-xl p-5 border border-accent-copper/20 animate-in fade-in slide-in-from-right-2 duration-200">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-2">
-                        <IconPlane className="w-4 h-4 text-accent-blue" />
+                        <IconPlane className="w-4 h-4 text-accent-copper" />
                         <span className="text-base font-semibold text-text-primary">
                           {selectedFlight.airlineCode}{selectedFlight.flightNumber}
                         </span>
@@ -381,7 +381,7 @@ export default function DashboardPage() {
                         <div className="text-xl font-bold text-text-primary">{selectedFlight.departureAirport}</div>
                         <div className="text-xs text-text-muted">{formatTime(selectedFlight.actualDeparture ?? selectedFlight.estimatedDeparture ?? selectedFlight.scheduledDeparture)}</div>
                         {selectedFlight.departureGate && (
-                          <div className="text-xs text-accent-blue">Gate {selectedFlight.departureGate}</div>
+                          <div className="text-xs text-accent-copper">Gate {selectedFlight.departureGate}</div>
                         )}
                       </div>
                       <div className="flex items-center gap-1 text-text-muted">
@@ -393,7 +393,7 @@ export default function DashboardPage() {
                         <div className="text-xl font-bold text-text-primary">{selectedFlight.arrivalAirport}</div>
                         <div className="text-xs text-text-muted">{formatTime(selectedFlight.actualArrival ?? selectedFlight.estimatedArrival ?? selectedFlight.scheduledArrival)}</div>
                         {selectedFlight.arrivalGate && (
-                          <div className="text-xs text-accent-blue">Gate {selectedFlight.arrivalGate}</div>
+                          <div className="text-xs text-accent-copper">Gate {selectedFlight.arrivalGate}</div>
                         )}
                       </div>
                     </div>
@@ -430,7 +430,7 @@ export default function DashboardPage() {
                     {/* View full tracking */}
                     <Link
                       href={`/bookings/${selectedFlight.bookingId}/track`}
-                      className="mt-4 flex items-center justify-center gap-2 w-full py-2 text-xs font-medium text-accent-blue bg-accent-blue/10 rounded-lg hover:bg-accent-blue/15 transition-colors"
+                      className="mt-4 flex items-center justify-center gap-2 w-full py-2 text-xs font-medium text-accent-copper bg-accent-copper/10 rounded-lg hover:bg-accent-copper/15 transition-colors"
                     >
                       View Full Tracking
                       <IconArrowRight className="w-3 h-3" />
@@ -457,7 +457,7 @@ export default function DashboardPage() {
                     <button
                       onClick={() => setShowHistory(false)}
                       className={`flex-1 text-xs font-medium py-1.5 rounded-md transition-colors ${
-                        !showHistory ? 'bg-accent-blue/10 text-accent-blue' : 'text-text-muted hover:text-text-secondary'
+                        !showHistory ? 'bg-accent-copper/10 text-accent-copper' : 'text-text-muted hover:text-text-secondary'
                       }`}
                     >
                       Upcoming ({flights.length})
@@ -465,7 +465,7 @@ export default function DashboardPage() {
                     <button
                       onClick={() => setShowHistory(true)}
                       className={`flex-1 text-xs font-medium py-1.5 rounded-md transition-colors ${
-                        showHistory ? 'bg-accent-blue/10 text-accent-blue' : 'text-text-muted hover:text-text-secondary'
+                        showHistory ? 'bg-accent-copper/10 text-accent-copper' : 'text-text-muted hover:text-text-secondary'
                       }`}
                     >
                       History ({historyFlights.length})
@@ -495,15 +495,15 @@ export default function DashboardPage() {
                               onClick={() => setSelectedId(isSelected ? null : flight.id)}
                               className={`w-full text-left glass-card rounded-xl p-3.5 border transition-all duration-150 ${
                                 isSelected
-                                  ? 'border-accent-blue/40 bg-accent-blue/5'
+                                  ? 'border-accent-copper/40 bg-accent-copper/5'
                                   : isHistory
                                     ? 'border-border-subtle/50 opacity-75 hover:opacity-100 hover:border-border-subtle'
-                                    : 'border-border-subtle hover:border-accent-blue/20'
+                                    : 'border-border-subtle hover:border-accent-copper/20'
                               }`}
                             >
                               <div className="flex items-center justify-between mb-1.5">
                                 <div className="flex items-center gap-2">
-                                  <IconPlane className={`w-3.5 h-3.5 ${isSelected ? 'text-accent-blue' : 'text-text-muted'}`} />
+                                  <IconPlane className={`w-3.5 h-3.5 ${isSelected ? 'text-accent-copper' : 'text-text-muted'}`} />
                                   <span className="text-sm font-semibold text-text-primary">
                                     {flight.airlineCode}{flight.flightNumber}
                                   </span>

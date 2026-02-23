@@ -158,7 +158,7 @@ export default function TrackFlightPage({ params }: { params: Promise<{ id: stri
   if (authLoading || loading) {
     return (
       <div className="w-full h-[calc(100dvh-4rem)] flex items-center justify-center bg-bg-primary">
-        <IconLoader className="w-6 h-6 text-accent-blue animate-spin" />
+        <IconLoader className="w-6 h-6 text-accent-copper animate-spin" />
       </div>
     );
   }
@@ -169,7 +169,7 @@ export default function TrackFlightPage({ params }: { params: Promise<{ id: stri
       <div className="w-full h-[calc(100dvh-4rem)] flex items-center justify-center bg-bg-primary">
         <div className="text-center space-y-3">
           <div className="text-text-muted text-sm">{error}</div>
-          <Link href={isStandalone ? '/track' : `/bookings/${id}`} className="text-sm text-accent-blue hover:underline">
+          <Link href={isStandalone ? '/track' : `/bookings/${id}`} className="text-sm text-accent-copper hover:underline">
             Go back
           </Link>
         </div>
@@ -254,7 +254,7 @@ export default function TrackFlightPage({ params }: { params: Promise<{ id: stri
             </div>
             <Link
               href="/dashboard"
-              className="ml-2 px-3 py-1.5 text-xs font-medium bg-accent-blue/10 text-accent-blue rounded-lg hover:bg-accent-blue/15 transition-colors"
+              className="ml-2 px-3 py-1.5 text-xs font-medium bg-accent-copper/10 text-accent-copper rounded-lg hover:bg-accent-copper/15 transition-colors"
             >
               Dashboard
             </Link>
@@ -287,7 +287,7 @@ export default function TrackFlightPage({ params }: { params: Promise<{ id: stri
         <div className="absolute top-16 right-16 z-20 animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="bg-[#1a1f2e]/95 backdrop-blur-xl border border-white/10 rounded-lg p-3 flex items-center gap-2 max-w-xs">
             <input readOnly value={shareUrl} className="flex-1 text-xs bg-transparent border-none text-text-primary outline-none min-w-0" />
-            <button onClick={handleCopy} className="shrink-0 px-2 py-1 text-xs bg-accent-blue text-white rounded-lg">
+            <button onClick={handleCopy} className="shrink-0 px-2 py-1 text-xs bg-accent-copper text-white rounded-lg">
               Copy
             </button>
           </div>
@@ -329,7 +329,7 @@ function ModeButton({ icon, label, active, onClick }: { icon: React.ReactNode; l
     <button
       onClick={onClick}
       className={`flex flex-col items-center gap-1 px-5 py-2.5 transition-colors ${
-      active ? 'bg-accent-blue/10 text-accent-blue' : 'text-text-muted hover:text-text-secondary hover:bg-black/5 dark:hover:bg-white/5'
+      active ? 'bg-accent-copper/10 text-accent-copper' : 'text-text-muted hover:text-text-secondary hover:bg-black/5 dark:hover:bg-white/5'
       }`}
     >
       {icon}

@@ -86,7 +86,7 @@ function relativeTime(iso: string): string {
 function eventIcon(type: string) {
   switch (type) {
     case 'gate_change':
-      return <Map className="w-3 h-3 text-accent-blue" />;
+      return <Map className="w-3 h-3 text-accent-copper" />;
     case 'delay':
       return <AlertTriangle className="w-3 h-3 text-amber-400" />;
     case 'cancellation':
@@ -223,8 +223,8 @@ export function FlightDetailDrawer({ flight, token, positions }: FlightDetailDra
         'border-border-subtle bg-bg-elevated/30'
       }`}>
         <div className="flex items-center gap-2 mb-1.5">
-          <Sparkles className="w-3.5 h-3.5 text-accent-blue" />
-          <span className="text-[10px] font-medium text-accent-blue uppercase tracking-wider">Amberlyn</span>
+          <Sparkles className="w-3.5 h-3.5 text-accent-copper" />
+          <span className="text-[10px] font-medium text-accent-copper uppercase tracking-wider">Amberlyn</span>
           {briefingLoading && <Loader2 className="w-3 h-3 animate-spin text-text-muted" />}
         </div>
         <h2 className={`text-xl font-bold ${status.color} mb-1`}>
@@ -263,7 +263,7 @@ export function FlightDetailDrawer({ flight, token, positions }: FlightDetailDra
             <div className="text-base font-bold text-text-primary">{flight.departureAirport}</div>
             <div className="text-xs text-text-muted">{formatTime(flight.actualDeparture ?? flight.estimatedDeparture ?? flight.scheduledDeparture)}</div>
             {flight.departureTerminal && <div className="text-[10px] text-text-muted">T{flight.departureTerminal}</div>}
-            {flight.departureGate && <div className="text-[10px] text-accent-blue">Gate {flight.departureGate}</div>}
+            {flight.departureGate && <div className="text-[10px] text-accent-copper">Gate {flight.departureGate}</div>}
           </div>
 
           <div className="flex-1 mx-4">
@@ -271,7 +271,7 @@ export function FlightDetailDrawer({ flight, token, positions }: FlightDetailDra
               <div
                 className={`absolute inset-y-0 left-0 rounded-full transition-all duration-1000 ${
                   isActive ? 'bg-linear-to-r from-emerald-500 to-emerald-400' :
-                  flight.flightStatus === 'landed' ? 'bg-accent-blue' : 'bg-accent-blue/40'
+                  flight.flightStatus === 'landed' ? 'bg-accent-copper' : 'bg-accent-copper/40'
                 }`}
                 style={{ width: `${Math.round(progress * 100)}%` }}
               />
@@ -290,7 +290,7 @@ export function FlightDetailDrawer({ flight, token, positions }: FlightDetailDra
             <div className="text-base font-bold text-text-primary">{flight.arrivalAirport}</div>
             <div className="text-xs text-text-muted">{formatTime(flight.actualArrival ?? flight.estimatedArrival ?? flight.scheduledArrival)}</div>
             {flight.arrivalTerminal && <div className="text-[10px] text-text-muted">T{flight.arrivalTerminal}</div>}
-            {flight.arrivalGate && <div className="text-[10px] text-accent-blue">Gate {flight.arrivalGate}</div>}
+            {flight.arrivalGate && <div className="text-[10px] text-accent-copper">Gate {flight.arrivalGate}</div>}
           </div>
         </div>
 
@@ -322,7 +322,7 @@ export function FlightDetailDrawer({ flight, token, positions }: FlightDetailDra
         {flight.flightStatus === 'scheduled' && (
           <div className="flex items-center justify-between mt-2 py-2 px-3 bg-bg-elevated/50 rounded-lg">
             <div className="flex items-center gap-2">
-              <Car className="w-3.5 h-3.5 text-accent-blue" />
+              <Car className="w-3.5 h-3.5 text-accent-copper" />
               <span className="text-xs text-text-secondary">Leave for airport</span>
             </div>
             <span className="text-xs font-medium text-text-primary">{arrivalTime}</span>
@@ -334,7 +334,7 @@ export function FlightDetailDrawer({ flight, token, positions }: FlightDetailDra
       {flight.delayPrediction && flight.delayPrediction.buckets && flight.flightStatus !== 'landed' && (
         <div className="bg-bg-elevated/30 rounded-xl p-4 border border-border-subtle">
           <div className="flex items-center gap-2 mb-3">
-            <BarChart3 className="w-3.5 h-3.5 text-accent-blue" />
+            <BarChart3 className="w-3.5 h-3.5 text-accent-copper" />
             <span className="text-xs font-medium text-text-secondary uppercase tracking-wider">Amadeus Delay Prediction</span>
           </div>
           <div className="grid grid-cols-4 gap-1.5">
@@ -404,7 +404,7 @@ export function FlightDetailDrawer({ flight, token, positions }: FlightDetailDra
           className="w-full flex items-center justify-between px-4 py-3 text-sm text-text-secondary hover:bg-bg-elevated/30 transition-colors"
         >
           <span className="flex items-center gap-2">
-            <Clock className="w-3.5 h-3.5 text-accent-blue" />
+            <Clock className="w-3.5 h-3.5 text-accent-copper" />
             <span className="font-medium">Status Timeline</span>
             <span className="text-xs text-text-muted">({timeline.length})</span>
           </span>
@@ -427,12 +427,12 @@ export function FlightDetailDrawer({ flight, token, positions }: FlightDetailDra
                   <div key={event.id} className="flex gap-3">
                     <div className="flex flex-col items-center">
                       <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                        i === 0 ? 'bg-accent-blue/10' : 'bg-bg-elevated/50'
+                        i === 0 ? 'bg-accent-copper/10' : 'bg-bg-elevated/50'
                       }`}>
                         {i === 0 && isActive ? (
                           <span className="relative flex h-2 w-2">
-                            <span className="absolute inline-flex h-full w-full rounded-full bg-accent-blue opacity-75 animate-ping" />
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-accent-blue" />
+                            <span className="absolute inline-flex h-full w-full rounded-full bg-accent-copper opacity-75 animate-ping" />
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-accent-copper" />
                           </span>
                         ) : (
                           eventIcon(event.eventType)
@@ -480,7 +480,7 @@ export function FlightDetailDrawer({ flight, token, positions }: FlightDetailDra
         )}
         <Link
           href={`/bookings/${flight.bookingId}/track`}
-          className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-accent-blue text-white text-sm font-medium rounded-xl hover:brightness-110 transition-all"
+          className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-accent-copper text-white text-sm font-medium rounded-xl hover:brightness-110 transition-all"
         >
           <Map className="w-4 h-4" />
           View on Map

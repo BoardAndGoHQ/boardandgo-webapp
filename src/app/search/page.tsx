@@ -341,7 +341,7 @@ function SearchResults() {
 
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20">
-          <IconLoader className="w-6 h-6 text-accent-blue animate-spin mb-4" />
+          <IconLoader className="w-6 h-6 text-accent-copper animate-spin mb-4" />
           <p className="text-sm text-text-muted">Searching real-time flight prices...</p>
         </div>
       ) : flights.length === 0 ? (
@@ -355,7 +355,7 @@ function SearchResults() {
             href={fallbackUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-accent-blue text-white font-medium rounded-lg hover:bg-accent-blue/90 transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-accent-copper text-white font-medium rounded-lg hover:bg-accent-copper/90 transition-colors"
           >
             Search on Trip.com
             <IconExternalLink className="w-4 h-4" />
@@ -395,7 +395,7 @@ function SearchResults() {
                       <span className="text-sm font-medium text-text-primary">{flight.airline}</span>
                       <span className="text-xs text-text-muted">({flight.flightNumber})</span>
                       {flight.stops === 0 ? (
-                        <span className="px-2 py-0.5 text-xs bg-accent-blue/10 text-accent-blue rounded">Direct</span>
+                        <span className="px-2 py-0.5 text-xs bg-accent-copper/10 text-accent-copper rounded">Direct</span>
                       ) : (
                         <span className="px-2 py-0.5 text-xs bg-accent-amber/10 text-accent-amber rounded">
                           {flight.stops} stop{flight.stops > 1 ? 's' : ''}
@@ -448,7 +448,7 @@ function SearchResults() {
                           {flight.duration}
                         </div>
                         <div className="w-full h-px bg-border-subtle relative">
-                          <IconPlane className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 text-accent-blue rotate-90" />
+                          <IconPlane className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 text-accent-copper rotate-90" />
                         </div>
                       </div>
                       <div className="text-center min-w-15">
@@ -469,7 +469,7 @@ function SearchResults() {
                           </div>
                           <div className="flex-1 flex flex-col items-center gap-1">
                             <div className="w-full h-px bg-border-subtle relative">
-                              <IconPlane className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 text-accent-blue -rotate-90" />
+                              <IconPlane className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 text-accent-copper -rotate-90" />
                             </div>
                           </div>
                           <div className="text-center min-w-15">
@@ -495,7 +495,7 @@ function SearchResults() {
                     </div>
                     <button
                       onClick={() => handleBookClick(flight)}
-                      className="flex items-center gap-2 px-4 py-2.5 bg-accent-blue text-white text-sm font-medium rounded-lg hover:bg-accent-blue/90 transition-colors cursor-pointer"
+                      className="flex items-center gap-2 px-4 py-2.5 bg-accent-copper text-white text-sm font-medium rounded-lg hover:bg-accent-copper/90 transition-colors cursor-pointer"
                     >
                       Book
                       <IconExternalLink className="w-4 h-4" />
@@ -531,7 +531,7 @@ function SearchResults() {
                     onClick={() => handlePageChange(page)}
                     className={`w-10 h-10 text-sm rounded-lg transition-colors ${
                       currentPage === page
-                        ? 'bg-accent-blue text-white font-medium'
+                        ? 'bg-accent-copper text-white font-medium'
                         : 'text-text-muted hover:text-text-primary bg-bg-card border border-border-subtle'
                     }`}
                   >
@@ -569,8 +569,8 @@ function SearchResults() {
 
             {/* Header */}
             <div className="text-center mb-5">
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-accent-blue/10 mb-3">
-                <IconPlane className="w-6 h-6 text-accent-blue" />
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-accent-copper/10 mb-3">
+                <IconPlane className="w-6 h-6 text-accent-copper" />
               </div>
               <h3 className="text-lg font-semibold text-text-primary">You&apos;re booking with Trip.com</h3>
               <p className="text-sm text-text-muted mt-1">Secure payment handled by our trusted partner</p>
@@ -589,7 +589,7 @@ function SearchResults() {
                 </div>
                 <div className="flex-1 flex items-center gap-1">
                   <div className="flex-1 h-px bg-border-subtle" />
-                  <IconPlane className="w-3 h-3 text-accent-blue rotate-90" />
+                  <IconPlane className="w-3 h-3 text-accent-copper rotate-90" />
                   <div className="flex-1 h-px bg-border-subtle" />
                 </div>
                 <div className="text-center">
@@ -604,19 +604,19 @@ function SearchResults() {
             </div>
 
             {/* Monitoring note */}
-            <div className="flex items-start gap-3 bg-accent-blue/5 border border-accent-blue/15 rounded-xl p-3 mb-5">
-              <div className="w-8 h-8 rounded-lg bg-accent-blue/10 flex items-center justify-center shrink-0 mt-0.5">
-                <IconClock className="w-4 h-4 text-accent-blue" />
+            <div className="flex items-start gap-3 bg-accent-copper/5 border border-accent-copper/15 rounded-xl p-3 mb-5">
+              <div className="w-8 h-8 rounded-lg bg-accent-copper/10 flex items-center justify-center shrink-0 mt-0.5">
+                <IconClock className="w-4 h-4 text-accent-copper" />
               </div>
               <p className="text-xs text-text-secondary leading-relaxed">
-                Your flight will be <span className="font-medium text-accent-blue">automatically monitored</span> after booking. We&apos;ll alert you about delays, gate changes, and cancellations.
+                Your flight will be <span className="font-medium text-accent-copper">automatically monitored</span> after booking. We&apos;ll alert you about delays, gate changes, and cancellations.
               </p>
             </div>
 
             {/* Actions */}
             <button
               onClick={confirmBooking}
-              className="w-full py-3 bg-accent-blue text-white font-semibold text-sm rounded-xl shadow-lg shadow-accent-blue/25 hover:brightness-110 transition-all duration-300 flex items-center justify-center gap-2"
+              className="w-full py-3 bg-accent-copper text-white font-semibold text-sm rounded-xl shadow-lg shadow-accent-copper/25 hover:brightness-110 transition-all duration-300 flex items-center justify-center gap-2"
             >
               Continue to Secure Booking
               <IconExternalLink className="w-4 h-4" />
@@ -641,7 +641,7 @@ function SearchModeToggle({
         onClick={() => onChange('manual')}
         className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
           mode === 'manual'
-            ? 'bg-accent-blue text-white'
+            ? 'bg-accent-copper text-white'
             : 'text-text-muted hover:text-text-primary'
         }`}
       >
@@ -652,7 +652,7 @@ function SearchModeToggle({
         onClick={() => onChange('ai')}
         className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
           mode === 'ai'
-            ? 'bg-accent-blue text-white'
+            ? 'bg-accent-copper text-white'
             : 'text-text-muted hover:text-text-primary'
         }`}
       >

@@ -57,7 +57,7 @@ function remainingStr(flight: TrackedFlight, progress: number, totalDistanceMi: 
 }
 
 const statusColors: Record<string, { label: string; color: string }> = {
-  scheduled: { label: 'Scheduled', color: 'text-accent-blue' },
+  scheduled: { label: 'Scheduled', color: 'text-accent-copper' },
   active: { label: 'In Flight', color: 'text-green-400' },
   landed: { label: 'Landed', color: 'text-text-muted' },
   cancelled: { label: 'Cancelled', color: 'text-red-400' },
@@ -116,7 +116,7 @@ export function FlightInfoPanel({ flight, position, airports, collapsed, onToggl
         onClick={onToggleCollapse}
         className="bg-[#1a1f2e]/95 backdrop-blur-xl border border-white/10 rounded-xl px-4 py-3 shadow-2xl flex items-center gap-3 hover:bg-[#1e2438]/95 transition-colors"
       >
-        <IconPlane className="w-4 h-4 text-accent-blue" />
+        <IconPlane className="w-4 h-4 text-accent-copper" />
         <span className="text-sm font-semibold text-text-primary">{flight.airlineCode}{flight.flightNumber}</span>
         <span className={`text-xs ${statusCfg.color}`}>{statusCfg.label}</span>
       </button>
@@ -145,7 +145,7 @@ export function FlightInfoPanel({ flight, position, airports, collapsed, onToggl
               }}
             />
             <div className="w-9 h-9 rounded-lg bg-white/10 hidden items-center justify-center">
-              <IconPlane className="w-5 h-5 text-accent-blue" />
+              <IconPlane className="w-5 h-5 text-accent-copper" />
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -186,11 +186,11 @@ export function FlightInfoPanel({ flight, position, airports, collapsed, onToggl
 
               <div className="flex-1 flex items-center justify-center px-3">
                 <div className="flex items-center gap-1">
-                  <div className="w-1.5 h-1.5 rounded-full bg-accent-blue" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-accent-copper" />
                   <div className="w-12 h-px bg-text-muted/30 relative">
                     <IconPlane className="w-3.5 h-3.5 text-text-secondary absolute -top-1.75 left-1/2 -translate-x-1/2 rotate-90" />
                   </div>
-                  <div className={`w-1.5 h-1.5 rounded-full ${flight.flightStatus === 'landed' ? 'bg-accent-blue' : 'bg-text-muted/40'}`} />
+                  <div className={`w-1.5 h-1.5 rounded-full ${flight.flightStatus === 'landed' ? 'bg-accent-copper' : 'bg-text-muted/40'}`} />
                 </div>
               </div>
 
@@ -235,8 +235,8 @@ export function FlightInfoPanel({ flight, position, airports, collapsed, onToggl
             {/* Departure details */}
             <div className="bg-white/5 rounded-lg p-3 space-y-1.5">
               <div className="flex items-center gap-2 mb-1">
-                <div className="w-5 h-5 rounded-full bg-accent-blue/20 flex items-center justify-center">
-                  <div className="w-2 h-2 rounded-full bg-accent-blue" />
+                <div className="w-5 h-5 rounded-full bg-accent-copper/20 flex items-center justify-center">
+                  <div className="w-2 h-2 rounded-full bg-accent-copper" />
                 </div>
                 <span className="text-xs font-medium text-text-primary">
                   {depAirport?.name ?? flight.departureAirportName ?? flight.departureAirport}
@@ -253,7 +253,7 @@ export function FlightInfoPanel({ flight, position, airports, collapsed, onToggl
             <div className="bg-white/5 rounded-lg p-3 space-y-1.5">
               <div className="flex items-center gap-2 mb-1">
                 <div className="w-5 h-5 rounded-full bg-text-muted/20 flex items-center justify-center">
-                  <div className={`w-2 h-2 rounded-full ${flight.flightStatus === 'landed' ? 'bg-accent-blue' : 'bg-text-muted'}`} />
+                  <div className={`w-2 h-2 rounded-full ${flight.flightStatus === 'landed' ? 'bg-accent-copper' : 'bg-text-muted'}`} />
                 </div>
                 <span className="text-xs font-medium text-text-primary">
                   {arrAirport?.name ?? flight.arrivalAirportName ?? flight.arrivalAirport}
@@ -308,7 +308,7 @@ export function FlightInfoPanel({ flight, position, airports, collapsed, onToggl
                     <div className="bg-white/5 rounded-lg p-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <Car className="w-4 h-4 text-accent-blue" />
+                          <Car className="w-4 h-4 text-accent-copper" />
                           <span className="text-xs text-text-secondary">Leave for Airport</span>
                         </div>
                         <span className="text-xs font-medium text-text-primary">
@@ -332,7 +332,7 @@ export function FlightInfoPanel({ flight, position, airports, collapsed, onToggl
                       .map((f, i) => (
                         <span key={f.id} className="flex items-center gap-1.5">
                           <span className={`text-xs font-semibold ${
-                          f.id === flight.id ? 'text-accent-blue' : 'text-text-muted'
+                          f.id === flight.id ? 'text-accent-copper' : 'text-text-muted'
                           }`}>
                             {f.departureAirport}
                           </span>
@@ -394,7 +394,7 @@ export function FlightInfoPanel({ flight, position, airports, collapsed, onToggl
                 {/* Journey status */}
                 {journeyStatus && journeyStatus !== 'upcoming' && (
                   <div className="flex items-center gap-2 text-xs">
-                    <IconPlane className="w-3 h-3 text-accent-blue" />
+                    <IconPlane className="w-3 h-3 text-accent-copper" />
                     <span className="text-text-muted">Journey:</span>
                     <span className="font-medium text-text-primary">
                       {journeyStatus === 'connection_active' ? 'Connecting'

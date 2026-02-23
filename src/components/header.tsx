@@ -10,6 +10,7 @@ import { NotificationCenter } from './notification-center';
 
 /* Links swap depending on auth state */
 const publicLinks = [
+  { href: '/', label: 'Home' },
   { href: '/features', label: 'Features' },
   { href: '/pricing', label: 'Pricing' },
   { href: '/about', label: 'About' },
@@ -32,7 +33,9 @@ export function Header() {
   const navLinks = user ? appLinks : publicLinks;
 
   const isActive = (href: string) =>
-    pathname === href || pathname.startsWith(href + '/') || (href === '/search' && pathname.startsWith('/search'));
+    href === '/'
+      ? pathname === '/'
+      : pathname === href || pathname.startsWith(href + '/') || (href === '/search' && pathname.startsWith('/search'));
 
   // Scroll-aware header: increase glass effect on scroll
   useEffect(() => {
@@ -43,11 +46,10 @@ export function Header() {
 
   return (
     <header
-      className={`sticky top-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? 'glass-nav shadow-sm'
-          : 'bg-transparent'
-      }`}
+      className={`sticky top-0 z-50 transition-all duration-300 ${scrolled
+        ? 'glass-nav shadow-sm'
+        : 'bg-transparent'
+        }`}
     >
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo */}
@@ -70,11 +72,10 @@ export function Header() {
             <Link
               key={link.href}
               href={link.href}
-              className={`relative px-4 py-1.5 text-[13px] font-medium rounded-full transition-all duration-200 ${
-                isActive(link.href)
-                  ? 'text-white bg-accent-blue shadow-sm shadow-accent-blue/25'
-                  : 'text-text-secondary hover:text-text-primary'
-              }`}
+              className={`relative px-4 py-1.5 text-[13px] font-medium rounded-full transition-all duration-200 ${isActive(link.href)
+                ? 'text-white bg-accent-copper shadow-sm shadow-accent-copper/25'
+                : 'text-text-secondary hover:text-text-primary'
+                }`}
             >
               {link.label}
             </Link>
@@ -89,8 +90,8 @@ export function Header() {
             <div className="flex items-center gap-2">
               <NotificationCenter />
               <div className="flex items-center gap-2 px-3 py-1.5 bg-white/60 dark:bg-bg-elevated/40 border border-black/4 dark:border-border-subtle rounded-full backdrop-blur-sm">
-                <div className="w-6 h-6 rounded-full bg-accent-blue/10 flex items-center justify-center">
-                  <span className="text-[10px] font-semibold text-accent-blue">
+                <div className="w-6 h-6 rounded-full bg-accent-copper/10 flex items-center justify-center">
+                  <span className="text-[10px] font-semibold text-accent-copper">
                     {user.email?.charAt(0).toUpperCase()}
                   </span>
                 </div>
@@ -116,7 +117,7 @@ export function Header() {
               </Link>
               <Link
                 href="/register"
-                className="flex items-center gap-1.5 px-4 py-1.5 text-[13px] font-medium text-white bg-accent-blue rounded-full hover:bg-accent-blue/90 shadow-sm shadow-accent-blue/25 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                className="flex items-center gap-1.5 px-4 py-1.5 text-[13px] font-medium text-white bg-accent-copper rounded-full hover:bg-accent-copper/90 shadow-sm shadow-accent-copper/25 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
               >
                 <IconUser className="w-3.5 h-3.5" />
                 Get Started
@@ -143,11 +144,10 @@ export function Header() {
                 key={link.href}
                 href={link.href}
                 onClick={() => setMobileOpen(false)}
-                className={`px-4 py-3 text-sm rounded-xl transition-all animate-fade-up opacity-0 ${
-                  isActive(link.href)
-                    ? 'text-white bg-accent-blue font-medium'
-                    : 'text-text-secondary hover:text-text-primary hover:bg-black/3 dark:hover:bg-bg-elevated/50'
-                }`}
+                className={`px-4 py-3 text-sm rounded-xl transition-all animate-fade-up opacity-0 ${isActive(link.href)
+                  ? 'text-white bg-accent-copper font-medium'
+                  : 'text-text-secondary hover:text-text-primary hover:bg-black/3 dark:hover:bg-bg-elevated/50'
+                  }`}
                 style={{ animationDelay: `${i * 50}ms`, animationFillMode: 'forwards' }}
               >
                 {link.label}
@@ -157,8 +157,8 @@ export function Header() {
             {user ? (
               <>
                 <div className="flex items-center gap-2 px-4 py-2 animate-fade-up opacity-0" style={{ animationDelay: '250ms', animationFillMode: 'forwards' }}>
-                  <div className="w-7 h-7 rounded-full bg-accent-blue/10 flex items-center justify-center">
-                    <span className="text-xs font-semibold text-accent-blue">
+                  <div className="w-7 h-7 rounded-full bg-accent-copper/10 flex items-center justify-center">
+                    <span className="text-xs font-semibold text-accent-copper">
                       {user.email?.charAt(0).toUpperCase()}
                     </span>
                   </div>
@@ -188,7 +188,7 @@ export function Header() {
                 <Link
                   href="/register"
                   onClick={() => setMobileOpen(false)}
-                  className="py-2.5 text-sm text-white bg-accent-blue text-center font-medium rounded-xl animate-fade-up opacity-0"
+                  className="py-2.5 text-sm text-white bg-accent-copper text-center font-medium rounded-xl animate-fade-up opacity-0"
                   style={{ animationDelay: '300ms', animationFillMode: 'forwards' }}
                 >
                   Get Started

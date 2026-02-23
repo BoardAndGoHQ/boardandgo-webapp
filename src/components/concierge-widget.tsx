@@ -194,7 +194,7 @@ export function ConciergeWidget() {
                 <div key={message.id}>
                   {message.role === 'user' ? (
                     <div className="flex justify-end">
-                      <div className="px-3 py-2 rounded-xl bg-accent-blue text-white text-sm max-w-[85%]">
+                      <div className="px-3 py-2 rounded-xl bg-accent-copper text-white text-sm max-w-[85%]">
                         {message.content}
                       </div>
                     </div>
@@ -204,12 +204,12 @@ export function ConciergeWidget() {
                         {message.content}
                       </div>
                       {message.pendingAction && (
-                        <div className="px-3 py-2 rounded-xl border border-accent-blue/30 bg-accent-blue/8">
-                          <div className="text-xs text-accent-blue font-medium">Action proposal</div>
+                        <div className="px-3 py-2 rounded-xl border border-accent-copper/30 bg-accent-copper/8">
+                          <div className="text-xs text-accent-copper font-medium">Action proposal</div>
                           <div className="text-sm text-text-primary mt-1">{message.pendingAction.summary}</div>
                           <button
                             onClick={() => onConfirmAction(message.pendingAction!.id)}
-                            className="mt-2 inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg bg-accent-blue text-white hover:bg-accent-blue/90"
+                            className="mt-2 inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg bg-accent-copper text-white hover:bg-accent-copper/90"
                           >
                             <CheckCircle2 className="w-3.5 h-3.5" />
                             Confirm
@@ -239,7 +239,7 @@ export function ConciergeWidget() {
             <button
               type="submit"
               disabled={sending || input.trim().length === 0}
-              className="p-2 rounded-xl bg-accent-blue text-white disabled:opacity-40"
+              className="p-2 rounded-xl bg-accent-copper text-white disabled:opacity-40"
             >
               {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
             </button>
@@ -249,7 +249,7 @@ export function ConciergeWidget() {
 
       <button
         onClick={() => setOpen(value => !value)}
-        className="w-12 h-12 rounded-full bg-accent-blue text-white shadow-lg shadow-accent-blue/30 flex items-center justify-center hover:bg-accent-blue/90 transition-colors"
+        className="w-12 h-12 rounded-full bg-accent-copper text-white shadow-lg shadow-accent-copper/30 flex items-center justify-center hover:bg-accent-copper/90 transition-colors"
       >
         <MessageCircle className="w-5 h-5" />
       </button>

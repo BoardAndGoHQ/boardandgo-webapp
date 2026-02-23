@@ -146,7 +146,7 @@ function DatePicker({
         onClick={() => setOpen(!open)}
         className={`search-input flex items-center gap-2 text-left w-full ${required && !value ? 'border-red-400/0' : ''}`}
       >
-        <IconCalendar className="w-4 h-4 text-accent-blue shrink-0" />
+        <IconCalendar className="w-4 h-4 text-accent-copper shrink-0" />
         <span className={`text-sm font-medium ${value ? 'text-text-primary' : 'text-text-muted'}`}>
           {value ? formatDateDisplay(value) : (placeholder || 'Select date')}
         </span>
@@ -172,7 +172,7 @@ function DatePicker({
               type="button"
               onClick={prevMonth}
               disabled={!canGoPrev()}
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-text-secondary hover:text-accent-blue hover:bg-accent-blue/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-text-secondary hover:text-accent-copper hover:bg-accent-copper/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
             >
               <IconChevronUp className="w-4 h-4 -rotate-90" />
             </button>
@@ -182,7 +182,7 @@ function DatePicker({
             <button
               type="button"
               onClick={nextMonth}
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-text-secondary hover:text-accent-blue hover:bg-accent-blue/10 transition-colors"
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-text-secondary hover:text-accent-copper hover:bg-accent-copper/10 transition-colors"
             >
               <IconChevronDown className="w-4 h-4 -rotate-90" />
             </button>
@@ -217,16 +217,16 @@ function DatePicker({
                     relative w-full aspect-square rounded-lg text-[13px] font-medium transition-all duration-150
                     flex items-center justify-center
                     ${selected
-                      ? 'bg-accent-blue text-white shadow-sm shadow-accent-blue/30'
+                      ? 'bg-accent-copper text-white shadow-sm shadow-accent-copper/30'
                       : disabled
                         ? 'text-text-muted/30 cursor-not-allowed'
-                        : 'text-text-secondary hover:bg-accent-blue/10 hover:text-accent-blue cursor-pointer'
+                        : 'text-text-secondary hover:bg-accent-copper/10 hover:text-accent-copper cursor-pointer'
                     }
                   `}
                 >
                   {day}
                   {todayMark && !selected && (
-                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-accent-blue" />
+                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-accent-copper" />
                   )}
                 </button>
               );
@@ -245,7 +245,7 @@ function DatePicker({
                 setOpen(false);
               }}
               disabled={todayStr < effectiveMin}
-              className="text-xs font-medium text-accent-blue hover:text-accent-blue/80 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              className="text-xs font-medium text-accent-copper hover:text-accent-copper/80 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
             >
               Today
             </button>
@@ -292,7 +292,7 @@ function InlineStepper({
           type="button"
           onClick={() => onChange(Math.max(min, value - 1))}
           disabled={value <= min}
-          className="w-8 h-8 rounded-full border border-border-subtle flex items-center justify-center text-text-secondary hover:border-accent-blue hover:text-accent-blue transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          className="w-8 h-8 rounded-full border border-border-subtle flex items-center justify-center text-text-secondary hover:border-accent-copper hover:text-accent-copper transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
         >
           <IconMinus className="w-3.5 h-3.5" />
         </button>
@@ -301,7 +301,7 @@ function InlineStepper({
           type="button"
           onClick={() => onChange(Math.min(max, value + 1))}
           disabled={value >= max}
-          className="w-8 h-8 rounded-full border border-border-subtle flex items-center justify-center text-text-secondary hover:border-accent-blue hover:text-accent-blue transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          className="w-8 h-8 rounded-full border border-border-subtle flex items-center justify-center text-text-secondary hover:border-accent-copper hover:text-accent-copper transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
         >
           <IconPlus className="w-3.5 h-3.5" />
         </button>
@@ -358,13 +358,13 @@ function CabinDropdown({
                 onClick={() => { onChange(opt.value); setOpen(false); }}
                 className={`w-full text-left px-4 py-2.5 text-sm transition-colors duration-150 flex items-center justify-between ${
                   isActive
-                    ? 'text-accent-blue bg-accent-blue/8 font-medium'
-                    : 'text-text-secondary hover:text-text-primary hover:bg-accent-blue/5'
+                    ? 'text-accent-copper bg-accent-copper/8 font-medium'
+                    : 'text-text-secondary hover:text-text-primary hover:bg-accent-copper/5'
                 }`}
               >
                 {opt.label}
                 {isActive && (
-                  <svg className="w-4 h-4 text-accent-blue shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                  <svg className="w-4 h-4 text-accent-copper shrink-0" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 )}
@@ -454,7 +454,7 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
               onClick={() => setForm((f) => ({ ...f, tripType: type }))}
               className={`px-5 py-2 text-[13px] font-medium rounded-full transition-all duration-200 ${
                 form.tripType === type
-                  ? 'bg-accent-blue text-white shadow-sm shadow-accent-blue/25'
+                  ? 'bg-accent-copper text-white shadow-sm shadow-accent-copper/25'
                   : 'text-text-muted hover:text-text-primary glass-card'
               }`}
             >
@@ -472,7 +472,7 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
               onChange={(iata) => setForm((f) => ({ ...f, origin: iata }))}
               placeholder="City or airport"
               required
-              icon={<IconMapPin className="w-4 h-4 text-accent-blue" />}
+              icon={<IconMapPin className="w-4 h-4 text-accent-copper" />}
               className="search-input"
               label="Origin airport"
               id="origin"
@@ -484,7 +484,7 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
             <button
               type="button"
               onClick={handleSwap}
-              className="w-10 h-10 rounded-full glass-card flex items-center justify-center text-text-muted hover:text-accent-blue hover:border-accent-blue hover:rotate-180 transition-all duration-300"
+              className="w-10 h-10 rounded-full glass-card flex items-center justify-center text-text-muted hover:text-accent-copper hover:border-accent-copper hover:rotate-180 transition-all duration-300"
               title="Swap origin and destination"
             >
               <IconSwapHorizontal className="w-4 h-4" />
@@ -498,7 +498,7 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
               onChange={(iata) => setForm((f) => ({ ...f, destination: iata }))}
               placeholder="City or airport"
               required
-              icon={<IconMapPin className="w-4 h-4 text-accent-blue" />}
+              icon={<IconMapPin className="w-4 h-4 text-accent-copper" />}
               className="search-input"
               label="Destination airport"
               id="destination"
@@ -543,7 +543,7 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
               onClick={() => setTravelersOpen(!travelersOpen)}
               className="search-input flex items-center gap-2 text-left w-full"
             >
-              <IconUsers className="w-4 h-4 text-accent-blue shrink-0" />
+              <IconUsers className="w-4 h-4 text-accent-copper shrink-0" />
               <span className="text-sm font-medium text-text-primary truncate">
                 {form.adults} Adult{form.adults > 1 ? 's' : ''}
                 {form.children > 0 && `, ${form.children} Child`}
@@ -563,7 +563,7 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
                   <button
                     type="button"
                     onClick={() => setTravelersOpen(false)}
-                    className="w-full py-2 text-xs font-medium text-accent-blue hover:bg-accent-blue/10 rounded-lg transition-colors"
+                    className="w-full py-2 text-xs font-medium text-accent-copper hover:bg-accent-copper/10 rounded-lg transition-colors"
                   >
                     Done
                   </button>
@@ -584,7 +584,7 @@ export function FlightSearch({ onSearch }: FlightSearchProps) {
         {/* ── Search Button ── */}
         <button
           type="submit"
-          className="w-full mt-5 py-3.5 bg-accent-blue text-white font-semibold text-sm rounded-xl hover:brightness-110 transition-all duration-300 flex items-center justify-center gap-2.5 shadow-lg shadow-accent-blue/25"
+          className="w-full mt-5 py-3.5 bg-accent-copper text-white font-semibold text-sm rounded-xl hover:brightness-110 transition-all duration-300 flex items-center justify-center gap-2.5 shadow-lg shadow-accent-copper/25"
         >
           <IconSearch className="w-4.5 h-4.5" />
           Search {totalPassengers} Traveler{totalPassengers > 1 ? 's' : ''} &middot; {cabinLabel}

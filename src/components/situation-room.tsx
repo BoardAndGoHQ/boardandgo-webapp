@@ -287,7 +287,7 @@ export function SituationRoom({ flight, token, allFlightsCount, onViewAll, allFl
                 key={i}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-bg-elevated/50 text-sm text-text-primary border border-border-subtle"
               >
-                <ArrowRight className="w-3.5 h-3.5 text-accent-blue" />
+                <ArrowRight className="w-3.5 h-3.5 text-accent-copper" />
                 {action}
               </span>
             ))}
@@ -307,7 +307,7 @@ export function SituationRoom({ flight, token, allFlightsCount, onViewAll, allFl
       {/* Journey Status Badge (multi-leg) */}
       {journeyStatus && journeyStatus !== 'upcoming' && allFlights && allFlights.length > 1 && (
         <div className="glass-card rounded-xl border border-border-subtle px-4 py-2.5 flex items-center gap-2">
-          <IconPlane className="w-4 h-4 text-accent-blue" />
+          <IconPlane className="w-4 h-4 text-accent-copper" />
           <span className="text-sm text-text-secondary">
             Journey: <span className="font-medium text-text-primary capitalize">
               {journeyStatus === 'connection_active' ? 'Connecting' :
@@ -329,9 +329,9 @@ export function SituationRoom({ flight, token, allFlightsCount, onViewAll, allFl
             className="w-full px-4 py-3 flex items-center justify-between text-sm text-text-secondary hover:bg-bg-elevated/30 transition-colors"
           >
             <span className="flex items-center gap-2">
-              <Layers className="w-4 h-4 text-accent-blue" />
+              <Layers className="w-4 h-4 text-accent-copper" />
               Flight Intelligence
-              <span className="text-xs px-1.5 py-0.5 bg-accent-blue/10 text-accent-blue rounded">Beta</span>
+              <span className="text-xs px-1.5 py-0.5 bg-accent-copper/10 text-accent-copper rounded">Beta</span>
             </span>
             <ChevronDown
               className={`w-4 h-4 text-text-muted transition-transform ${expanded ? 'rotate-180' : ''}`}
@@ -385,7 +385,7 @@ export function SituationRoom({ flight, token, allFlightsCount, onViewAll, allFl
       {/* Quick link to full tracking */}
       <Link
         href={`/bookings/${flight.bookingId}/track`}
-        className="flex items-center justify-center gap-2 px-4 py-2.5 glass-card rounded-xl border border-border-subtle text-sm text-text-secondary hover:text-text-primary hover:border-accent-blue/30 transition-all"
+        className="flex items-center justify-center gap-2 px-4 py-2.5 glass-card rounded-xl border border-border-subtle text-sm text-text-secondary hover:text-text-primary hover:border-accent-copper/30 transition-all"
       >
         <span>View Full Tracking</span>
         <IconArrowRight className="w-4 h-4" />
@@ -400,8 +400,8 @@ export function SituationRoom({ flight, token, allFlightsCount, onViewAll, allFl
 export function EmptySituationRoom() {
   return (
     <div className="rounded-2xl border border-border-subtle bg-bg-elevated/30 p-8 text-center">
-      <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-accent-blue/10 flex items-center justify-center">
-        <IconPlane className="w-8 h-8 text-accent-blue/50" />
+      <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-accent-copper/10 flex items-center justify-center">
+        <IconPlane className="w-8 h-8 text-accent-copper/50" />
       </div>
       <h2 className="text-2xl font-bold text-text-primary mb-2">No flights to monitor</h2>
       <p className="text-text-muted text-sm mb-6 max-w-sm mx-auto">
@@ -409,7 +409,7 @@ export function EmptySituationRoom() {
       </p>
       <Link
         href="/track"
-        className="inline-flex items-center gap-2 px-6 py-2.5 bg-accent-blue text-white font-medium text-sm rounded-xl hover:brightness-110 transition-all shadow-lg shadow-accent-blue/20"
+        className="inline-flex items-center gap-2 px-6 py-2.5 bg-accent-copper text-white font-medium text-sm rounded-xl hover:brightness-110 transition-all shadow-lg shadow-accent-copper/20"
       >
         <IconPlane className="w-4 h-4" />
         Track a Flight

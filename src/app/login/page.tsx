@@ -49,15 +49,15 @@ function LoginForm() {
   return (
     <div className="min-h-[85vh] flex items-center justify-center px-5 py-16 relative overflow-hidden">
       {/* Decorative blobs */}
-      <div className="absolute top-1/4 left-1/4 w-100 h-100 bg-accent-blue/6 rounded-full blur-3xl pointer-events-none animate-drift" />
-      <div className="absolute bottom-1/4 right-1/4 w-75 h-75 bg-accent-blue/4 rounded-full blur-3xl pointer-events-none animate-drift-reverse" />
+      <div className="absolute top-1/4 left-1/4 w-100 h-100 bg-accent-copper/6 rounded-full blur-3xl pointer-events-none animate-drift" />
+      <div className="absolute bottom-1/4 right-1/4 w-75 h-75 bg-accent-copper/4 rounded-full blur-3xl pointer-events-none animate-drift-reverse" />
 
       <div className="w-full max-w-md animate-fade-up">
         {/* Glass card */}
         <div className="glass-card rounded-3xl p-8 md:p-10 shadow-lg">
           {/* Logo / Brand */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-accent-blue/10 text-accent-blue mb-4">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-accent-copper/10 text-accent-copper mb-4">
               <Plane className="w-7 h-7" />
             </div>
             <h1 className="text-2xl font-bold text-text-primary mb-1">Welcome back</h1>
@@ -106,7 +106,7 @@ function LoginForm() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-accent-blue text-white font-semibold text-sm rounded-xl hover:bg-accent-blue/90 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 glow-primary"
+              className="w-full py-3 bg-accent-copper text-white font-semibold text-sm rounded-xl hover:bg-accent-copper/90 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 glow-primary"
             >
               {loading ? (
                 <>
@@ -143,7 +143,7 @@ function LoginForm() {
 
           <p className="text-center text-sm text-text-muted mt-6">
             No account yet?{' '}
-            <Link href={`/register${redirectTo !== '/dashboard' ? `?redirect=${encodeURIComponent(redirectTo)}` : ''}`} className="text-accent-blue font-semibold hover:underline">
+            <Link href={`/register${redirectTo !== '/dashboard' ? `?redirect=${encodeURIComponent(redirectTo)}` : ''}`} className="text-accent-copper font-semibold hover:underline">
               Create one
             </Link>
           </p>

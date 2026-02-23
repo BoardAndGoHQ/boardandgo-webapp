@@ -393,7 +393,7 @@ export default function SettingsPage() {
   if (authLoading || prefsLoading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-        <IconLoader className="w-6 h-6 text-accent-blue animate-spin" />
+        <IconLoader className="w-6 h-6 text-accent-copper animate-spin" />
       </div>
     );
   }
@@ -401,8 +401,8 @@ export default function SettingsPage() {
   return (
     <div className="max-w-3xl mx-auto px-5 py-10">
       <div className="flex items-center gap-3 mb-2">
-        <div className="w-10 h-10 rounded-2xl bg-accent-blue/10 flex items-center justify-center">
-          <Settings className="w-5 h-5 text-accent-blue" />
+        <div className="w-10 h-10 rounded-2xl bg-accent-copper/10 flex items-center justify-center">
+          <Settings className="w-5 h-5 text-accent-copper" />
         </div>
         <h1 className="text-2xl font-bold text-text-primary">Settings</h1>
       </div>
@@ -413,7 +413,7 @@ export default function SettingsPage() {
 
       <section className="glass-card rounded-2xl p-6 mb-6">
         <h2 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
-          <Bell className="w-4 h-4 text-accent-blue" />
+          <Bell className="w-4 h-4 text-accent-copper" />
           Notification Channels
         </h2>
         <div className="grid grid-cols-2 gap-3 mb-4">
@@ -428,7 +428,7 @@ export default function SettingsPage() {
                 }
                 onChange={() => toggleChannel(channel.id)}
                 disabled={savingPrefs || pushBusy}
-                className="accent-accent-blue"
+                className="accent-accent-copper"
               />
               {channel.label}
             </label>
@@ -473,7 +473,7 @@ export default function SettingsPage() {
           <button
             onClick={() => void handlePushToggle(!(preferences?.webPushEnabled ?? false))}
             disabled={pushBusy}
-            className="px-3 py-2 rounded-xl bg-accent-blue/10 border border-accent-blue/20 text-accent-blue disabled:opacity-50 inline-flex items-center gap-2"
+            className="px-3 py-2 rounded-xl bg-accent-copper/10 border border-accent-copper/20 text-accent-copper disabled:opacity-50 inline-flex items-center gap-2"
           >
             {pushBusy ? <IconLoader className="w-4 h-4 animate-spin" /> : <Smartphone className="w-4 h-4" />}
             {preferences?.webPushEnabled ? 'Disable Browser Push' : 'Enable Browser Push'}
@@ -484,7 +484,7 @@ export default function SettingsPage() {
 
       <section className="glass-card rounded-2xl p-6 mb-6">
         <h2 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
-          <Layers className="w-4 h-4 text-accent-blue" />
+          <Layers className="w-4 h-4 text-accent-copper" />
           Intelligence Profile
         </h2>
         <div className="grid gap-3 md:grid-cols-3">
@@ -498,14 +498,14 @@ export default function SettingsPage() {
                 className={[
                   'rounded-2xl border p-4 text-left transition-all',
                   active
-                    ? 'border-accent-blue bg-accent-blue/10 shadow-sm'
-                    : 'border-border-subtle bg-bg-elevated/40 hover:border-accent-blue/40',
+                    ? 'border-accent-copper bg-accent-copper/10 shadow-sm'
+                    : 'border-border-subtle bg-bg-elevated/40 hover:border-accent-copper/40',
                 ].join(' ')}
               >
                 <div className="mb-2 flex items-center justify-between">
                   <span className="text-sm font-semibold text-text-primary">{profile.title}</span>
                   {profile.recommended ? (
-                    <span className="text-[10px] font-semibold uppercase tracking-wide text-accent-blue">
+                    <span className="text-[10px] font-semibold uppercase tracking-wide text-accent-copper">
                       Recommended
                     </span>
                   ) : null}
@@ -537,7 +537,7 @@ export default function SettingsPage() {
               <button
                 onClick={scanGmail}
                 disabled={scanning}
-                className="px-3 py-2 rounded-xl bg-accent-blue/10 border border-accent-blue/20 text-accent-blue text-sm inline-flex items-center gap-2"
+                className="px-3 py-2 rounded-xl bg-accent-copper/10 border border-accent-copper/20 text-accent-copper text-sm inline-flex items-center gap-2"
               >
                 {scanning ? <IconLoader className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
                 Scan Now

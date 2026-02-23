@@ -75,11 +75,11 @@ export default function NewBookingPage() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 md:py-12 relative">
       {/* Decorative background */}
-      <div className="fixed top-20 right-1/4 w-125 h-125 bg-accent-blue/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="fixed bottom-20 left-1/4 w-100 h-100 bg-accent-blue/8 rounded-full blur-3xl pointer-events-none" />
+      <div className="fixed top-20 right-1/4 w-125 h-125 bg-accent-copper/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="fixed bottom-20 left-1/4 w-100 h-100 bg-accent-copper/8 rounded-full blur-3xl pointer-events-none" />
 
       <div className="mb-8 animate-fade-up">
-        <Link href="/bookings" className="inline-flex items-center gap-1.5 text-sm text-text-muted hover:text-accent-blue transition-colors">
+        <Link href="/bookings" className="inline-flex items-center gap-1.5 text-sm text-text-muted hover:text-accent-copper transition-colors">
           <IconArrowRight className="w-3.5 h-3.5 rotate-180" />
           Back to Bookings
         </Link>
@@ -96,7 +96,7 @@ export default function NewBookingPage() {
 
         <div className="glass-card rounded-2xl p-5 animate-fade-up" style={{ animationDelay: '60ms' }}>
           <h2 className="text-sm font-medium text-text-primary mb-4 flex items-center gap-2">
-            <IconPlane className="w-4 h-4 text-accent-blue" />
+            <IconPlane className="w-4 h-4 text-accent-copper" />
             Flight Details
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -127,7 +127,7 @@ export default function NewBookingPage() {
 
         <div className="glass-card rounded-2xl p-5 animate-fade-up" style={{ animationDelay: '120ms' }}>
           <h2 className="text-sm font-medium text-text-primary mb-4 flex items-center gap-2">
-            <IconMapPin className="w-4 h-4 text-accent-blue" />
+            <IconMapPin className="w-4 h-4 text-accent-copper" />
             Route
           </h2>
           <div className="flex items-center gap-4">
@@ -161,7 +161,7 @@ export default function NewBookingPage() {
 
         <div className="glass-card rounded-2xl p-5 animate-fade-up" style={{ animationDelay: '180ms' }}>
           <h2 className="text-sm font-medium text-text-primary mb-4 flex items-center gap-2">
-            <IconCalendar className="w-4 h-4 text-accent-blue" />
+            <IconCalendar className="w-4 h-4 text-accent-copper" />
             Schedule
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -190,7 +190,7 @@ export default function NewBookingPage() {
 
         <div className="glass-card rounded-2xl p-5 animate-fade-up" style={{ animationDelay: '240ms' }}>
           <h2 className="text-sm font-medium text-text-primary mb-4 flex items-center gap-2">
-            <IconUser className="w-4 h-4 text-accent-blue" />
+            <IconUser className="w-4 h-4 text-accent-copper" />
             Additional Info (Optional)
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -221,7 +221,7 @@ export default function NewBookingPage() {
           <button
             type="submit"
             disabled={loading}
-            className="flex-1 py-3 bg-accent-blue text-white font-medium text-sm rounded-xl hover:bg-accent-blue/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-accent-blue/20"
+            className="flex-1 py-3 bg-accent-copper text-white font-medium text-sm rounded-xl hover:bg-accent-copper/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-accent-copper/20"
           >
             {loading ? (
               <>
