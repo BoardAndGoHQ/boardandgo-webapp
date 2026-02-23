@@ -53,15 +53,15 @@ export function Header() {
     >
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2.5 group">
+        <Link href="/" className="flex items-center group">
           <Image
-            src="/logo.svg"
+            src="/logo.png"
             alt="BoardAndGo"
-            width={24}
-            height={34}
-            className="w-6 h-auto transition-transform duration-300 group-hover:scale-110"
+            width={70}
+            height={70}
+            className="w-16 h-auto transition-transform duration-300 group-hover:scale-110"
           />
-          <span className="text-text-primary font-semibold text-base tracking-tight">
+          <span className="-ml-2 text-text-primary font-semibold text-base tracking-tight">
             BoardAndGo
           </span>
         </Link>
